@@ -1,0 +1,3 @@
+[submodule "third-party/lexicon_neurips"]
+	path = third-party/lexicon_neurips
+	url = https://github.com/Periklismant/lexicon_neurips
