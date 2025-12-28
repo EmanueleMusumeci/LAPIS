@@ -1,3 +1,9 @@
 [submodule "third-party/lexicon_neurips"]
 	path = third-party/lexicon_neurips
 	url = https://github.com/Periklismant/lexicon_neurips
+[submodule "third-party/alfworld"]
+	path = third-party/alfworld
+	url = https://github.com/alfworld/alfworld.git
+[submodule "third-party/virtualhome"]
+	path = third-party/virtualhome
+	url = https://github.com/xavierpuigf/virtualhome.git
