@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAPIS — Language-Adaptive PDDL Iterative Synthesis</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <img src="assets/logo.png" alt="LAPIS Logo">
+            </div>
+            <ul class="nav-links">
+                <li><a href="#how-it-works">How it Works</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#evaluation">Evaluation</a></li>
+                <li><a href="https://github.com/EmanueleMusumeci/ContextMattersDemo" class="btn-sm">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container">
+            <h1>Language-Adaptive PDDL <br><span class="gradient-text">Iterative Synthesis</span></h1>
+            <p class="subtitle">An end-to-end framework for grounding natural language tasks into provably executable
+                symbolic plans through iterative refinement.</p>
+            <div class="hero-btns">
+                <a href="#how-it-works" class="btn-primary">Explore Pipeline</a>
+                <a href="https://example.com/lapis-demo-video" class="btn-secondary">Watch Demo Video</a>
+            </div>
+            <div class="hero-image">
+                <div class="glass-card main-screenshot">
+                    <img src="assets/gui.png" alt="LAPIS Dashboard Preview">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section id="how-it-works" class="pipeline">
+        <div class="container text-center">
+            <h2 class="section-title">The LAPIS Pipeline</h2>
+            <p class="section-subtitle">Bridging the gap between LLM flexibility and symbolic planning rigor.</p>
+
+            <div class="pipeline-steps">
+                <div class="glass-card step">
+                    <div class="step-icon">🔧</div>
+                    <h3>Domain Synthesis</h3>
+                    <p>Translates NL task descriptions into structured PDDL domain files with VAL-guided syntax
+                        correction.</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="glass-card step">
+                    <div class="step-icon">🔍</div>
+                    <h3>Adequacy Check</h3>
+                    <p>Verifies domain expressivity via Chain-of-Thought reasoning to identify missing predicates or
+                        actions.</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="glass-card step">
+                    <div class="step-icon">📋</div>
+                    <h3>Problem Gen</h3>
+                    <p>Generates specific problem instances using dynamic schema injection from the synthesised domain.
+                    </p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="glass-card step highlight">
+                    <div class="step-icon">⚙️</div>
+                    <h3>Refinement Loop</h3>
+                    <p>Iteratively refines PDDL via symbolic feedback until a valid plan is found by a classical solver.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="features">
+        <div class="container">
+            <div class="grid">
+                <div class="feature-item">
+                    <h3>Provable Correctness</h3>
+                    <p>Uses VAL (PDDL Validator) to ensure that every generated plan is logically sound and executable.
+                    </p>
+                </div>
+                <div class="feature-item">
+                    <h3>Zero-Shot Deployment</h3>
+                    <p>Handles entirely new domains without requiring manual PDDL modeling or expert-in-the-loop
+                        intervention.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Complex Reasoning</h3>
+                    <p>Combines the broad semantic knowledge of LLMs (GPT-4o/Claude) with the precision of classical
+                        search.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Scalability</h3>
+                    <p>Successfully plans tasks with long horizons (>80 steps) where pure autoregressive models fail.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="evaluation" class="evaluation gradient-bg">
+        <div class="container text-center">
+            <h2>Benchmarked Performance</h2>
+            <p>LAPIS consistently outperforms single-shot translation baselines on IPC domains.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Success on BlocksWorld</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">3x</span>
+                    <span class="stat-label">Faster Recovery than Baselines</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">0</span>
+                    <span class="stat-label">Manual Modeling Effort</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container text-center">
+            <div class="affiliations">
+                <span>Sapienza University of Rome</span> | <span>Mohamed Khider University of Biskra</span>
+            </div>
+            <p>&copy; 2026 LAPIS Project. ICAPS 2026 Demo Track.</p>
+        </div>
+    </footer>
+</body>
+
+</html>
