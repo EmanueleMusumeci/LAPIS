@@ -1,0 +1,619 @@
+================================================================================
+PROBLEM 107 - GENERATION HISTORY
+================================================================================
+
+LTL FORMULA:
+F(grey_ball_in_room_4 & agent_in_room_4) & F(red_ball_1_in_room_4 & agent_in_room_1) & F(!purple_door_1_locked) & (holding_red_box_1 U !purple_door_1_locked) & F(agent_in_room_4) & ((holding_grey_ball_1 | !green_door_1_locked) U agent_in_room_4) & F(!grey_door_1_locked)
+
+
+================================================================================
+ATTEMPT 1
+================================================================================
+
+REASONING:
+Initial State Analysis: The agent starts in room_2 with access to a blue box. The grey ball is located in room_1, and the red ball is also in room_1. The agent needs to navigate through the rooms to achieve the goal of having the grey ball in room_4 while also being in room_4. 
+
+Goal Analysis: The final configuration requires the grey ball to be in room_4 and the agent to be in room_4 as well. 
+
+Constraint Analysis: 
+1. The first constraint requires that red_ball_1 must be in room_4 while the agent is in room_1. This means the agent must first move to room_1 and then ensure red_ball_1 is moved to room_4. 
+2. The second constraint states that purple_door_1 must not be locked, which means the agent needs to toggle the door state. 
+3. The third constraint indicates that the agent must hold red_box_1 before purple_door_1 can be unlocked. 
+4. The fourth constraint requires the agent to be in room_4. 
+5. The fifth constraint states that if the agent is in room_4, they must have either grey_ball_1 or green_door_1 must be unlocked. 
+6. The sixth constraint requires grey_door_1 to be unlocked. 
+
+Subgoal Sequence: 
+1. Move to room_1 to access red_ball_1. 
+2. Pick up red_ball_1 in room_1. 
+3. Move to room_4 with red_ball_1. 
+4. Ensure purple_door_1 is unlocked by holding red_box_1. 
+5. Move to room_4 with grey_ball_1. 
+6. Ensure grey_door_1 is unlocked. 
+7. Finally, achieve the goal state where grey_ball_1 is in room_4 and the agent is also in room_4.
+
+GENERATED PLAN:
+1. Move to room_1
+2. Pick up red_ball_1
+3. Move to room_4
+4. Hold red_box_1 to unlock purple_door_1
+5. Move to room_4 with grey_ball_1
+6. Unlock grey_door_1
+7. Achieve goal state with grey_ball_1 in room_4 and agent in room_4
+
+VALID: False
+
+TRACE (State Sequence):
+  State 0:
+    - !holding_grey_ball_1
+    - !holding_red_box_1
+    - agent_in_room_2
+    - grey_ball_in_room_1
+    - grey_door_1_locked
+    - purple_door_1_locked
+    - red_ball_1_in_room_1
+  State 1:
+    - !holding_grey_ball_1
+    - !holding_red_box_1
+    - agent_in_room_1
+    - grey_ball_in_room_1
+    - grey_door_1_locked
+    - purple_door_1_locked
+    - red_ball_1_in_room_1
+  State 2:
+    - !holding_grey_ball_1
+    - !holding_red_box_1
+    - !red_ball_1_in_room_1
+    - agent_in_room_1
+    - grey_ball_in_room_1
+    - grey_door_1_locked
+    - holding_red_ball_1
+    - purple_door_1_locked
+  State 3:
+    - !holding_grey_ball_1
+    - !purple_door_1_locked
+    - !red_ball_1_in_room_1
+    - agent_in_room_4
+    - grey_ball_in_room_1
+    - grey_door_1_locked
+    - holding_red_ball_1
+    - holding_red_box_1
+  State 4:
+    - !purple_door_1_locked
+    - !red_ball_1_in_room_1
+    - agent_in_room_4
+    - grey_ball_in_room_4
+    - grey_door_1_locked
+    - holding_grey_ball_1
+    - holding_red_ball_1
+    - holding_red_box_1
+  State 5:
+    - !grey_door_1_locked
+    - !purple_door_1_locked
+    - !red_ball_1_in_room_1
+    - agent_in_room_4
+    - grey_ball_in_room_4
+    - holding_grey_ball_1
+    - holding_red_ball_1
+    - holding_red_box_1
+  State 6:
+    - !grey_door_1_locked
+    - !purple_door_1_locked
+    - !red_ball_1_in_room_1
+    - agent_in_room_4
+    - grey_ball_in_room_4
+    - holding_grey_ball_1
+    - holding_red_ball_1
+    - holding_red_box_1
+
+FEEDBACK PROVIDED:
+WHAT WENT WRONG: The plan does not meet the constraints that require you to hold the grey ball or have the green door unlocked before entering room 4. This leads to an inability to achieve the goal state as specified.
+ HOW TO FIX: You need to pick up the grey ball before moving to room 4, and ensure that the purple door is unlocked before attempting to enter room 4 with the grey ball.
+
+================================================================================
+ATTEMPT 2
+================================================================================
+
+REASONING:
+Initial State Analysis: The agent starts in room_2 with access to a blue box. The grey ball and red ball are located in room_1. The agent needs to navigate through the rooms to achieve the goal of having the grey ball in room_4 while also being in room_4. 
+
+Goal Analysis: The final configuration requires the grey ball to be in room_4 and the agent to be in room_4 as well. 
+
+Constraint Analysis: 
+1. The first constraint requires that red_ball_1 must be in room_4 while the agent is in room_1. This means the agent must first move to room_1 and then to room_4. 
+2. The second constraint states that purple_door_1 must not be locked, which means the agent needs to ensure this door is unlocked before proceeding. 
+3. The third constraint indicates that if purple_door_1 is not locked, the agent must have been holding red_box_1 at some point. 
+4. The fourth constraint requires the agent to be in room_4. 
+5. The fifth constraint states that if the agent is in room_4, they must have been holding grey_ball_1 or green_door_1 must not be locked. 
+6. The sixth constraint requires grey_door_1 to be unlocked. 
+
+Subgoal Sequence: 
+1. Move to room_1 to access red_ball_1. 
+2. Pick up red_box_1 to prepare for unlocking the purple door. 
+3. Unlock purple_door_1 to allow passage to room_4. 
+4. Move to room_4. 
+5. Pick up grey_ball_1 to satisfy the goal condition. 
+6. Ensure that grey_door_1 is unlocked to meet the final state requirements. 
+7. Finally, confirm that the agent is in room_4 with the grey ball present. 
+
+This sequence of actions will ensure that all constraints are satisfied while achieving the goal of having the grey ball in room_4 and the agent also in room_4.
+
+GENERATED PLAN:
+1. Move to room_1
+2. Pick up red_box_1
+3. Unlock purple_door_1
+4. Move to room_4
+5. Pick up grey_ball_1
+6. Unlock grey_door_1
+7. Be in room_4 with grey_ball_1
+
+VALID: False
+
+TRACE (State Sequence):
+  State 0:
+    - !agent_in_room_4
+    - !grey_ball_in_room_4
+    - !holding_grey_ball_1
+    - !holding_red_box_1
+    - agent_in_room_2
+    - grey_ball_1_in_room_1
+    - purple_door_1_locked
+    - red_ball_1_in_room_1
+  State 1:
+    - !agent_in_room_4
+    - !grey_ball_in_room_4
+    - !holding_grey_ball_1
+    - agent_in_room_1
+    - grey_ball_1_in_room_1
+    - holding_red_box_1
+    - purple_door_1_locked
+    - red_ball_1_in_room_1
+  State 2:
+    - !agent_in_room_4
+    - !grey_ball_in_room_4
+    - !holding_grey_ball_1
+    - !purple_door_1_locked
+    - agent_in_room_1
+    - grey_ball_1_in_room_1
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+  State 3:
+    - !agent_in_room_4
+    - !grey_ball_in_room_4
+    - !holding_grey_ball_1
+    - !purple_door_1_locked
+    - agent_in_room_4
+    - grey_ball_1_in_room_1
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+  State 4:
+    - !agent_in_room_4
+    - !grey_ball_in_room_4
+    - !purple_door_1_locked
+    - agent_in_room_4
+    - grey_ball_1_in_room_1
+    - holding_grey_ball_1
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+  State 5:
+    - !agent_in_room_4
+    - !grey_ball_in_room_4
+    - !grey_door_1_locked
+    - !purple_door_1_locked
+    - agent_in_room_4
+    - grey_ball_1_in_room_1
+    - holding_grey_ball_1
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+  State 6:
+    - !agent_in_room_4
+    - !grey_ball_in_room_4
+    - !grey_door_1_locked
+    - !purple_door_1_locked
+    - agent_in_room_4
+    - grey_ball_1_in_room_1
+    - holding_grey_ball_1
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+  State 7:
+    - !agent_in_room_4
+    - !grey_ball_in_room_4
+    - !grey_door_1_locked
+    - !purple_door_1_locked
+    - agent_in_room_4
+    - grey_ball_1_in_room_1
+    - holding_grey_ball_1
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+
+FEEDBACK PROVIDED:
+WHAT WENT WRONG: The plan does not ensure that you are holding the grey ball before you arrive in room 4, which is necessary to meet the goal. Additionally, the plan does not address the requirement for the purple door to be unlocked before moving to room 4.
+ HOW TO FIX: You need to ensure that you pick up the grey ball before moving to room 4, and also make sure that the purple door is unlocked before attempting to enter room 4.
+
+================================================================================
+ATTEMPT 3
+================================================================================
+
+REASONING:
+Initial State Analysis: The agent starts in room_2 with access to a blue box. The grey ball and red ball are located in room_1. The agent needs to navigate through the rooms to achieve the goal of having the grey ball in room_4 while also being in room_4. 
+
+Goal Analysis: The final configuration requires the grey ball to be in room_4 and the agent to be in room_4 as well. 
+
+Constraint Analysis: 
+1. The first constraint requires that red_ball_1 must be in room_4 while the agent is in room_1. This means the agent must first move to room_1 and then to room_4. 
+2. The second constraint states that purple_door_1 must not be locked, which means the agent needs to unlock it if it is locked. 
+3. The third constraint indicates that the agent must be holding red_box_1 before purple_door_1 can be unlocked. 
+4. The fourth constraint requires the agent to be in room_4 at some point. 
+5. The fifth constraint states that if the agent is in room_4, they must have either grey_ball_1 or green_door_1 must be unlocked. 
+6. The sixth constraint requires grey_door_1 to be unlocked. 
+
+Subgoal Sequence: 
+1. Move to room_1 to access red_ball_1. 
+2. Pick up red_box_1 in room_1. 
+3. Unlock purple_door_1 while holding red_box_1. 
+4. Move to room_4 through purple_door_1. 
+5. Pick up grey_ball_1 in room_1. 
+6. Move to room_4 with grey_ball_1. 
+7. Ensure grey_door_1 is unlocked. 
+8. Achieve the goal state with grey_ball_1 in room_4 and the agent in room_4.
+
+GENERATED PLAN:
+1. Move to room_1 to access red_ball_1.
+2. Pick up red_box_1 in room_1.
+3. Unlock purple_door_1 while holding red_box_1.
+4. Move to room_4 through purple_door_1.
+5. Pick up grey_ball_1 in room_1.
+6. Move to room_4 with grey_ball_1.
+7. Ensure grey_door_1 is unlocked.
+8. Achieve the goal state with grey_ball_1 in room_4 and the agent in room_4.
+
+VALID: False
+
+TRACE (State Sequence):
+  State 0:
+    - !agent_in_room_4
+    - !holding_grey_ball_1
+    - !holding_red_box_1
+    - agent_in_room_2
+    - grey_ball_in_room_1
+    - grey_door_1_locked
+    - purple_door_1_locked
+    - red_ball_1_in_room_1
+  State 1:
+    - !agent_in_room_4
+    - !holding_grey_ball_1
+    - !holding_red_box_1
+    - agent_in_room_1
+    - grey_ball_in_room_1
+    - grey_door_1_locked
+    - purple_door_1_locked
+    - red_ball_1_in_room_1
+  State 2:
+    - !agent_in_room_4
+    - !holding_grey_ball_1
+    - agent_in_room_1
+    - grey_ball_in_room_1
+    - grey_door_1_locked
+    - holding_red_box_1
+    - purple_door_1_locked
+    - red_ball_1_in_room_1
+  State 3:
+    - !agent_in_room_4
+    - !holding_grey_ball_1
+    - !purple_door_1_locked
+    - agent_in_room_1
+    - grey_ball_in_room_1
+    - grey_door_1_locked
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+  State 4:
+    - !holding_grey_ball_1
+    - !purple_door_1_locked
+    - agent_in_room_4
+    - agent_in_room_4
+    - grey_ball_in_room_1
+    - grey_door_1_locked
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+  State 5:
+    - !holding_grey_ball_1
+    - !purple_door_1_locked
+    - agent_in_room_4
+    - agent_in_room_4
+    - grey_ball_in_room_1
+    - grey_door_1_locked
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+  State 6:
+    - !holding_grey_ball_1
+    - !purple_door_1_locked
+    - agent_in_room_4
+    - agent_in_room_4
+    - grey_ball_in_room_1
+    - grey_door_1_locked
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+  State 7:
+    - !holding_grey_ball_1
+    - !purple_door_1_locked
+    - agent_in_room_4
+    - agent_in_room_4
+    - grey_ball_in_room_1
+    - grey_door_1_locked
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+  State 8:
+    - !holding_grey_ball_1
+    - !purple_door_1_locked
+    - agent_in_room_4
+    - agent_in_room_4
+    - grey_ball_in_room_4
+    - grey_door_1_locked
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+
+FEEDBACK PROVIDED:
+WHAT WENT WRONG: The issue arises because the plan does not ensure that you are holding the grey ball or that the green door is unlocked before you reach room 4. This means the necessary conditions for being in room 4 are not met.
+ HOW TO FIX: You need to ensure that you either pick up the grey ball before moving to room 4 or unlock the green door before reaching room 4. Adjust the sequence to include one of these actions before step 4.
+
+================================================================================
+ATTEMPT 4
+================================================================================
+
+REASONING:
+Initial State Analysis: The agent starts in room_2 with access to a blue box. Room_1 contains grey_ball_1 and red_ball_1. The agent needs to navigate through the rooms to achieve the goal of having grey_ball_1 in room_4 while also being in room_4. 
+
+Goal Analysis: The final configuration requires the grey ball to be in room_4 and the agent to also be in room_4. 
+
+Constraint Analysis: 
+1. The first constraint requires that red_ball_1 must be in room_4 while the agent is in room_1. This means the agent must first move to room_1 and then to room_4. 
+2. The second constraint requires that purple_door_1 must be unlocked, which means the agent needs to toggle the door state. 
+3. The third constraint states that if purple_door_1 is unlocked, the agent must have been holding red_box_1 at some point. 
+4. The fourth constraint requires the agent to be in room_4. 
+5. The fifth constraint states that if the agent is in room_4, they must either be holding grey_ball_1 or green_door_1 must be unlocked. 
+6. The sixth constraint requires grey_door_1 to be unlocked. 
+
+Subgoal Sequence: 
+1. Move to room_1 to access red_ball_1. 
+2. Pick up red_ball_1 in room_1. 
+3. Move to room_2 to access purple_door_1. 
+4. Toggle purple_door_1 to unlock it. 
+5. Move to room_4 through purple_door_1. 
+6. Pick up grey_ball_1 in room_1. 
+7. Move to room_4 with grey_ball_1. 
+8. Ensure that grey_door_1 is unlocked. 
+
+This sequence ensures that all constraints are satisfied before reaching the goal state.
+
+GENERATED PLAN:
+1. Move to room_1 to access red_ball_1.
+2. Pick up red_ball_1 in room_1.
+3. Move to room_2 to access purple_door_1.
+4. Toggle purple_door_1 to unlock it.
+5. Move to room_4 through purple_door_1.
+6. Pick up grey_ball_1 in room_1.
+7. Move to room_4 with grey_ball_1.
+8. Ensure that grey_door_1 is unlocked.
+
+VALID: False
+
+TRACE (State Sequence):
+  State 0:
+    - !agent_in_room_4
+    - !green_door_1_locked
+    - !grey_ball_in_room_4
+    - !grey_door_1_locked
+    - !holding_grey_ball_1
+    - !holding_red_ball_1
+    - !holding_red_box_1
+    - agent_in_room_2
+    - grey_ball_in_room_1
+    - purple_door_1_locked
+    - red_ball_1_in_room_1
+  State 1:
+    - !agent_in_room_4
+    - !green_door_1_locked
+    - !grey_ball_in_room_4
+    - !grey_door_1_locked
+    - !holding_grey_ball_1
+    - !holding_red_ball_1
+    - !holding_red_box_1
+    - agent_in_room_1
+    - grey_ball_in_room_1
+    - purple_door_1_locked
+    - red_ball_1_in_room_1
+  State 2:
+    - !agent_in_room_4
+    - !green_door_1_locked
+    - !grey_ball_in_room_4
+    - !grey_door_1_locked
+    - !holding_grey_ball_1
+    - !holding_red_box_1
+    - !red_ball_1_in_room_1
+    - agent_in_room_1
+    - grey_ball_in_room_1
+    - holding_red_ball_1
+    - purple_door_1_locked
+  State 3:
+    - !agent_in_room_4
+    - !green_door_1_locked
+    - !grey_ball_in_room_4
+    - !grey_door_1_locked
+    - !holding_grey_ball_1
+    - !holding_red_box_1
+    - !purple_door_1_locked
+    - !red_ball_1_in_room_1
+    - agent_in_room_2
+    - grey_ball_in_room_1
+    - holding_red_ball_1
+  State 4:
+    - !agent_in_room_4
+    - !green_door_1_locked
+    - !grey_ball_in_room_4
+    - !grey_door_1_locked
+    - !holding_grey_ball_1
+    - !holding_red_box_1
+    - !purple_door_1_locked
+    - !red_ball_1_in_room_1
+    - agent_in_room_2
+    - grey_ball_in_room_1
+    - holding_red_ball_1
+  State 5:
+    - !green_door_1_locked
+    - !grey_ball_in_room_4
+    - !grey_door_1_locked
+    - !holding_grey_ball_1
+    - !holding_red_box_1
+    - !purple_door_1_locked
+    - !red_ball_1_in_room_1
+    - agent_in_room_4
+    - agent_in_room_4
+    - grey_ball_in_room_1
+    - holding_red_ball_1
+  State 6:
+    - !green_door_1_locked
+    - !grey_ball_in_room_1
+    - !grey_ball_in_room_4
+    - !grey_door_1_locked
+    - !holding_grey_ball_1
+    - !holding_red_box_1
+    - !purple_door_1_locked
+    - !red_ball_1_in_room_1
+    - agent_in_room_4
+    - agent_in_room_4
+    - holding_red_ball_1
+  State 7:
+    - !green_door_1_locked
+    - !grey_ball_in_room_1
+    - !grey_ball_in_room_4
+    - !grey_door_1_locked
+    - !holding_grey_ball_1
+    - !holding_red_box_1
+    - !purple_door_1_locked
+    - !red_ball_1_in_room_1
+    - agent_in_room_4
+    - agent_in_room_4
+    - holding_red_ball_1
+  State 8:
+    - !green_door_1_locked
+    - !grey_ball_in_room_1
+    - !grey_ball_in_room_4
+    - !grey_door_1_locked
+    - !holding_grey_ball_1
+    - !holding_red_box_1
+    - !purple_door_1_locked
+    - !red_ball_1_in_room_1
+    - agent_in_room_4
+    - agent_in_room_4
+    - holding_red_ball_1
+
+FEEDBACK PROVIDED:
+WHAT WENT WRONG: The plan does not satisfy the constraint that requires the grey door to be unlocked before you can enter room 4. This means you cannot access room 4 as needed to achieve the goal.
+ HOW TO FIX: You need to unlock the grey door before attempting to move to room 4. Adjust the sequence to ensure that the grey door is unlocked prior to moving through purple door 1.
+
+================================================================================
+ATTEMPT 5
+================================================================================
+
+REASONING:
+Initial State Analysis: The agent starts in room_2 with access to a blue box. The grey ball is located in room_1, and the red ball is also in room_1. The agent needs to navigate through the rooms to achieve the goal of having the grey ball in room_4 while also being in room_4. The doors connecting the rooms must be considered, particularly the grey door which must be unlocked to access room_4. 
+
+Goal Analysis: The final configuration requires the grey ball to be in room_4 and the agent to be in room_4 as well. 
+
+Constraint Analysis: 
+1. The first constraint requires that red_ball_1 must be in room_4 while the agent is in room_1. This means the agent must first move to room_1 and then manipulate the red ball. 
+2. The second constraint states that purple_door_1 must not be locked, which means the agent must ensure it is unlocked. 
+3. The third constraint indicates that the agent must be holding red_box_1 before purple_door_1 can be unlocked. 
+4. The fourth constraint requires the agent to be in room_4 at some point. 
+5. The fifth constraint states that if the agent is in room_4, they must have either grey_ball_1 or green_door_1 must be unlocked. 
+6. The sixth constraint requires grey_door_1 to be unlocked before the agent can enter room_4. 
+
+Subgoal Sequence: 
+1. Move to room_1 to access red_ball_1. 
+2. Pick up red_box_1 in room_1. 
+3. Unlock purple_door_1 while holding red_box_1. 
+4. Unlock grey_door_1 to access room_4. 
+5. Move to room_4 through grey_door_1. 
+6. Ensure grey_ball_1 is in room_4. 
+7. Achieve the final state where the agent is in room_4 with grey_ball_1 present.
+
+GENERATED PLAN:
+1. Go to room_1
+2. Pick up red_box_1 in room_1
+3. Unlock purple_door_1 while holding red_box_1
+4. Unlock grey_door_1
+5. Go to room_4 through grey_door_1
+6. Ensure grey_ball_1 is in room_4
+7. Be in room_4 with grey_ball_1
+
+VALID: False
+
+TRACE (State Sequence):
+  State 0:
+    - agent_in_room_2
+    - grey_ball_in_room_1
+    - grey_door_1_locked
+    - holding_red_box_1
+    - purple_door_1_locked
+    - red_ball_1_in_room_1
+  State 1:
+    - agent_in_room_1
+    - grey_ball_in_room_1
+    - grey_door_1_locked
+    - holding_red_box_1
+    - purple_door_1_locked
+    - red_ball_1_in_room_1
+  State 2:
+    - !purple_door_1_locked
+    - agent_in_room_1
+    - grey_ball_in_room_1
+    - grey_door_1_locked
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+  State 3:
+    - !grey_door_1_locked
+    - !purple_door_1_locked
+    - agent_in_room_1
+    - grey_ball_in_room_1
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+  State 4:
+    - !grey_door_1_locked
+    - !purple_door_1_locked
+    - agent_in_room_4
+    - grey_ball_in_room_1
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+  State 5:
+    - !grey_door_1_locked
+    - !purple_door_1_locked
+    - agent_in_room_4
+    - grey_ball_in_room_1
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+  State 6:
+    - !grey_door_1_locked
+    - !purple_door_1_locked
+    - agent_in_room_4
+    - grey_ball_in_room_1
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+  State 7:
+    - !grey_door_1_locked
+    - !purple_door_1_locked
+    - agent_in_room_4
+    - grey_ball_in_room_1
+    - holding_red_box_1
+    - red_ball_1_in_room_1
+
+FEEDBACK PROVIDED:
+WHAT WENT WRONG: The plan does not satisfy the constraint that requires the grey ball to be in room 4 before you can be in room 4. Furthermore, the purple door must be unlocked before you can move through it, which is not adequately addressed in the sequence of actions.
+ HOW TO FIX: You need to ensure that the grey ball is moved to room 4 before you go to room 4. Additionally, make sure to unlock the purple door before attempting to go through it.
+
+================================================================================
+FINAL RESULT
+================================================================================
+
+STATUS: FAILED
+
+failed plan

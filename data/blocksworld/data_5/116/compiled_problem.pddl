@@ -1,0 +1,8 @@
+(define (problem liftedtcore_blocksworld-problem)
+ (:domain liftedtcore_blocksworld-domain)
+ (:objects
+ )
+ (:init (ontable brown_block_1) (on white_block_1 brown_block_1) (on orange_block_1 white_block_1) (ontable red_block_1) (on blue_block_1 orange_block_1) (clear red_block_1) (clear blue_block_1) (handempty) (hold_0) (hold_3) (hold_5) (hold_6) (= (total-cost) 0))
+ (:goal (and (holding blue_block_1) (hold_0) (hold_1) (hold_2) (hold_3) (hold_4) (hold_5) (hold_6) (hold_7)))
+ (:metric minimize (total-cost))
+)

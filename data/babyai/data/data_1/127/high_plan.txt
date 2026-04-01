@@ -1,0 +1,4 @@
+Move to room_3 to check for the green ball.
+Explore room_2 to locate the green ball if not found in room_3.
+Explore room_4 to locate the green ball if not found in room_2.
+Move the green ball to room_3 if found.

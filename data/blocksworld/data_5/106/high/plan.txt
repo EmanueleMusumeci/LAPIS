@@ -1,0 +1,541 @@
+================================================================================
+PROBLEM 106 - GENERATION HISTORY
+================================================================================
+
+LTL FORMULA:
+F(holding_white_block_2) & F(on_table_black_block_2) & ((not_on_table_white_block_2 | not_clear_red_block_1) U on_table_black_block_2) & F(not_clear_red_block_1) & F(not_clear_white_block_1) & F(on_table_red_block_1 | on_top_black_block_1_red_block_1) & F(not_clear_white_block_2) & G(not_clear_white_block_2 -> F(not_clear_black_block_2 | holding_white_block_1))
+
+
+================================================================================
+ATTEMPT 1
+================================================================================
+
+REASONING:
+Initial State Analysis: The initial state consists of five blocks: black_block_1 is on the table, red_block_1 is on top of black_block_1, white_block_1 is on the table, white_block_2 is on the table, and black_block_2 is on top of white_block_2. The robotic arm is not holding any block. 
+
+Goal Analysis: The goal is for the robotic arm to end up holding white_block_2. This means that white_block_2 must be clear and on the table at some point before the arm can pick it up. 
+
+Constraint Analysis: 
+1. The first constraint requires that black_block_2 must be on the table at some point. This can be achieved by unstacking it from white_block_2. 
+2. The second constraint states that if black_block_2 is on the table, then either white_block_2 is not on the table or red_block_1 is not clear. This will be satisfied by ensuring that black_block_2 is unstacked first. 
+3. The third constraint requires that red_block_1 is not clear, which is already satisfied since it is on top of black_block_1. 
+4. The fourth constraint requires that white_block_1 is not clear, which can be achieved by stacking another block on top of it. 
+5. The fifth constraint requires that either red_block_1 is on the table or black_block_1 is on top of red_block_1, which is satisfied as red_block_1 is currently on top of black_block_1. 
+6. The sixth constraint requires that white_block_2 is not clear, which is satisfied as it is currently under black_block_2. 
+7. The seventh constraint states that if white_block_2 is not clear, then either black_block_2 is not clear or the robotic arm must hold white_block_1. This will be satisfied by unstacking black_block_2 from white_block_2. 
+
+Subgoal Sequence: 
+1. Unstack black_block_2 from white_block_2 to ensure black_block_2 is on the table. 
+2. Stack black_block_2 on the table to satisfy the first constraint. 
+3. Unstack white_block_2 to achieve the goal of holding it. 
+4. Ensure that white_block_1 is not clear by stacking another block on top of it. 
+5. Ensure that red_block_1 is not clear by confirming it is on top of black_block_1. 
+6. Confirm that white_block_2 is not clear by ensuring black_block_2 is on top of it. 
+7. Finally, pick up white_block_2 to achieve the goal of holding it.
+
+GENERATED PLAN:
+1. Unstack black_block_2 from white_block_2
+2. Put black_block_2 on the table
+3. Unstack white_block_2
+4. Stack a block on top of white_block_1
+5. Confirm red_block_1 is on top of black_block_1
+6. Confirm black_block_2 is on top of white_block_2
+7. Pick up white_block_2
+
+VALID: False
+
+TRACE (State Sequence):
+  State 0:
+    - clear(black_block_1)
+    - clear(black_block_2)
+    - clear(white_block_1)
+    - clear(white_block_2)
+    - not_clear(black_block_1)
+    - not_clear(red_block_1)
+    - not_clear(white_block_1]
+    - not_clear(white_block_2)
+    - not_on_table(white_block_2)
+    - on(black_block_2, white_block_2)
+    - on(red_block_1, black_block_1)
+    - on_table(black_block_1)
+    - on_table(black_block_2)
+    - on_table(white_block_1)
+    - on_table(white_block_2)
+  State 1:
+    - clear(black_block_1)
+    - clear(white_block_1)
+    - clear(white_block_2)
+    - not_clear(black_block_1)
+    - not_clear(black_block_2)
+    - not_clear(red_block_1)
+    - not_clear(white_block_1)
+    - not_on_table(white_block_2)
+    - on(red_block_1, black_block_1)
+    - on_table(black_block_1)
+    - on_table(black_block_2)
+    - on_table(white_block_1)
+    - on_table(white_block_2)
+  State 2:
+    - clear(black_block_1)
+    - clear(white_block_1)
+    - clear(white_block_2)
+    - not_clear(black_block_1)
+    - not_clear(red_block_1)
+    - not_clear(white_block_1)
+    - not_on_table(white_block_2)
+    - on(red_block_1, black_block_1)
+    - on_table(black_block_1)
+    - on_table(black_block_2)
+    - on_table(white_block_1)
+  State 3:
+    - clear(black_block_1)
+    - clear(white_block_2)
+    - not_clear(black_block_1)
+    - not_clear(red_block_1)
+    - not_clear(white_block_1)
+    - not_on_table(white_block_2)
+    - on(red_block_1, black_block_1)
+    - on_table(black_block_1)
+    - on_table(black_block_2)
+    - on_table(white_block_1)
+  State 4:
+    - clear(black_block_1)
+    - clear(white_block_2)
+    - not_clear(black_block_1)
+    - not_clear(red_block_1)
+    - not_clear(white_block_1)
+    - not_on_table(white_block_2)
+    - on(red_block_1, black_block_1)
+    - on_table(black_block_1)
+    - on_table(black_block_2)
+    - on_table(white_block_1)
+  State 5:
+    - clear(black_block_1)
+    - clear(white_block_2)
+    - not_clear(black_block_1)
+    - not_clear(red_block_1)
+    - not_clear(white_block_1)
+    - not_on_table(white_block_2)
+    - on(red_block_1, black_block_1)
+    - on_table(black_block_1)
+    - on_table(black_block_2)
+    - on_table(white_block_1)
+  State 6:
+    - clear(black_block_1)
+    - clear(white_block_2)
+    - holding(white_block_2)
+    - not_clear(black_block_1)
+    - not_clear(red_block_1)
+    - not_clear(white_block_1)
+    - not_on_table(white_block_2)
+    - on(red_block_1, black_block_1)
+    - on_table(black_block_1)
+    - on_table(black_block_2)
+    - on_table(white_block_1)
+
+FEEDBACK PROVIDED:
+WHAT WENT WRONG: The plan does not satisfy the constraint that requires the black block to be on the table at some point, and it also fails to ensure that the white block is clear before attempting to pick it up.
+ HOW TO FIX: You need to ensure that the black block is placed on the table before trying to pick up the white block. Additionally, make sure to unstack the white block earlier in the plan so that it is clear when you attempt to pick it up.
+
+================================================================================
+ATTEMPT 2
+================================================================================
+
+REASONING:
+Initial State Analysis: The initial state consists of five blocks: black_block_1 is on the table, red_block_1 is on top of black_block_1, white_block_1 is on the table, white_block_2 is on the table, and black_block_2 is on top of white_block_2. The robotic arm is not holding any block. 
+
+Goal Analysis: The goal is for the robotic arm to end up holding white_block_2. To achieve this, white_block_2 must be clear and accessible for the robotic arm to pick it up. 
+
+Constraint Analysis: 
+1. The first constraint requires that black_block_2 must be on the table at some point. 
+2. The second constraint indicates that if black_block_2 is on the table, then either white_block_2 must not be on the table or red_block_1 must not be clear. 
+3. The third constraint states that red_block_1 must have a block on top of it at some point. 
+4. The fourth constraint requires that white_block_1 must have a block on top of it at some point. 
+5. The fifth constraint states that either red_block_1 must be on the table or black_block_1 must be on top of red_block_1. 
+6. The sixth constraint requires that white_block_2 must have a block on top of it at some point. 
+7. The seventh constraint states that if there is a block on top of white_block_2, then either black_block_2 must not be clear or the robotic arm must be holding white_block_1. 
+
+Subgoal Sequence: 
+1. Place black_block_1 on the table to satisfy the first constraint. 
+2. Unstack red_block_1 from black_block_1 to ensure that red_block_1 is not clear, satisfying the second constraint. 
+3. Unstack black_block_2 from white_block_2 to ensure that white_block_2 is clear for the robotic arm to pick it up. 
+4. Stack black_block_2 back on white_block_2 to satisfy the sixth constraint. 
+5. Pick up white_block_2 to achieve the goal. 
+
+This sequence of actions ensures that all constraints are satisfied while leading to the goal of holding white_block_2.
+
+GENERATED PLAN:
+1. Place black_block_1 on the table.
+2. Unstack red_block_1 from black_block_1.
+3. Unstack black_block_2 from white_block_2.
+4. Stack black_block_2 back on white_block_2.
+5. Pick up white_block_2.
+
+VALID: False
+
+TRACE (State Sequence):
+  State 0:
+    - clear(black_block_1)
+    - clear(white_block_1)
+    - clear(white_block_2)
+    - not_clear(black_block_1)
+    - not_clear(black_block_2)
+    - not_clear(red_block_1)
+    - not_clear(red_block_1)
+    - not_clear(white_block_1)
+    - not_clear(white_block_2)
+    - not_on_table(white_block_2)
+    - on(black_block_2, white_block_2)
+    - on(red_block_1, black_block_1)
+    - on_table(black_block_1)
+    - on_table(white_block_1)
+    - on_table(white_block_2)
+  State 1:
+    - clear(black_block_1)
+    - clear(white_block_1)
+    - clear(white_block_2)
+    - not_clear(black_block_2)
+    - not_clear(red_block_1)
+    - not_clear(white_block_1)
+    - not_clear(white_block_2)
+    - not_on_table(white_block_2)
+    - on(black_block_2, white_block_2)
+    - on_table(black_block_1)
+    - on_table(white_block_1)
+    - on_table(white_block_2)
+  State 2:
+    - clear(black_block_1)
+    - clear(red_block_1)
+    - clear(white_block_1)
+    - clear(white_block_2)
+    - not_clear(black_block_2)
+    - not_clear(white_block_1)
+    - not_clear(white_block_2)
+    - not_on_table(white_block_2)
+    - on_table(black_block_1)
+    - on_table(white_block_1)
+    - on_table(white_block_2)
+  State 3:
+    - clear(black_block_1)
+    - clear(red_block_1)
+    - clear(white_block_1)
+    - not_clear(black_block_2)
+    - not_clear(white_block_1)
+    - not_clear(white_block_2)
+    - not_on_table(white_block_2)
+    - on(black_block_2, white_block_2)
+    - on_table(black_block_1)
+    - on_table(white_block_1)
+  State 4:
+    - clear(black_block_1)
+    - clear(red_block_1)
+    - clear(white_block_1)
+    - holding(white_block_2)
+    - not_clear(black_block_2)
+    - not_clear(white_block_1)
+    - not_clear(white_block_2)
+    - not_on_table(white_block_2)
+    - on(black_block_2, white_block_2)
+    - on_table(black_block_1)
+    - on_table(white_block_1)
+
+FEEDBACK PROVIDED:
+WHAT WENT WRONG: The plan does not meet the requirement that there must be a block on top of white_block_2 at some point before the robotic arm can pick it up. This leads to a violation of the constraints regarding the state of white_block_2.
+ HOW TO FIX: You need to ensure that there is a block on top of white_block_2 before the robotic arm attempts to pick it up. Consider stacking another block on top of white_block_2 earlier in the plan.
+
+================================================================================
+ATTEMPT 3
+================================================================================
+
+REASONING:
+Initial State Analysis: The initial state consists of five blocks: black_block_1 is on the table, red_block_1 is on top of black_block_1, white_block_1 is on the table, white_block_2 is on the table, and black_block_2 is on top of white_block_2. The robotic arm is not holding any block. 
+
+Goal Analysis: The goal is for the robotic arm to end up holding white_block_2. To achieve this, white_block_2 must be clear (no block on top) at the time of picking it up. However, the constraints indicate that there must be a block on top of white_block_2 at some point before the robotic arm can pick it up. 
+
+Constraint Analysis: 
+1. Black_block_2 must be on the table at some point. 
+2. If black_block_2 is on the table, then either white_block_2 is not on the table or red_block_1 is not clear. 
+3. Red_block_1 must have a block on top of it at some point. 
+4. White_block_1 must have a block on top of it at some point. 
+5. Either red_block_1 is on the table or black_block_1 is on top of red_block_1 at some point. 
+6. White_block_2 must have a block on top of it at some point. 
+7. If there is a block on top of white_block_2, then either there is a block on top of black_block_2 or the robotic arm is holding white_block_1 at some point. 
+
+Subgoal Sequence: 
+1. Stack black_block_2 on top of white_block_2 to satisfy constraint 6. 
+2. Unstack black_block_2 from white_block_2 to satisfy the goal of holding white_block_2. 
+3. Ensure that red_block_1 has a block on top of it (which is already satisfied by the initial state). 
+4. Ensure that white_block_1 has a block on top of it (this can be achieved by stacking any block on top of it). 
+5. Ensure that black_block_1 is on top of red_block_1 (this is already satisfied by the initial state). 
+6. Ensure that black_block_2 is on the table (this can be achieved by putting it down after unstacking). 
+7. Finally, pick up white_block_2 to achieve the goal. 
+
+The plan will be structured to ensure that all constraints are satisfied while leading to the goal of holding white_block_2.
+
+GENERATED PLAN:
+1. Stack black_block_2 on top of white_block_2.
+2. Unstack black_block_2 from white_block_2.
+3. Stack white_block_1 on top of white_block_2.
+4. Pick up white_block_2.
+
+VALID: False
+
+TRACE (State Sequence):
+  State 0:
+    - clear(black_block_1)
+    - clear(white_block_1)
+    - clear(white_block_2)
+    - not_clear(black_block_1)
+    - not_clear(black_block_2)
+    - not_clear(red_block_1)
+    - not_clear(white_block_2)
+    - on(black_block_2, white_block_2)
+    - on(red_block_1, black_block_1)
+    - on_table(black_block_1)
+    - on_table(white_block_1)
+    - on_table(white_block_2)
+  State 1:
+    - clear(black_block_1)
+    - clear(white_block_1)
+    - not_clear(black_block_2)
+    - not_clear(red_block_1)
+    - not_clear(white_block_2)
+    - on(black_block_2, white_block_2)
+    - on(red_block_1, black_block_1)
+    - on_table(black_block_1)
+    - on_table(white_block_1)
+  State 2:
+    - clear(black_block_1)
+    - clear(black_block_2)
+    - not_clear(red_block_1)
+    - not_clear(white_block_1)
+    - not_clear(white_block_2)
+    - on(red_block_1, black_block_1)
+    - on(white_block_1, white_block_2)
+    - on_table(black_block_1)
+    - on_table(black_block_2)
+  State 3:
+    - clear(black_block_1)
+    - holding(black_block_2)
+    - not_clear(red_block_1)
+    - not_clear(white_block_1)
+    - not_clear(white_block_2)
+    - not_on_table(white_block_2)
+    - on(red_block_1, black_block_1)
+    - on(white_block_1, white_block_2)
+    - on_table(black_block_1)
+  State 4:
+    - clear(black_block_1)
+    - holding(white_block_2)
+    - not_clear(red_block_1)
+    - not_clear(white_block_1)
+    - not_clear(white_block_2)
+    - not_on_table(white_block_2)
+    - on(red_block_1, black_block_1)
+    - on(white_block_1, white_block_2)
+    - on_table(black_block_1)
+
+FEEDBACK PROVIDED:
+WHAT WENT WRONG: The plan does not meet the necessary conditions for holding white_block_2 because it does not establish that there is a block on top of white_block_2 or that black_block_2 is on the table at any point in the sequence.
+ HOW TO FIX: You need to ensure that black_block_2 is placed on the table before attempting to stack or unstack any blocks. Additionally, you should stack a block on top of white_block_2 before trying to pick it up.
+
+================================================================================
+ATTEMPT 4
+================================================================================
+
+REASONING:
+Initial State Analysis: The initial state consists of five blocks: black_block_1 is on the table, red_block_1 is on top of black_block_1, white_block_1 is on the table, white_block_2 is on the table, and black_block_2 is on top of white_block_2. The robotic arm is not holding any blocks. 
+
+Goal Analysis: The goal is for the robotic arm to end up holding white_block_2. To achieve this, the arm must first ensure that white_block_2 is clear (no blocks on top of it) and then pick it up. 
+
+Constraint Analysis: 
+1. The expression 'black_block_2 is on the table' must hold in at least one state. This requires that black_block_2 be placed on the table. 
+2. If 'black_block_2 is on the table' holds, then there must be a state where either 'white_block_2 is not on the table' or 'there is a block on top of red_block_1'. This will be satisfied by ensuring that black_block_2 is on the table. 
+3. The expression 'there is a block on top of red_block_1' must hold in at least one state. This is already satisfied as red_block_1 is on top of black_block_1. 
+4. The expression 'there is a block on top of white_block_1' must hold in at least one state. This can be satisfied by stacking a block on top of white_block_1. 
+5. At least one of the following must be true: 'red_block_1 is on the table' or 'black_block_1 is on top of red_block_1'. This is satisfied as black_block_1 is on top of red_block_1. 
+6. The expression 'there is a block on top of white_block_2' must hold in at least one state. This can be satisfied by stacking black_block_2 on top of white_block_2. 
+7. If 'there is a block on top of white_block_2' holds, then at some state, either 'there is a block on top of black_block_2' or 'you are holding white_block_1' must be true. This will be satisfied by ensuring that black_block_2 is on the table before picking up white_block_2. 
+
+Subgoal Sequence: 
+1. Place black_block_2 on the table to satisfy the first constraint. 
+2. Stack black_block_2 on top of white_block_2 to satisfy the sixth constraint. 
+3. Ensure that white_block_2 is clear by unstacking black_block_2 from it. 
+4. Finally, pick up white_block_2 to achieve the goal. 
+
+This sequence of actions will ensure that all constraints are satisfied while achieving the goal of holding white_block_2.
+
+GENERATED PLAN:
+1. Place black_block_2 on the table.
+2. Stack black_block_2 on top of white_block_2.
+3. Unstack black_block_2 from white_block_2.
+4. Pick up white_block_2.
+
+VALID: False
+
+TRACE (State Sequence):
+  State 0:
+    - arm_empty
+    - clear(black_block_1)
+    - clear(black_block_2)
+    - clear(white_block_1)
+    - clear(white_block_2)
+    - not_clear(black_block_1)
+    - not_clear(red_block_1)
+    - not_clear(white_block_2)
+    - on(black_block_2, white_block_2)
+    - on(red_block_1, black_block_1)
+    - on_table(black_block_1)
+    - on_table(black_block_2)
+    - on_table(white_block_1)
+    - on_table(white_block_2)
+  State 1:
+    - arm_empty
+    - clear(black_block_1)
+    - clear(black_block_2)
+    - clear(white_block_1)
+    - clear(white_block_2)
+    - not_clear(black_block_1)
+    - not_clear(red_block_1)
+    - not_clear(white_block_2)
+    - on(black_block_2, white_block_2)
+    - on(red_block_1, black_block_1)
+    - on_table(black_block_1)
+    - on_table(black_block_2)
+    - on_table(white_block_1)
+    - on_table(white_block_2)
+  State 2:
+    - arm_empty
+    - clear(black_block_1)
+    - clear(black_block_2)
+    - clear(white_block_1)
+    - not_clear(black_block_1)
+    - not_clear(red_block_1)
+    - not_clear(white_block_2)
+    - on(black_block_2, white_block_2)
+    - on(red_block_1, black_block_1)
+    - on_table(black_block_1)
+    - on_table(black_block_2)
+    - on_table(white_block_1)
+    - on_table(white_block_2)
+  State 3:
+    - clear(black_block_1)
+    - clear(black_block_2)
+    - clear(white_block_1)
+    - holding(white_block_2)
+    - not_clear(black_block_1)
+    - not_clear(red_block_1)
+    - not_clear(white_block_2)
+    - not_on_table(white_block_2)
+    - on(black_block_2, white_block_2)
+    - on(red_block_1, black_block_1)
+    - on_table(black_block_1)
+    - on_table(black_block_2)
+    - on_table(white_block_1)
+
+FEEDBACK PROVIDED:
+WHAT WENT WRONG: The plan does not meet the requirement that there must be a block on top of white_block_2 at some point, and it incorrectly attempts to stack black_block_2 on white_block_2 without ensuring that black_block_2 is on the table first.
+ HOW TO FIX: You need to ensure that there is a block on top of white_block_2 before attempting to stack black_block_2 on it. Additionally, make sure to place black_block_2 on the table before stacking it on white_block_2.
+
+================================================================================
+ATTEMPT 5
+================================================================================
+
+REASONING:
+Initial State Analysis: The initial state consists of five blocks: black_block_1 is on the table, red_block_1 is on top of black_block_1, white_block_1 is on the table, white_block_2 is on the table, and black_block_2 is on top of white_block_2. The robotic arm is not holding any block. 
+
+Goal Analysis: The goal is for the robotic arm to end up holding white_block_2. This means that at some point, the arm must pick up white_block_2 from the table. 
+
+Constraint Analysis: 
+1. The first constraint requires that black_block_2 must be on the table at some point. 
+2. The second constraint states that if black_block_2 is on the table, then either white_block_2 must not be on the table or red_block_1 must not be clear. 
+3. The third constraint requires that red_block_1 must not be clear, meaning there must be a block on top of it. 
+4. The fourth constraint requires that white_block_1 must not be clear, meaning there must be a block on top of it. 
+5. The fifth constraint states that either red_block_1 must be on the table or black_block_1 must be on top of red_block_1. 
+6. The sixth constraint requires that white_block_2 must not be clear, meaning there must be a block on top of it. 
+7. The seventh constraint states that if there is a block on top of white_block_2, then either black_block_2 must not be clear or the robotic arm must be holding white_block_1. 
+
+Subgoal Sequence: 
+1. Ensure that black_block_2 is on the table. 
+2. Ensure that red_block_1 is not clear by stacking black_block_1 on top of it. 
+3. Ensure that white_block_1 is not clear by stacking red_block_1 on top of it. 
+4. Ensure that there is a block on top of white_block_2 by stacking black_block_2 on it. 
+5. Finally, pick up white_block_2 to achieve the goal of holding it.
+
+GENERATED PLAN:
+1. Ensure black_block_2 is on the table.
+2. Stack black_block_1 on top of red_block_1.
+3. Stack red_block_1 on top of white_block_1.
+4. Stack black_block_2 on top of white_block_2.
+5. Pick up white_block_2.
+
+VALID: False
+
+TRACE (State Sequence):
+  State 0:
+    - holding_white_block_1: false
+    - holding_white_block_2: false
+    - not_clear_black_block_2: true
+    - not_clear_red_block_1: true
+    - not_clear_white_block_1: false
+    - not_clear_white_block_2: true
+    - not_on_table_white_block_2: true
+    - on_table_black_block_2: false
+    - on_table_red_block_1: false
+    - on_top_black_block_1_red_block_1: true
+  State 1:
+    - holding_white_block_1: false
+    - holding_white_block_2: false
+    - not_clear_black_block_2: true
+    - not_clear_red_block_1: true
+    - not_clear_white_block_1: false
+    - not_clear_white_block_2: true
+    - not_on_table_white_block_2: true
+    - on_table_black_block_2: false
+    - on_table_red_block_1: false
+    - on_top_black_block_1_red_block_1: true
+  State 2:
+    - holding_white_block_1: false
+    - holding_white_block_2: false
+    - not_clear_black_block_2: true
+    - not_clear_red_block_1: false
+    - not_clear_white_block_1: false
+    - not_clear_white_block_2: true
+    - not_on_table_white_block_2: true
+    - on_table_black_block_2: false
+    - on_table_red_block_1: false
+    - on_top_black_block_1_red_block_1: false
+  State 3:
+    - holding_white_block_1: false
+    - holding_white_block_2: false
+    - not_clear_black_block_2: false
+    - not_clear_red_block_1: false
+    - not_clear_white_block_1: false
+    - not_clear_white_block_2: true
+    - not_on_table_white_block_2: true
+    - on_table_black_block_2: false
+    - on_table_red_block_1: false
+    - on_top_black_block_1_red_block_1: false
+  State 4:
+    - holding_white_block_1: false
+    - holding_white_block_2: true
+    - not_clear_black_block_2: false
+    - not_clear_red_block_1: false
+    - not_clear_white_block_1: false
+    - not_clear_white_block_2: false
+    - not_on_table_white_block_2: true
+    - on_table_black_block_2: false
+    - on_table_red_block_1: false
+    - on_top_black_block_1_red_block_1: false
+
+FEEDBACK PROVIDED:
+WHAT WENT WRONG: The plan does not satisfy the requirement that black block number 2 must be on the table at some point, and it also fails to show that red block number 1 is not clear, meaning there should be a block on top of it.
+ HOW TO FIX: You need to ensure that black block number 2 is on the table before stacking black block number 1 on top of red block number 1. Additionally, you should stack another block on top of red block number 1 to satisfy the constraint that it is not clear.
+
+================================================================================
+FINAL RESULT
+================================================================================
+
+STATUS: FAILED
+
+failed plan

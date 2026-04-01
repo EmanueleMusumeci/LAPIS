@@ -1,0 +1,8 @@
+Unstack the red block number 1 from the brown block number 2.
+Put down the red block number 1 on the table.
+Unstack the brown block number 2 from the grey block number 1.
+Put down the brown block number 2 on the table.
+Pickup the blue block number 1 from the table.
+Put down the blue block number 1 on the table.
+Unstack the grey block number 1 from the brown block number 1.
+Put down the grey block number 1 on the table.

@@ -18,7 +18,8 @@ def get_cfg(mode, initial_seed=0, num_seeds=1):
         "parallelize": False,
         "render": False,
         "folder_no": 2,
-        "llm": "mock_llm", # Placeholder
+        "llm": "gpt-4o",
+        "planner_name": None, # Set to "symk" to use SymK, or None for auto-selection
         "evaluation_data": [initial_seed + i for i in range(num_seeds)],
         "few_shot_data": [],
         "constraint_form": {

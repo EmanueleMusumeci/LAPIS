@@ -1,0 +1,3 @@
+Ensure the red ball is in room_4.
+Move the grey ball to room_4.
+Navigate to room_4.

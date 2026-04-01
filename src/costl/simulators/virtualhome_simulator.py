@@ -94,6 +94,13 @@ class VirtualHomeSimulator(BaseSimulator):
         self.current_graph = None
         self.agent_states = [{"location": None, "holding": []} for _ in range(num_agents)]
 
+    def setup(self, **kwargs) -> bool:
+        """Setup the simulator.
+        
+        VirtualHome simulator is set up during initialization.
+        """
+        return True
+
     def reset(self, seed: Optional[int] = None, scene_id: Optional[int] = None) -> Tuple[Dict, Dict]:
         """Reset the VirtualHome environment.
         

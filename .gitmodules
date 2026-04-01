@@ -7,3 +7,9 @@
 [submodule "third-party/virtualhome"]
 	path = third-party/virtualhome
 	url = https://github.com/xavierpuigf/virtualhome.git
+[submodule "third-party/LTL_Verifier"]
+	path = third-party/LTL_Verifier
+	url = /DATA/LTL_Verifier
+[submodule "third-party/context_matters_3dsg"]
+	path = third-party/context_matters_3dsg
+	url = /DATA/context-matters-3dsg

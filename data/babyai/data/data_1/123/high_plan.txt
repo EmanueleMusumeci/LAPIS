@@ -1,0 +1,3 @@
+Go to the position in front of red_door_1
+Unlock red_door_1
+Confirm that red_ball_1 is present in the world

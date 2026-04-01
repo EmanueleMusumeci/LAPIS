@@ -97,6 +97,13 @@ class HabitatSimulator(BaseSimulator):
         # Initialize agent
         self.agent = self.sim.initialize_agent(0)
         self.action_space = self._get_action_space()
+
+    def setup(self, **kwargs) -> bool:
+        """Setup the simulator.
+        
+        Habitat simulator is set up during initialization.
+        """
+        return True
         
     def _create_sim_config(self) -> Any:
         """Create Habitat simulator configuration."""

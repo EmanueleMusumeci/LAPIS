@@ -1,0 +1,1290 @@
+timestamp,problem_id,domain_name,num_constraints,domain,problem,actions,goal,constraints,ltl_formula,formula_reasoning,fluent_syntax,plan,plan_reasoning,trace,trace_reasoning,is_valid,num_loops,status,feedback
+2026-02-06 08:45:33,100,blocksworld,4,"The domain we're dealing with is a classic blocksworld scenario. Imagine a table and a set of blocks. Each block can either sit directly on the table or be stacked on top of another block. All the blocks are the same size, and you can stack them as high as you want. There's no limit to how many blocks can be on the table at once. You control a robotic arm that can hold only one block at a time. The actions you can perform include picking up a block from the table, putting a block down on the table, stacking one block on another, and unstacking a block from another. Each action has specific conditions that must be met before you can perform it, and each action changes the state of the blocks in some way.","In this specific problem, we have five blocks: two green blocks, two black blocks, and one purple block. Initially, the first green block is on the table with the first black block on top of it. The second black block is on the table with the second green block on top of it. The purple block is also on the table. The goal is to get the first black block onto the table.","Let's talk about the actions you can perform with the blocks:
+
+1. **Pickup**: You can pick up a block from the table, but only if there's nothing on top of it, it's sitting directly on the table, and you're not already holding another block. So, if you want to pick up a block, make sure it's clear and you're not holding anything else.
+
+2. **Putdown**: You can put down a block onto the table, but only if you're currently holding that block. Once you put it down, it will be clear, and you won't be holding any block anymore.
+
+3. **Stack**: You can stack one block on top of another, but only if you're holding the block you want to stack and the block you want to stack it on is clear. After stacking, the block you placed will be clear, but the block underneath won't be.
+
+4. **Unstack**: You can unstack a block from another, but only if the block you want to unstack is clear, it's on top of another block, and you're not holding anything else. After unstacking, you'll be holding the block, and the block it was on will be clear.",The goal is to have the first black block sitting directly on the table.,"1. At some point, the purple block must not be on the table, and you must be holding the first green block.
+2. At some point, the purple block must not be on top of the second black block.
+3. If the purple block is not on top of the second black block, then you must be holding the first black block at that time or later.
+4. At some point, the second green block must not be on top of the second black block.
+5. At some point, the second green block must be on top of the first black block, and the purple block must not be clear (meaning something is on top of it).","F(on_table(first_black)) & F(!on_table(purple) & holding(first_green)) & F(!on(purple, second_black)) & G(!on(purple, second_black) -> F(holding(first_black))) & F(!on(second_green, second_black)) & F(on(second_green, first_black) & !clear(purple))","1. **Goal**: The goal is to have the first black block on the table. This is a simple goal that must be true in the final state, so we use the 'Finally' operator: F(on_table(first_black)).
+
+2. **Constraint 1**: At some point, the purple block must not be on the table, and you must be holding the first green block. This is a simple constraint that must be true at least once, so we use the 'Finally' operator: F(!on_table(purple) & holding(first_green)).
+
+3. **Constraint 2**: At some point, the purple block must not be on top of the second black block. This is another simple constraint that must be true at least once, so we use the 'Finally' operator: F(!on(purple, second_black)).
+
+4. **Constraint 3**: If the purple block is not on top of the second black block, then you must be holding the first black block at that time or later. This is a consequence constraint, so we use the 'Globally' and 'Finally' operators: G(!on(purple, second_black) -> F(holding(first_black))).
+
+5. **Constraint 4**: At some point, the second green block must not be on top of the second black block. This is a simple constraint that must be true at least once, so we use the 'Finally' operator: F(!on(second_green, second_black)).
+
+6. **Constraint 5**: At some point, the second green block must be on top of the first black block, and the purple block must not be clear. This is a simple constraint that must be true at least once, so we use the 'Finally' operator: F(on(second_green, first_black) & !clear(purple)).
+
+Combining all these, we get the complete LTL formula.","Fluents are predicates that describe the state of the blocks. For example, on_table(block) means the block is on the table, on(block1, block2) means block1 is on block2, holding(block) means the robotic arm is holding the block, and clear(block) means there is nothing on top of the block.","1. Unstack B1 from G1
+2. Unstack G2 from B2
+3. Pick up G1
+4. Place P on B2
+5. Pick up B1
+6. Stack G2 on B1
+7. Put B1 on the table","### Initial State Analysis
+- There are five blocks: two green blocks (G1, G2), two black blocks (B1, B2), and one purple block (P).
+- G1 is on the table with B1 on top of it.
+- B2 is on the table with G2 on top of it.
+- P is on the table.
+
+### Goal Analysis
+- The goal is to have the first black block (B1) sitting directly on the table.
+
+### Constraint Analysis
+1. At some point, the purple block must not be on the table, and you must be holding the first green block.
+2. At some point, the purple block must not be on top of the second black block.
+3. If the purple block is not on top of the second black block, then you must be holding the first black block at that time or later.
+4. At some point, the second green block must not be on top of the second black block.
+5. At some point, the second green block must be on top of the first black block, and the purple block must not be clear.
+
+### Subgoal Sequence
+1. **Remove B1 from G1**: Unstack B1 from G1 to make B1 available for manipulation.
+2. **Clear B2**: Unstack G2 from B2 to make B2 available for manipulation.
+3. **Hold G1**: Pick up G1 to satisfy the constraint of holding G1 while P is not on the table.
+4. **Move P**: Place P on B2 to ensure P is not on the table and not on B2.
+5. **Hold B1**: Pick up B1 to satisfy the constraint of holding B1 when P is not on B2.
+6. **Place G2 on B1**: Stack G2 on B1 to satisfy the constraint of G2 being on B1.
+7. **Place B1 on the table**: Finally, put B1 on the table to achieve the goal.
+
+### Prototype Plan
+1. **Unstack B1 from G1**: This makes B1 available for further manipulation.
+2. **Unstack G2 from B2**: This clears B2, allowing P to be placed on it.
+3. **Pick up G1**: This satisfies the constraint of holding G1 while P is not on the table.
+4. **Place P on B2**: This ensures P is not on the table and not on B2.
+5. **Pick up B1**: This satisfies the constraint of holding B1 when P is not on B2.
+6. **Stack G2 on B1**: This satisfies the constraint of G2 being on B1.
+7. **Put B1 on the table**: This achieves the goal of having B1 on the table.","[['on_table(first_green)', 'on(first_black, first_green)', '!clear(first_green)', 'clear(first_black)', 'on_table(second_black)', 'on(second_green, second_black)', '!clear(second_black)', 'clear(second_green)', 'on_table(purple)', 'clear(purple)'], ['holding(first_black)', 'clear(first_green)', '!on(first_black, first_green)'], ['holding(second_green)', 'clear(second_black)', '!on(second_green, second_black)'], ['holding(first_green)', '!on_table(first_green)'], ['on(purple, second_black)', '!clear(second_black)', '!clear(purple)'], ['holding(first_black)', '!on_table(first_black)'], ['on(second_green, first_black)', '!clear(first_black)'], ['on_table(first_black)', '!holding(first_black)', 'clear(second_green)']]","### Initial State Analysis (State 0):
+- We have five blocks: two green blocks (G1, G2), two black blocks (B1, B2), and one purple block (P).
+- Initial configuration:
+  - G1 is on the table with B1 on top of it.
+  - B2 is on the table with G2 on top of it.
+  - P is on the table.
+- From this, we can derive the following fluents:
+  - on_table(first_green)
+  - on(first_black, first_green)
+  - !clear(first_green) (since B1 is on it)
+  - clear(first_black) (since nothing is on B1)
+  - on_table(second_black)
+  - on(second_green, second_black)
+  - !clear(second_black) (since G2 is on it)
+  - clear(second_green) (since nothing is on G2)
+  - on_table(purple)
+  - clear(purple) (since nothing is on P)
+  - arm is empty initially, so no holding fluents.
+
+### Plan Execution:
+
+#### Step 1: Unstack B1 from G1
+- Action: Unstack B1 from G1
+- Effects:
+  - B1 is now held by the arm.
+  - G1 becomes clear.
+- Resulting State:
+  - holding(first_black)
+  - clear(first_green)
+  - !on(first_black, first_green)
+
+#### Step 2: Unstack G2 from B2
+- Action: Unstack G2 from B2
+- Effects:
+  - G2 is now held by the arm.
+  - B2 becomes clear.
+- Resulting State:
+  - holding(second_green)
+  - clear(second_black)
+  - !on(second_green, second_black)
+
+#### Step 3: Pick up G1
+- Action: Pick up G1
+- Effects:
+  - G1 is now held by the arm.
+  - G1 is no longer on the table.
+- Resulting State:
+  - holding(first_green)
+  - !on_table(first_green)
+
+#### Step 4: Place P on B2
+- Action: Place P on B2
+- Effects:
+  - P is now on B2.
+  - B2 is no longer clear.
+- Resulting State:
+  - on(purple, second_black)
+  - !clear(second_black)
+  - !clear(purple)
+
+#### Step 5: Pick up B1
+- Action: Pick up B1
+- Effects:
+  - B1 is now held by the arm.
+  - B1 is no longer on the table.
+- Resulting State:
+  - holding(first_black)
+  - !on_table(first_black)
+
+#### Step 6: Stack G2 on B1
+- Action: Stack G2 on B1
+- Effects:
+  - G2 is now on B1.
+  - B1 is no longer clear.
+- Resulting State:
+  - on(second_green, first_black)
+  - !clear(first_black)
+
+#### Step 7: Put B1 on the table
+- Action: Put B1 on the table
+- Effects:
+  - B1 is now on the table.
+  - Arm is empty.
+- Resulting State:
+  - on_table(first_black)
+  - !holding(first_black)
+  - clear(second_green)
+
+### Final Trace:
+The trace will reflect the states after each plan step, ensuring that the fluents are consistent with the actions taken and the LTL formula requirements.",False,5,failed,"WHAT WENT WRONG: The plan did not satisfy the requirement that the first black block must be picked up after the purple block is no longer on the second black block.
+ HOW TO FIX: You need to ensure that after the purple block is placed on the second black block, you eventually pick up the first black block. Consider adding a step to pick up the first black block after placing the purple block on the second black block."
+2026-02-06 08:48:00,101,blocksworld,4,"The domain we're dealing with is a classic blocksworld scenario. Imagine a table and a set of blocks that can be stacked on top of each other or placed directly on the table. The blocks are all the same size, and you can build towers of any height. There's no limit to how many blocks you can have on the table. You control a robotic arm that can hold only one block at a time, which is a key limitation in this domain.","In this specific problem, we have five blocks: a brown block, a yellow block, a white block, a grey block, and a black block. Initially, the brown, yellow, and grey blocks are on the table. The white block is on top of the yellow block, and the black block is on top of the white block. The brown and grey blocks are clear, meaning nothing is on top of them. The black block is also clear. You start without holding any block. The goal is to end up holding the yellow block.","In this blocksworld, you have four main actions you can perform:
+
+1. **Pickup**: You can pick up a block from the table, but only if the block is clear (nothing is on top of it), it's on the table, and you're not already holding another block.
+
+2. **Putdown**: You can put down a block you're holding onto the table. You must be holding the block you want to put down.
+
+3. **Stack**: You can place a block you're holding on top of another block, but only if the block you're placing it on is clear (nothing is on top of it).
+
+4. **Unstack**: You can pick up a block from the top of another block, but only if the block you're picking up is clear and you're not already holding another block.
+
+These actions are constrained by the fact that you can only hold one block at a time, and you must meet the preconditions for each action to perform it.",The goal is to be holding the yellow block at the end of the sequence of actions.,"1. At some point, the yellow block must not be on top of the grey block.
+2. If the yellow block is not on top of the grey block, then at that time or later, either the black block or the white block must not be clear.
+3. At some point, the yellow block must not be on the table.
+4. If the yellow block is not on the table, then before that, either the brown block must not be clear or the grey block must not be on the table.
+5. At some point, the grey block must not be on the table.
+6. The white block must never be on the table.",F(holding_yellow) & F(!(on_yellow_grey)) & G(!(on_yellow_grey) -> F(!(clear_black) | !(clear_white))) & F(!(on_yellow_table)) & (!(clear_brown) | !(on_grey_table)) U !(on_yellow_table) & F(!(on_grey_table)) & G(!(on_white_table)),"1. **Goal**: The goal is to be holding the yellow block at the end of the sequence of actions. This is a simple goal that must be true eventually, so we use the formula F(holding_yellow).
+
+2. **Constraint 1**: ""At some point, the yellow block must not be on top of the grey block."" This is a simple constraint that must be true at least once, so we use F(!(on_yellow_grey)).
+
+3. **Constraint 2**: ""If the yellow block is not on top of the grey block, then at that time or later, either the black block or the white block must not be clear."" This is a consequence constraint because it specifies what must happen after or at the same time as the yellow block not being on the grey block. We use G(!(on_yellow_grey) -> F(!(clear_black) | !(clear_white))).
+
+4. **Constraint 3**: ""At some point, the yellow block must not be on the table."" This is a simple constraint that must be true at least once, so we use F(!(on_yellow_table)).
+
+5. **Constraint 4**: ""If the yellow block is not on the table, then before that, either the brown block must not be clear or the grey block must not be on the table."" This is a precedence constraint because it specifies what must happen before the yellow block is not on the table. We use (!(clear_brown) | !(on_grey_table)) U !(on_yellow_table).
+
+6. **Constraint 5**: ""At some point, the grey block must not be on the table."" This is a simple constraint that must be true at least once, so we use F(!(on_grey_table)).
+
+7. **Constraint 6**: ""The white block must never be on the table."" This is a global constraint that must always be true, so we use G(!(on_white_table)).
+
+Combining all these, the complete LTL formula is:
+F(holding_yellow) & F(!(on_yellow_grey)) & G(!(on_yellow_grey) -> F(!(clear_black) | !(clear_white))) & F(!(on_yellow_table)) & (!(clear_brown) | !(on_grey_table)) U !(on_yellow_table) & F(!(on_grey_table)) & G(!(on_white_table)).","Fluents are predicates that describe the state of the blocks. For example, 'holding_yellow' means the robotic arm is holding the yellow block, 'on_yellow_grey' means the yellow block is on top of the grey block, 'clear_black' means the black block is clear, and 'on_yellow_table' means the yellow block is on the table.","1. Move the black block from the white block to the brown block.
+2. Move the white block from the yellow block to the grey block.
+3. Move the grey block from the table to the brown block.
+4. Pick up the yellow block.","### Initial State Analysis
+- Brown block is on the table and clear.
+- Yellow block is on the table with the white block on top of it.
+- White block is on top of the yellow block with the black block on top of it.
+- Grey block is on the table and clear.
+- Black block is on top of the white block and is clear.
+- The robotic arm is not holding any block.
+
+### Goal Analysis
+- The goal is to be holding the yellow block.
+
+### Constraint Analysis
+1. The yellow block must not be on top of the grey block.
+2. If the yellow block is not on top of the grey block, then either the black block or the white block must not be clear.
+3. The yellow block must not be on the table.
+4. If the yellow block is not on the table, then either the brown block must not be clear or the grey block must not be on the table.
+5. The grey block must not be on the table.
+6. The white block must never be on the table.
+
+### Subgoal Sequence
+1. **Ensure the white block is not on the table**: Since the white block is currently on the yellow block, we need to move it to another block that is clear, such as the brown block or the grey block.
+2. **Ensure the yellow block is not on the table**: To achieve this, we need to remove the white and black blocks from the yellow block.
+3. **Ensure the grey block is not on the table**: This can be achieved by placing the grey block on top of another block, such as the brown block.
+4. **Ensure the yellow block is not on top of the grey block**: This is already satisfied as the yellow block is initially on the table.
+5. **Ensure either the black block or the white block is not clear**: This can be achieved by stacking the black block on top of another block.
+6. **Ensure either the brown block is not clear or the grey block is not on the table**: This is achieved by placing the grey block on top of the brown block.
+7. **Achieve the goal of holding the yellow block**: Once the yellow block is clear, pick it up.
+
+### Prototype Plan
+1. Move the black block from the white block to the brown block to ensure the white block is not on the table and the black block is not clear.
+2. Move the white block from the yellow block to the grey block to ensure the white block is not on the table.
+3. Move the grey block from the table to the brown block to ensure the grey block is not on the table and the brown block is not clear.
+4. Pick up the yellow block to achieve the goal of holding the yellow block.","[['clear_brown', 'clear_grey', 'clear_black', 'on_white_yellow', 'on_black_white', 'on_brown_table', 'on_grey_table', '!on_yellow_table', '!holding_yellow'], ['on_black_brown', 'clear_white', 'clear_black', '!clear_brown'], ['on_white_grey', 'clear_yellow', 'clear_white', '!clear_grey'], ['on_grey_brown', 'clear_grey', '!clear_brown'], ['holding_yellow', '!on_yellow_table', '!clear_yellow']]","**Initial State Analysis (State 0):**
+- We have five blocks: brown, yellow, white, grey, and black.
+- Brown, yellow, and grey blocks are on the table.
+- White block is on top of the yellow block.
+- Black block is on top of the white block.
+- Brown, grey, and black blocks are clear.
+- The robotic arm is not holding any block.
+
+From this, we can derive the following fluents:
+- clear_brown: true (brown block is clear)
+- clear_grey: true (grey block is clear)
+- clear_black: true (black block is clear)
+- on_white_yellow: true (white block is on yellow block)
+- on_black_white: true (black block is on white block)
+- on_brown_table: true (brown block is on the table)
+- on_yellow_table: false (yellow block is not on the table)
+- on_grey_table: true (grey block is on the table)
+- holding_yellow: false (not holding yellow block)
+
+**Plan Step 1: Move the black block from the white block to the brown block.**
+- Action: Move black block to brown block.
+- After this step:
+  - on_black_brown: true (black block is on brown block)
+  - clear_white: true (white block is now clear)
+  - clear_black: true (black block is clear)
+  - clear_brown: false (brown block is not clear)
+
+**Plan Step 2: Move the white block from the yellow block to the grey block.**
+- Action: Move white block to grey block.
+- After this step:
+  - on_white_grey: true (white block is on grey block)
+  - clear_yellow: true (yellow block is now clear)
+  - clear_white: true (white block is clear)
+  - clear_grey: false (grey block is not clear)
+
+**Plan Step 3: Move the grey block from the table to the brown block.**
+- Action: Move grey block to brown block.
+- After this step:
+  - on_grey_brown: true (grey block is on brown block)
+  - clear_grey: true (grey block is clear)
+  - clear_brown: false (brown block is not clear)
+
+**Plan Step 4: Pick up the yellow block.**
+- Action: Pick up yellow block.
+- After this step:
+  - holding_yellow: true (holding yellow block)
+  - on_yellow_table: false (yellow block is not on the table)
+  - clear_yellow: false (yellow block is not clear)
+
+Each state reflects the configuration after the corresponding plan step, ensuring that only certain fluents are included.",True,5,completed,
+2026-02-06 08:50:12,104,blocksworld,4,"The domain we're dealing with is a classic blocksworld scenario. Imagine a table and a set of blocks that can be stacked on top of each other or placed directly on the table. The blocks are all the same size, and you can build towers of any height. There's no limit to how many blocks you can have on the table. You control a robotic arm that can hold only one block at a time. The actions you can perform include picking up a block from the table, putting a block down on the table, stacking one block on top of another, and unstacking a block from another block. Each action has specific conditions that must be met before you can perform it, and each action has certain effects that change the state of the world.","In this specific problem, we have five blocks: a red block, two yellow blocks, a purple block, and a grey block. Initially, the red, yellow (both), and grey blocks are on the table, while the purple block is on top of the red block. The yellow blocks, purple block, and grey block are clear, meaning nothing is on top of them. The goal is to place the second yellow block on top of the purple block.","In this blocksworld, you can perform four main actions:
+
+1. **Pickup a block**: You can pick up a block from the table, but only if there's nothing on top of it (it's clear), it's on the table, and you're not already holding another block.
+
+2. **Put down a block**: You can put down a block onto the table, but only if you're currently holding that block.
+
+3. **Stack a block on another block**: You can place one block on top of another, but only if you're holding the block you want to place, and the block you're placing it on is clear (nothing on top of it).
+
+4. **Unstack a block from another block**: You can pick up a block from the top of another block, but only if the block you're picking up is clear, it's on top of another block, and you're not holding any other block.",The goal is to have the second yellow block on top of the purple block.,"1. At some point, there must be a block on top of the purple block, making it not clear.
+2. If the purple block is not clear at some point, you must be holding the red block at that time or later.
+3. At some point, you must be holding the grey block.
+4. At some point, there must be a block on top of the grey block, making it not clear.
+5. At some point, you must be holding the second yellow block.
+6. If you are holding the second yellow block at some point, then either you must be holding the grey block or there must be a block on top of the grey block at that time or later.",F(second_yellow_on_purple) & F(!clear_purple) & G(!clear_purple -> F(holding_red)) & F(holding_grey) & F(!clear_grey) & F(holding_second_yellow) & G(holding_second_yellow -> F(holding_grey | !clear_grey)),"1. **Goal**: The goal is to have the second yellow block on top of the purple block. This is a final state condition, so we use F(second_yellow_on_purple) to ensure it is eventually reached.
+
+2. **Constraint 1**: ""At some point, there must be a block on top of the purple block, making it not clear."" This is a simple constraint that must happen at least once, so we use F(!clear_purple).
+
+3. **Constraint 2**: ""If the purple block is not clear at some point, you must be holding the red block at that time or later."" This is a consequence constraint, as it specifies a condition that must follow when the purple block is not clear. We use G(!clear_purple -> F(holding_red)).
+
+4. **Constraint 3**: ""At some point, you must be holding the grey block."" This is a simple constraint that must happen at least once, so we use F(holding_grey).
+
+5. **Constraint 4**: ""At some point, there must be a block on top of the grey block, making it not clear."" This is a simple constraint that must happen at least once, so we use F(!clear_grey).
+
+6. **Constraint 5**: ""At some point, you must be holding the second yellow block."" This is a simple constraint that must happen at least once, so we use F(holding_second_yellow).
+
+7. **Constraint 6**: ""If you are holding the second yellow block at some point, then either you must be holding the grey block or there must be a block on top of the grey block at that time or later."" This is a consequence constraint, as it specifies a condition that must follow when holding the second yellow block. We use G(holding_second_yellow -> F(holding_grey | !clear_grey)).
+
+Combining all these, we get the complete LTL formula.","Fluents are predicates that describe the state of the world. For example, 'second_yellow_on_purple' means the second yellow block is on the purple block, 'clear_purple' means the purple block is clear, and 'holding_red' means the red block is being held by the robotic arm.","1. Place the first yellow block on the grey block.
+2. Unstack the purple block from the red block.
+3. Hold the grey block.
+4. Hold the second yellow block.
+5. Place the second yellow block on the purple block.","### Initial State Analysis
+- Blocks: Red, Yellow1, Yellow2, Purple, Grey
+- Initial Configuration:
+  - Red block is on the table with the Purple block on top of it.
+  - Yellow1 and Yellow2 blocks are on the table.
+  - Grey block is on the table.
+  - Purple block is clear.
+  - Yellow1, Yellow2, and Grey blocks are clear.
+
+### Goal Analysis
+- The final configuration requires the second Yellow block (Yellow2) to be on top of the Purple block.
+
+### Constraint Analysis
+1. **Constraint 1**: At some point, there must be a block on top of the Purple block, making it not clear.
+   - This can be achieved by placing Yellow2 on the Purple block.
+
+2. **Constraint 2**: If the Purple block is not clear at some point, you must be holding the Red block at that time or later.
+   - This requires unstacking the Purple block from the Red block and holding the Red block.
+
+3. **Constraint 3**: At some point, you must be holding the Grey block.
+   - This can be achieved by picking up the Grey block from the table.
+
+4. **Constraint 4**: At some point, there must be a block on top of the Grey block, making it not clear.
+   - This can be achieved by placing Yellow1 on the Grey block.
+
+5. **Constraint 5**: At some point, you must be holding the second Yellow block.
+   - This can be achieved by picking up Yellow2 from the table.
+
+6. **Constraint 6**: If you are holding the second Yellow block at some point, then either you must be holding the Grey block or there must be a block on top of the Grey block at that time or later.
+   - This requires ensuring Yellow1 is on the Grey block when handling Yellow2.
+
+### Subgoal Sequence
+1. **Place Yellow1 on Grey**: This ensures that the Grey block is not clear, satisfying Constraint 4.
+2. **Unstack Purple from Red**: This makes the Purple block clear and allows holding the Red block, satisfying Constraint 2.
+3. **Hold Grey block**: Pick up the Grey block to satisfy Constraint 3.
+4. **Hold Yellow2 block**: Pick up Yellow2 to satisfy Constraint 5.
+5. **Place Yellow2 on Purple**: Achieve the goal and satisfy Constraint 1.
+
+### Plan
+- The plan ensures that the Grey block has another block on top of it when the second Yellow block is being handled, thus satisfying all constraints and achieving the goal.","[['on_table(red)', 'on_table(yellow block 1)', 'on_table(yellow block 2)', 'on_table(grey)', 'on(purple, red)', 'clear(yellow block 1)', 'clear(yellow block 2)', 'clear(purple)', 'clear(grey)', '!holding_any'], ['on(yellow block 1, grey)', '!on_table(yellow block 1)', '!clear(grey)', 'clear(yellow block 1)'], ['on_table(purple)', 'clear(red)', '!on(purple, red)', 'clear(purple)'], ['holding_grey', '!on_table(grey)', '!clear(yellow block 1)'], ['holding_second_yellow', '!on_table(yellow block 2)'], ['second_yellow_on_purple', '!holding_second_yellow', '!clear(purple)', 'clear(second yellow block)']]","### Initial State Analysis (State 0):
+- We have five blocks: a red block, two yellow blocks, a purple block, and a grey block.
+- The red block, both yellow blocks, and the grey block are initially on the table.
+- The purple block is on top of the red block.
+- The yellow blocks, purple block, and grey block are clear, meaning nothing is on top of them.
+- The robotic arm is not holding any block initially.
+
+From this, we can derive the following fluents:
+- `on_table(red)`: The red block is on the table.
+- `on_table(yellow block 1)`: The first yellow block is on the table.
+- `on_table(yellow block 2)`: The second yellow block is on the table.
+- `on_table(grey)`: The grey block is on the table.
+- `on(purple, red)`: The purple block is on the red block.
+- `clear(yellow block 1)`: The first yellow block is clear.
+- `clear(yellow block 2)`: The second yellow block is clear.
+- `clear(purple)`: The purple block is clear.
+- `clear(grey)`: The grey block is clear.
+- `!holding_any`: The robotic arm is not holding any block.
+
+### Plan Execution:
+
+#### Step 1: Place the first yellow block on the grey block.
+- Action: Move the first yellow block from the table to the top of the grey block.
+- Effects:
+  - `on(yellow block 1, grey)`: The first yellow block is on the grey block.
+  - `!on_table(yellow block 1)`: The first yellow block is no longer on the table.
+  - `!clear(grey)`: The grey block is no longer clear.
+  - `clear(yellow block 1)`: The first yellow block is clear.
+
+#### Step 2: Unstack the purple block from the red block.
+- Action: Remove the purple block from the top of the red block.
+- Effects:
+  - `on_table(purple)`: The purple block is now on the table.
+  - `clear(red)`: The red block is now clear.
+  - `!on(purple, red)`: The purple block is no longer on the red block.
+  - `clear(purple)`: The purple block is clear.
+
+#### Step 3: Hold the grey block.
+- Action: Pick up the grey block.
+- Effects:
+  - `holding_grey`: The robotic arm is holding the grey block.
+  - `!on_table(grey)`: The grey block is no longer on the table.
+  - `!clear(yellow block 1)`: The first yellow block is no longer clear.
+
+#### Step 4: Hold the second yellow block.
+- Action: Pick up the second yellow block from the table.
+- Effects:
+  - `holding_second_yellow`: The robotic arm is holding the second yellow block.
+  - `!on_table(yellow block 2)`: The second yellow block is no longer on the table.
+
+#### Step 5: Place the second yellow block on the purple block.
+- Action: Move the second yellow block from the robotic arm to the top of the purple block.
+- Effects:
+  - `second_yellow_on_purple`: The second yellow block is on the purple block.
+  - `!holding_second_yellow`: The robotic arm is no longer holding the second yellow block.
+  - `!clear(purple)`: The purple block is no longer clear.
+  - `clear(second yellow block)`: The second yellow block is clear.
+
+### Trace:
+The trace will include the initial state and the state after each plan step, reflecting the changes described above.",False,5,failed,"WHAT WENT WRONG: The plan does not ensure that the purple block is not clear before placing the second yellow block on it, and it fails to meet the condition related to holding the second yellow block and the grey block.
+ HOW TO FIX: You need to ensure that the purple block is not clear before placing the second yellow block on it. Additionally, make sure that when you hold the second yellow block, either the grey block is held or there is a block on top of the grey block at that time or later. Consider rearranging the sequence to satisfy these constraints."
+2026-02-06 08:52:30,105,blocksworld,4,"The domain we're dealing with here is a classic problem in artificial intelligence known as the ""Blocksworld"". In this domain, you have a table and a set of blocks. Each block can either be placed directly on the table or stacked on top of another block. All the blocks are the same size, and there's no restriction on how tall you can make a tower of blocks or how many blocks you can have on the table. You control a robotic arm that can hold only one block at a time, which is a key limitation in this domain.","In this specific problem instance, we have five blocks: a brown block number 1, a grey block number 1, a brown block number 2, a blue block number 1, and a red block number 1. Initially, the brown block number 1 is on the table, the grey block number 1 is on top of the brown block number 1, the brown block number 2 is on top of the grey block number 1, the blue block number 1 is on the table, and the red block number 1 is on top of the brown block number 2. The blue block number 1 and the red block number 1 are clear, meaning nothing is on top of them. The goal is to have the grey block number 1 on the table.","In this domain, you have four main actions you can perform with the blocks:
+
+1. **Pickup**: You can pick up a block from the table, but only if the block is clear (nothing is on top of it), it's on the table, and you're not already holding another block.
+
+2. **Putdown**: You can put down a block onto the table, but only if you're currently holding that block.
+
+3. **Stack**: You can place one block on top of another, but only if you're holding the block you want to place, and the block you want to place it on is clear.
+
+4. **Unstack**: You can pick up a block from the top of another block, but only if the block you're picking up is clear, it's on top of another block, and you're not holding any other block.
+
+These actions have specific effects. For example, when you pick up a block, you end up holding it, and it's no longer on the table. When you put down a block, it becomes clear, and you're no longer holding it. When you stack a block, it becomes clear, but the block underneath it is no longer clear. When you unstack a block, you end up holding it, and the block it was on becomes clear.",The goal is to have the grey block number 1 on the table.,"1. At some point, you must be holding the brown block number 2.
+2. If you are holding the brown block number 2, you must also hold the blue block number 1 at the same time or later.
+3. At some point, the brown block number 1 must not be on top of the grey block number 1.
+4. If the brown block number 1 is not on top of the grey block number 1, then either the red block number 1 must be on top of the grey block number 1, or you must be holding the red block number 1 at the same time or later.
+5. The brown block number 2 must never be on the table.
+6. At some point, the brown block number 1 must be clear (nothing on top of it).
+7. If the brown block number 1 is clear, there must have been an earlier state where either the grey block number 1 was not on top of the brown block number 1, or the blue block number 1 was not on the table.",F(on_table_grey1) & F(holding_brown2) & G(holding_brown2 -> F(holding_blue1)) & F(!on_brown1_grey1) & G(!on_brown1_grey1 -> F(on_red1_grey1 | holding_red1)) & G(!on_table_brown2) & F(clear_brown1) & ((!on_grey1_brown1 | !on_table_blue1) U clear_brown1),"1. **Goal**: The goal is to have the grey block number 1 on the table. This is a simple goal that must be true eventually, so we use the formula F(on_table_grey1).
+
+2. **Constraint 1**: At some point, you must be holding the brown block number 2. This is a simple constraint that must be true at least once, so we use F(holding_brown2).
+
+3. **Constraint 2**: If you are holding the brown block number 2, you must also hold the blue block number 1 at the same time or later. This is a consequence constraint, so we use G(holding_brown2 -> F(holding_blue1)).
+
+4. **Constraint 3**: At some point, the brown block number 1 must not be on top of the grey block number 1. This is a simple constraint that must be true at least once, so we use F(!on_brown1_grey1).
+
+5. **Constraint 4**: If the brown block number 1 is not on top of the grey block number 1, then either the red block number 1 must be on top of the grey block number 1, or you must be holding the red block number 1 at the same time or later. This is a consequence constraint, so we use G(!on_brown1_grey1 -> F(on_red1_grey1 | holding_red1)).
+
+6. **Constraint 5**: The brown block number 2 must never be on the table. This is a global constraint, so we use G(!on_table_brown2).
+
+7. **Constraint 6**: At some point, the brown block number 1 must be clear. This is a simple constraint that must be true at least once, so we use F(clear_brown1).
+
+8. **Constraint 7**: If the brown block number 1 is clear, there must have been an earlier state where either the grey block number 1 was not on top of the brown block number 1, or the blue block number 1 was not on the table. This is a precedence constraint, so we use ( (!on_grey1_brown1 | !on_table_blue1) U clear_brown1 ).
+
+Combining all these, we get the final LTL formula.","Fluents are predicates that describe the state of the blocks and the robot arm. For example, 'on_table_grey1' means the grey block number 1 is on the table, 'holding_brown2' means the robot arm is holding the brown block number 2, 'on_brown1_grey1' means the brown block number 1 is on top of the grey block number 1, and 'clear_brown1' means the brown block number 1 is clear (nothing on top of it).","1. Hold the red block number 1.
+2. Hold the brown block number 2.
+3. Hold the blue block number 1.
+4. Place the red block number 1 on the grey block number 1.
+5. Clear the brown block number 1.
+6. Ensure the grey block number 1 is on the table.","### Initial State Analysis
+- Brown block number 1 is on the table.
+- Grey block number 1 is on top of brown block number 1.
+- Brown block number 2 is on top of grey block number 1.
+- Blue block number 1 is on the table.
+- Red block number 1 is on top of brown block number 2.
+- Blue block number 1 and red block number 1 are clear.
+
+### Goal Analysis
+- Grey block number 1 must be on the table.
+
+### Constraint Analysis
+1. At some point, you must be holding the brown block number 2.
+2. If you are holding the brown block number 2, you must also hold the blue block number 1 at the same time or later.
+3. At some point, the brown block number 1 must not be on top of the grey block number 1.
+4. If the brown block number 1 is not on top of the grey block number 1, then either the red block number 1 must be on top of the grey block number 1, or you must be holding the red block number 1 at the same time or later.
+5. The brown block number 2 must never be on the table.
+6. At some point, the brown block number 1 must be clear (nothing on top of it).
+7. If the brown block number 1 is clear, there must have been an earlier state where either the grey block number 1 was not on top of the brown block number 1, or the blue block number 1 was not on the table.
+
+### Subgoal Sequence
+1. **Hold the red block number 1**: This allows us to clear the brown block number 2 and eventually hold it, satisfying constraint 1.
+2. **Hold the brown block number 2**: This satisfies constraint 1 and ensures it is never placed on the table, satisfying constraint 5.
+3. **Hold the blue block number 1**: This satisfies constraint 2, as it must be held after or at the same time as the brown block number 2.
+4. **Place the red block number 1 on the grey block number 1**: This satisfies constraint 4, as the brown block number 1 will not be on top of the grey block number 1.
+5. **Clear the brown block number 1**: This satisfies constraint 6, ensuring nothing is on top of it.
+6. **Ensure the grey block number 1 is on the table**: This achieves the goal.
+
+### Prototype Plan
+1. Hold the red block number 1.
+   - **State**: The red block number 1 is held, clearing the brown block number 2.
+2. Hold the brown block number 2.
+   - **State**: The brown block number 2 is held, ensuring it is never placed on the table.
+3. Hold the blue block number 1.
+   - **State**: The blue block number 1 is held, satisfying the constraint that it must be held after or at the same time as the brown block number 2.
+4. Place the red block number 1 on the grey block number 1.
+   - **State**: The red block number 1 is on the grey block number 1, ensuring the brown block number 1 is not on top of the grey block number 1.
+5. Clear the brown block number 1.
+   - **State**: The brown block number 1 is clear, satisfying the constraint that it must be clear at some point.
+6. Ensure the grey block number 1 is on the table.
+   - **State**: The grey block number 1 is on the table, achieving the goal.","[['on_table_brown1', 'on_grey1_brown1', 'on_brown2_grey1', 'on_table_blue1', 'on_red1_brown2', 'clear_blue1', 'clear_red1'], ['holding_red1', '!on_red1_brown2'], ['holding_brown2', '!on_brown2_grey1'], ['holding_blue1', '!on_table_blue1'], ['on_red1_grey1', '!holding_red1'], ['clear_brown1', '!on_grey1_brown1'], ['on_table_grey1']]","**Initial State Reasoning (State 0):**
+- We have five blocks: brown block number 1, grey block number 1, brown block number 2, blue block number 1, and red block number 1.
+- Brown block number 1 is on the table, so we have `on_table_brown1`.
+- Grey block number 1 is on top of brown block number 1, so we have `on_grey1_brown1`.
+- Brown block number 2 is on top of grey block number 1, so we have `on_brown2_grey1`.
+- Blue block number 1 is on the table, so we have `on_table_blue1`.
+- Red block number 1 is on top of brown block number 2, so we have `on_red1_brown2`.
+- Blue block number 1 and red block number 1 are clear, so we have `clear_blue1` and `clear_red1`.
+- The arm is not holding anything initially.
+
+**Plan Step 1 Reasoning (State 1):**
+- Action: Hold the red block number 1.
+- After this step, the arm is holding the red block number 1, so `holding_red1` is true.
+- Red block number 1 is no longer on brown block number 2, so `!on_red1_brown2`.
+
+**Plan Step 2 Reasoning (State 2):**
+- Action: Hold the brown block number 2.
+- After this step, the arm is holding the brown block number 2, so `holding_brown2` is true.
+- Brown block number 2 is no longer on grey block number 1, so `!on_brown2_grey1`.
+
+**Plan Step 3 Reasoning (State 3):**
+- Action: Hold the blue block number 1.
+- After this step, the arm is holding the blue block number 1, so `holding_blue1` is true.
+- Blue block number 1 is no longer on the table, so `!on_table_blue1`.
+
+**Plan Step 4 Reasoning (State 4):**
+- Action: Place the red block number 1 on the grey block number 1.
+- After this step, red block number 1 is on grey block number 1, so `on_red1_grey1` is true.
+- The arm is no longer holding the red block number 1, so `!holding_red1`.
+
+**Plan Step 5 Reasoning (State 5):**
+- Action: Clear the brown block number 1.
+- After this step, brown block number 1 is clear, so `clear_brown1` is true.
+- Grey block number 1 is no longer on brown block number 1, so `!on_grey1_brown1`.
+
+**Plan Step 6 Reasoning (State 6):**
+- Action: Ensure the grey block number 1 is on the table.
+- After this step, grey block number 1 is on the table, so `on_table_grey1` is true.
+- The arm is not holding anything, and the configuration is complete.",False,5,failed,"WHAT WENT WRONG: The plan fails because it does not ensure that the brown block number 1 is not on top of the grey block number 1, and it does not prevent the brown block number 2 from being on the table.
+ HOW TO FIX: You need to ensure that the brown block number 1 is not on top of the grey block number 1 at some point in the plan. Additionally, make sure that the brown block number 2 is never placed on the table. Consider rearranging the sequence to achieve these constraints, such as ensuring the grey block number 1 is on the table before clearing the brown block number 1."
+2026-02-06 08:54:45,106,blocksworld,4,"The domain we're dealing with here is a classic blocksworld scenario. Imagine a table and a set of blocks that can be stacked on top of each other or placed directly on the table. The blocks are all the same size, and you can build towers of any height. There's no limit to how many blocks you can have on the table. You're controlling a robotic arm that can hold only one block at a time. The actions you can perform include picking up a block from the table, putting a block down on the table, stacking one block on top of another, and unstacking a block from another block. Each action has specific preconditions that must be met before you can perform it, and each action has certain effects that change the state of the world.","In this specific problem, we have five blocks: two black blocks, one red block, and two white blocks. Initially, the first black block is on the table with the red block on top of it. The first white block and the second white block are on the table, while the second black block is on top of the second white block. The red block, the first white block, and the second black block are clear, meaning nothing is on top of them. The goal is to end up holding the second white block.","In this blocksworld, you can perform four main actions:
+
+1. **Pickup**: You can pick up a block from the table, but only if the block is clear (nothing is on top of it), it's on the table, and you're not already holding another block.
+
+2. **Putdown**: You can put down a block onto the table, but only if you're currently holding that block.
+
+3. **Stack**: You can place one block on top of another, but only if you're holding the block you want to place, and the block you want to place it on is clear.
+
+4. **Unstack**: You can pick up a block from on top of another block, but only if the block you're picking up is clear, it's on top of another block, and you're not holding any other block.
+
+These actions allow you to manipulate the blocks, but you must always ensure the preconditions are met before performing any action.",The goal is to be holding the second white block (white_block_2) at the end of the sequence of actions.,"1. At some point, the second black block (black_block_2) must be on the table.
+2. If the second black block is on the table, there must have been a previous state where either the second white block (white_block_2) was not on the table or the red block (red_block_1) was not clear.
+3. At some point, there must be a block on top of the red block (red_block_1), making it not clear.
+4. At some point, there must be a block on top of the first white block (white_block_1), making it not clear.
+5. At some point, either the red block (red_block_1) must be on the table or the first black block (black_block_1) must be on top of the red block.",F(holding_white_block_2) & F(on_table_black_block_2) & ((!on_table_white_block_2 | !clear_red_block_1) U on_table_black_block_2) & F(!clear_red_block_1) & F(!clear_white_block_1) & F(on_table_red_block_1 | on_red_block_1_black_block_1),"1. **Goal**: The goal is to be holding the second white block (white_block_2) at the end of the sequence. This is a simple goal that must be true eventually, so we use the formula F(holding_white_block_2).
+
+2. **Constraint 1**: The second black block (black_block_2) must be on the table at some point. This is a simple constraint that must be true at least once, so we use F(on_table_black_block_2).
+
+3. **Constraint 2**: If the second black block is on the table, there must have been a previous state where either the second white block was not on the table or the red block was not clear. This is a precedence constraint, so we use (!on_table_white_block_2 | !clear_red_block_1) U on_table_black_block_2.
+
+4. **Constraint 3**: At some point, there must be a block on top of the red block, making it not clear. This is a simple constraint that must be true at least once, so we use F(!clear_red_block_1).
+
+5. **Constraint 4**: At some point, there must be a block on top of the first white block, making it not clear. This is a simple constraint that must be true at least once, so we use F(!clear_white_block_1).
+
+6. **Constraint 5**: At some point, either the red block must be on the table or the first black block must be on top of the red block. This is a simple constraint that must be true at least once, so we use F(on_table_red_block_1 | on_red_block_1_black_block_1).
+
+Combining all these, we get the complete LTL formula.","Fluents are predicates that describe the state of the blocks, such as holding_white_block_2, on_table_black_block_2, clear_red_block_1, etc. Each fluent represents a specific condition or state of a block in the blocksworld domain.","1. Stack black_block_1 on red_block_1.
+2. Stack white_block_2 on white_block_1.
+3. Unstack black_block_2 from white_block_2.
+4. Put down black_block_2 on the table.
+5. Pickup white_block_2.","### Initial State Analysis
+- **Black Block 1 (black_block_1)**: On the table with the red block on top.
+- **Red Block (red_block_1)**: On top of black_block_1, clear.
+- **White Block 1 (white_block_1)**: On the table, clear.
+- **White Block 2 (white_block_2)**: On the table, clear.
+- **Black Block 2 (black_block_2)**: On top of white_block_2, clear.
+
+### Goal Analysis
+- **Goal**: End up holding the second white block (white_block_2).
+
+### Constraint Analysis
+1. **Black Block 2 on the Table**: At some point, black_block_2 must be on the table.
+2. **Condition for Black Block 2 on the Table**: Before black_block_2 is on the table, either white_block_2 is not on the table or red_block_1 is not clear.
+3. **Block on Red Block**: At some point, a block must be on top of red_block_1.
+4. **Block on White Block 1**: At some point, a block must be on top of white_block_1.
+5. **Red Block on Table or Black Block 1 on Red Block**: At some point, red_block_1 must be on the table or black_block_1 must be on top of red_block_1.
+
+### Subgoal Sequence
+1. **Achieve Constraint 3**: Place a block on top of red_block_1 to make it not clear.
+   - **Action**: Stack black_block_1 on red_block_1.
+   - **Reasoning**: This satisfies the constraint of having a block on top of red_block_1.
+
+2. **Achieve Constraint 4**: Place a block on top of white_block_1 to make it not clear.
+   - **Action**: Stack white_block_2 on white_block_1.
+   - **Reasoning**: This satisfies the constraint of having a block on top of white_block_1.
+
+3. **Achieve Constraint 5**: Ensure red_block_1 is on the table or black_block_1 is on top of red_block_1.
+   - **Action**: Ensure black_block_1 is on top of red_block_1.
+   - **Reasoning**: This is already achieved in step 1.
+
+4. **Achieve Constraint 2**: Ensure either white_block_2 is not on the table or red_block_1 is not clear before black_block_2 is on the table.
+   - **Action**: Unstack black_block_2 from white_block_2.
+   - **Reasoning**: This ensures white_block_2 is not on the table, satisfying the condition for placing black_block_2 on the table.
+
+5. **Achieve Constraint 1**: Place black_block_2 on the table.
+   - **Action**: Put down black_block_2 on the table.
+   - **Reasoning**: This satisfies the constraint of having black_block_2 on the table.
+
+6. **Achieve Goal**: End up holding white_block_2.
+   - **Action**: Pickup white_block_2.
+   - **Reasoning**: This achieves the final goal of holding white_block_2.
+
+### Plan
+The plan is structured to ensure that all constraints are met in sequence, leading to the final goal of holding white_block_2.","[['on_table_black_block_1', 'on_red_block_1_black_block_1', 'on_table_white_block_1', 'on_table_white_block_2', 'on_black_block_2_white_block_2', 'clear_red_block_1', 'clear_white_block_1', 'clear_black_block_2'], ['on_black_block_1_red_block_1', 'clear_black_block_1'], ['on_white_block_1_white_block_2', 'clear_white_block_2'], ['holding_black_block_2', 'clear_white_block_2'], ['on_table_black_block_2', 'clear_black_block_2'], ['holding_white_block_2', 'clear_white_block_1']]","**Initial State Reasoning:**
+- We have five blocks: two black blocks, one red block, and two white blocks.
+- Initial configuration:
+  - Black block 1 is on the table with the red block on top of it.
+  - White block 1 and white block 2 are on the table.
+  - Black block 2 is on top of white block 2.
+  - Red block, white block 1, and black block 2 are clear.
+- From this, we can derive the following fluents:
+  - on_table_black_block_1 (since black block 1 is on the table)
+  - on_red_block_1_black_block_1 (since red block is on black block 1)
+  - on_table_white_block_1 (since white block 1 is on the table)
+  - on_table_white_block_2 (since white block 2 is on the table)
+  - on_black_block_2_white_block_2 (since black block 2 is on white block 2)
+  - clear_red_block_1 (since red block is clear)
+  - clear_white_block_1 (since white block 1 is clear)
+  - clear_black_block_2 (since black block 2 is clear)
+
+**Plan Step 1: Stack black_block_1 on red_block_1.**
+- Action: Move black block 1 on top of red block 1.
+- Effects:
+  - on_red_block_1_black_block_1 becomes false (since black block 1 is now on top of red block 1)
+  - on_black_block_1_red_block_1 becomes true
+  - clear_red_block_1 becomes false (since black block 1 is on it)
+  - clear_black_block_1 becomes true (since nothing is on it)
+
+**Plan Step 2: Stack white_block_2 on white_block_1.**
+- Action: Move white block 2 on top of white block 1.
+- Effects:
+  - on_table_white_block_2 becomes false
+  - on_white_block_1_white_block_2 becomes true
+  - clear_white_block_1 becomes false (since white block 2 is on it)
+  - clear_white_block_2 becomes true (since nothing is on it)
+
+**Plan Step 3: Unstack black_block_2 from white_block_2.**
+- Action: Remove black block 2 from white block 2.
+- Effects:
+  - on_black_block_2_white_block_2 becomes false
+  - holding_black_block_2 becomes true
+  - clear_white_block_2 becomes true (since black block 2 is removed)
+
+**Plan Step 4: Put down black_block_2 on the table.**
+- Action: Place black block 2 on the table.
+- Effects:
+  - holding_black_block_2 becomes false
+  - on_table_black_block_2 becomes true
+  - clear_black_block_2 becomes true (since nothing is on it)
+
+**Plan Step 5: Pickup white_block_2.**
+- Action: Pick up white block 2.
+- Effects:
+  - holding_white_block_2 becomes true
+  - on_white_block_1_white_block_2 becomes false
+  - clear_white_block_1 becomes true (since white block 2 is removed)",False,5,failed,"WHAT WENT WRONG: The plan failed because the condition that either the second white block is not on the table or the red block is not clear was not maintained until the second black block was placed on the table.
+ HOW TO FIX: You need to ensure that either the second white block is not on the table or the red block is not clear before you place the second black block on the table. This means you should rearrange the sequence so that this condition is established and maintained until the second black block is on the table. Consider placing a block on the red block or moving the second white block off the table earlier in the plan."
+2026-02-06 08:57:04,107,blocksworld,4,"The domain we're dealing with here is a classic problem known as the Blocksworld. Imagine a table and a set of blocks that can be stacked on top of each other or placed directly on the table. The blocks are all the same size, and you can build towers of any height. There's no limit to how many blocks you can have on the table. You control a robotic arm that can hold only one block at a time, which is a key limitation in this domain.","In this specific problem, we have five blocks: a yellow block, two brown blocks, a purple block, and a black block. Initially, the yellow block, brown block number 1, and the black block are on the table. The second brown block is on top of the yellow block, and the purple block is on top of the second brown block. The brown block number 1, the purple block, and the black block are clear, meaning nothing is on top of them. The goal is to have the yellow block on top of the second brown block.","In this domain, you have four main actions you can perform with the blocks:
+
+1. **Pickup**: You can pick up a block from the table, but only if there's nothing on top of it (it's clear), it's on the table, and you're not already holding another block.
+
+2. **Putdown**: You can put down a block onto the table, but only if you're currently holding that block.
+
+3. **Stack**: You can place one block on top of another, but only if you're holding the block you want to place, and the block you want to place it on is clear.
+
+4. **Unstack**: You can pick up a block from on top of another block, but only if the block you're picking up is clear and you're not already holding another block.
+
+These actions have specific effects. For example, when you pick up a block, you start holding it, and it's no longer on the table. When you put down a block, it becomes clear, and you're no longer holding it. When you stack a block, it becomes clear, and the block underneath it is no longer clear. When you unstack a block, you start holding it, and the block it was on becomes clear.",The goal is to rearrange the blocks so that the yellow block is on top of the second brown block.,"1. At some point, both the brown block number 1 and the black block must have something on top of them.
+2. At some point, either the brown block number 1 is not on the table, or you are holding it.
+3. The purple block must never be on the table.
+4. At some point, the yellow block must not be on the table.
+5. If the yellow block is not on the table, there must have been a previous state where either the second brown block was on top of the purple block, or the brown block number 1 was not clear.","F(on(yellow, brown2)) & F(∃x on(x, brown1) & ∃y on(y, black)) & F(!on_table(brown1) | holding(brown1)) & G(!on_table(purple)) & F(!on_table(yellow)) & G((!on_table(yellow)) -> ((on(brown2, purple) | !clear(brown1)) U !on_table(yellow)))","1. **Goal**: The goal is to have the yellow block on top of the second brown block. This is a final state requirement, so we use the 'Finally' operator: F(on(yellow, brown2)).
+
+2. **Constraint 1**: Both the brown block number 1 and the black block must have something on top of them at some point. This is a simple constraint that must be true at least once, so we use: F(∃x on(x, brown1) & ∃y on(y, black)).
+
+3. **Constraint 2**: Either the brown block number 1 is not on the table, or you are holding it at some point. This is another simple constraint that must be true at least once, so we use: F(!on_table(brown1) | holding(brown1)).
+
+4. **Constraint 3**: The purple block must never be on the table. This is an always true constraint, so we use: G(!on_table(purple)).
+
+5. **Constraint 4**: At some point, the yellow block must not be on the table. This is a simple constraint that must be true at least once, so we use: F(!on_table(yellow)).
+
+6. **Constraint 5**: If the yellow block is not on the table, there must have been a previous state where either the second brown block was on top of the purple block, or the brown block number 1 was not clear. This is a precedence constraint, so we use: (!on_table(yellow)) -> ((on(brown2, purple) | !clear(brown1)) U !on_table(yellow)).","Fluents are predicates that describe the state of the blocks. For example, on(x, y) means block x is on block y, on_table(x) means block x is on the table, holding(x) means the robotic arm is holding block x, and clear(x) means there is nothing on top of block x.","1. Place the purple block on the black block.
+2. Place the yellow block on the brown block number 1.
+3. Move the yellow block to the second brown block.","### Initial State Analysis
+- Yellow block is on the table.
+- Brown block number 1 is on the table and clear.
+- Black block is on the table and clear.
+- Second brown block is on top of the yellow block.
+- Purple block is on top of the second brown block and is clear.
+
+### Goal Analysis
+- The yellow block must be on top of the second brown block.
+
+### Constraint Analysis
+1. At some point, both the brown block number 1 and the black block must have something on top of them.
+2. At some point, either the brown block number 1 is not on the table, or you are holding it.
+3. The purple block must never be on the table.
+4. At some point, the yellow block must not be on the table.
+5. If the yellow block is not on the table, there must have been a previous state where either the second brown block was on top of the purple block, or the brown block number 1 was not clear.
+
+### Subgoal Sequence
+1. **Ensure the purple block is never on the table**: This means the purple block must always be on top of another block.
+2. **Achieve a state where both the brown block number 1 and the black block have something on top of them**: This can be done by placing the purple block on the black block and the yellow block on the brown block number 1.
+3. **Ensure the yellow block is not on the table**: This can be achieved by stacking it on the brown block number 1.
+4. **Ensure the brown block number 1 is not clear**: This can be achieved by placing the yellow block on it.
+5. **Achieve the goal of having the yellow block on top of the second brown block**: This requires moving the yellow block from the brown block number 1 to the second brown block.
+
+### Prototype Plan
+1. **Place the purple block on the black block**: This ensures the purple block is never on the table and satisfies the constraint of having something on the black block.
+2. **Place the yellow block on the brown block number 1**: This ensures the yellow block is not on the table and satisfies the constraint of having something on the brown block number 1.
+3. **Move the yellow block to the second brown block**: This achieves the final goal of having the yellow block on top of the second brown block.","[['on_table(yellow)', 'on_table(brown1)', 'on_table(black)', 'on(brown2, yellow)', 'on(purple, brown2)', 'clear(brown1)', 'clear(purple)', 'clear(black)', '!holding(yellow)', '!holding(brown1)', '!holding(brown2)', '!holding(purple)', '!holding(black)'], ['on(purple, black)', 'clear(brown2)', '!clear(black)'], ['on(yellow, brown1)', '!on_table(yellow)', '!clear(brown1)'], ['on(yellow, brown2)', 'clear(brown1)', '!clear(brown2)']]","### Initial State Analysis (State 0):
+- We have five blocks: a yellow block, two brown blocks (brown block number 1 and brown block number 2), a purple block, and a black block.
+- The yellow block is on the table.
+- Brown block number 1 is on the table and is clear.
+- Brown block number 2 is on top of the yellow block.
+- The purple block is on top of brown block number 2.
+- The black block is on the table and is clear.
+- The robotic arm is not holding any block initially.
+
+From this, we can derive the following fluents:
+- `on_table(yellow)` because the yellow block is on the table.
+- `on_table(brown1)` because brown block number 1 is on the table.
+- `on_table(black)` because the black block is on the table.
+- `on(brown2, yellow)` because brown block number 2 is on the yellow block.
+- `on(purple, brown2)` because the purple block is on brown block number 2.
+- `clear(brown1)` because nothing is on top of brown block number 1.
+- `clear(purple)` because nothing is on top of the purple block.
+- `clear(black)` because nothing is on top of the black block.
+- `!holding(yellow)`, `!holding(brown1)`, `!holding(brown2)`, `!holding(purple)`, `!holding(black)` because the arm is not holding any block.
+
+### Plan Execution:
+
+#### Step 1: Place the purple block on the black block.
+- Action: Move the purple block from brown block number 2 to the black block.
+- Certainties after this step:
+  - `on(purple, black)` because the purple block is now on the black block.
+  - `clear(brown2)` because the purple block was removed from it.
+  - `!clear(black)` because the purple block is now on it.
+
+#### Step 2: Place the yellow block on the brown block number 1.
+- Action: Move the yellow block from the table to brown block number 1.
+- Certainties after this step:
+  - `on(yellow, brown1)` because the yellow block is now on brown block number 1.
+  - `!on_table(yellow)` because the yellow block is no longer on the table.
+  - `clear(brown1)` becomes false because the yellow block is on it.
+
+#### Step 3: Move the yellow block to the second brown block.
+- Action: Move the yellow block from brown block number 1 to brown block number 2.
+- Certainties after this step:
+  - `on(yellow, brown2)` because the yellow block is now on brown block number 2.
+  - `clear(brown1)` because the yellow block was removed from it.
+  - `!clear(brown2)` because the yellow block is now on it.
+
+### Resulting Trace:
+- Each state reflects the configuration after each plan step, with fluents that are certainly true.",False,5,failed,"WHAT WENT WRONG: The plan did not satisfy the requirement that both the brown block number 1 and the black block must have something on top of them at the same time.
+ HOW TO FIX: You need to adjust the plan to ensure that at some point, both the brown block number 1 and the black block have blocks placed on them simultaneously. Consider placing the purple block on the black block and another block on the brown block number 1 earlier in the sequence to meet this constraint."
+2026-02-06 08:59:22,109,blocksworld,4,"The domain we're dealing with here is a classic blocksworld scenario. Imagine a table and a set of blocks that can be stacked on top of each other or placed directly on the table. The blocks are all the same size, and you can build towers of any height. There's no limit to how many blocks you can have on the table. You're controlling a robotic arm that can hold only one block at a time. The actions you can perform include picking up a block from the table, putting a block down on the table, stacking one block on top of another, and unstacking a block from another block. Each action has specific preconditions that must be met before you can perform it, and each action has certain effects that change the state of the world.","In this specific problem, we have five blocks: an orange block, a yellow block, two black blocks, and a white block. Initially, the orange, yellow, and the first black block are on the table. The second black block is on top of the first black block, and the white block is on top of the yellow block. The orange block, the second black block, and the white block are clear, meaning nothing is on top of them. The goal is to have the white block on top of the orange block.","In this blocksworld, you can perform four main actions:
+
+1. **Pickup**: You can pick up a block from the table, but only if the block is clear (nothing is on top of it), it's on the table, and you're not already holding another block.
+
+2. **Putdown**: You can put down a block onto the table, but only if you're currently holding that block.
+
+3. **Stack**: You can place one block on top of another, but only if you're holding the block you want to place, and the block you want to place it on is clear.
+
+4. **Unstack**: You can pick up a block from on top of another block, but only if the block you're picking up is clear, it's on top of another block, and you're not holding any other block.
+
+Remember, you can only hold one block at a time, so you need to put down any block you're holding before picking up another one.",The goal is to have the white block on top of the orange block.,"1. At some point, you must be holding the white block.
+2. If you are holding the white block, there must have been a time before that when the first black block was clear.
+3. At some point, the yellow block must be clear.
+4. If the yellow block is clear, there must have been a time before that when the first black block was on top of the orange block.
+5. At some point, the second black block must not be clear (something is on top of it).
+6. At some point, the yellow block must not be on the table.","F(on(white, orange)) & F(holding(white)) & (clear(black1) U holding(white)) & F(clear(yellow)) & (on(black1, orange) U clear(yellow)) & F(!clear(black2)) & F(!on(yellow, table))","1. **Goal**: The goal is to have the white block on top of the orange block. This is a simple goal that must be true in the final state, so we use the 'Finally' operator: F(on(white, orange)).
+
+2. **Constraint 1**: At some point, you must be holding the white block. This is a simple constraint that must be true at least once, so we use the 'Finally' operator: F(holding(white)).
+
+3. **Constraint 2**: If you are holding the white block, there must have been a time before that when the first black block was clear. This is a precedence constraint because it specifies a condition that must have been true before another condition. We use the 'Until' operator: clear(black1) U holding(white).
+
+4. **Constraint 3**: At some point, the yellow block must be clear. This is a simple constraint that must be true at least once, so we use the 'Finally' operator: F(clear(yellow)).
+
+5. **Constraint 4**: If the yellow block is clear, there must have been a time before that when the first black block was on top of the orange block. This is a precedence constraint, so we use the 'Until' operator: on(black1, orange) U clear(yellow).
+
+6. **Constraint 5**: At some point, the second black block must not be clear. This is a simple constraint that must be true at least once, so we use the 'Finally' operator: F(!clear(black2)).
+
+7. **Constraint 6**: At some point, the yellow block must not be on the table. This is a simple constraint that must be true at least once, so we use the 'Finally' operator: F(!on(yellow, table)).
+
+Combining all these, we get the complete LTL formula.","Fluents are predicates that describe the state of the world. For example, on(white, orange) means the white block is on top of the orange block, holding(white) means the robotic arm is holding the white block, clear(yellow) means the yellow block has no block on top of it, and on(yellow, table) means the yellow block is directly on the table.","1. Place the first black block on top of the orange block.
+2. Unstack the white block from the yellow block.
+3. Stack the white block on the second black block.
+4. Unstack the second black block from the first black block.
+5. Pickup the white block.
+6. Stack the white block on the orange block.","### Initial State Analysis
+- Orange block is on the table and clear.
+- Yellow block is on the table with the white block on top of it.
+- First black block is on the table with the second black block on top of it.
+- Second black block is clear.
+- White block is clear.
+
+### Goal Analysis
+- The white block must be on top of the orange block.
+
+### Constraint Analysis
+1. At some point, you must be holding the white block.
+2. If you are holding the white block, there must have been a time before that when the first black block was clear.
+3. At some point, the yellow block must be clear.
+4. If the yellow block is clear, there must have been a time before that when the first black block was on top of the orange block.
+5. At some point, the second black block must not be clear (something is on top of it).
+6. At some point, the yellow block must not be on the table.
+
+### Subgoal Sequence
+1. **Ensure the first black block is on top of the orange block.**
+   - This satisfies the condition that the first black block must be on the orange block before the yellow block is clear.
+2. **Make the yellow block clear.**
+   - This involves unstacking the white block from the yellow block.
+3. **Ensure the second black block is not clear.**
+   - This can be achieved by placing the white block on top of the second black block temporarily.
+4. **Ensure the first black block is clear.**
+   - This involves unstacking the second black block from the first black block.
+5. **Hold the white block.**
+   - This is a direct constraint and can be achieved once the white block is clear.
+6. **Place the white block on top of the orange block.**
+   - This achieves the final goal.
+
+### Prototype Plan
+1. **Place the first black block on top of the orange block.**
+   - This ensures that the first black block is on the orange block, setting up for the yellow block to be cleared later.
+2. **Unstack the white block from the yellow block.**
+   - This makes the yellow block clear, satisfying the constraint that the yellow block must be clear.
+3. **Stack the white block on the second black block.**
+   - This ensures the second black block is not clear, satisfying the constraint.
+4. **Unstack the second black block from the first black block.**
+   - This makes the first black block clear, allowing the white block to be held later.
+5. **Pickup the white block.**
+   - This satisfies the constraint that the white block must be held.
+6. **Stack the white block on the orange block.**
+   - This achieves the final goal of having the white block on top of the orange block.","[['on_table(orange)', 'clear(orange)', 'on_table(yellow)', '!clear(yellow)', 'on_table(black1)', '!clear(black1)', 'on(black2, black1)', 'clear(black2)', 'on(white, yellow)', 'clear(white)', '!holding(white)'], ['on(black1, orange)', 'on_table(orange)', 'clear(orange)', 'on_table(yellow)', '!clear(yellow)', 'on(black2, black1)', 'clear(black2)', 'on(white, yellow)', 'clear(white)', '!holding(white)'], ['on(black1, orange)', 'on_table(orange)', 'clear(orange)', 'on_table(yellow)', 'clear(yellow)', 'on(black2, black1)', 'clear(black2)', 'holding(white)'], ['on(black1, orange)', 'on_table(orange)', 'clear(orange)', 'on_table(yellow)', 'clear(yellow)', 'on(black2, black1)', '!clear(black2)', 'on(white, black2)'], ['on(black1, orange)', 'clear(black1)', 'on_table(orange)', 'clear(orange)', 'on_table(yellow)', 'clear(yellow)', 'holding(black2)', 'on(white, black2)'], ['on(black1, orange)', 'clear(black1)', 'on_table(orange)', 'clear(orange)', 'on_table(yellow)', 'clear(yellow)', 'clear(black2)', 'holding(white)'], ['on(black1, orange)', 'clear(black1)', 'on_table(orange)', 'on_table(yellow)', 'clear(yellow)', 'clear(black2)', 'on(white, orange)']]","**Initial State Reasoning (State 0):**
+- We have five blocks: orange, yellow, black1, black2, and white.
+- Orange block is on the table and clear.
+- Yellow block is on the table but not clear (white block is on it).
+- Black1 is on the table and not clear (black2 is on it).
+- Black2 is on top of black1 and is clear.
+- White block is on top of the yellow block and is clear.
+- The robotic arm is not holding any block initially.
+
+**State 0:**
+- on_table(orange), clear(orange)
+- on_table(yellow), !clear(yellow)
+- on_table(black1), !clear(black1)
+- on(black2, black1), clear(black2)
+- on(white, yellow), clear(white)
+- !holding(white)
+
+**Plan Step 1: Place the first black block on top of the orange block.**
+- Action: Move black1 from the table to on top of the orange block.
+- Effects: black1 is no longer on the table, it is on the orange block, and black1 is not clear anymore.
+- Resulting State: on(black1, orange), !on_table(black1), !clear(black1)
+
+**State 1:**
+- on(black1, orange)
+- on_table(orange), clear(orange)
+- on_table(yellow), !clear(yellow)
+- on(black2, black1), clear(black2)
+- on(white, yellow), clear(white)
+- !holding(white)
+
+**Plan Step 2: Unstack the white block from the yellow block.**
+- Action: Remove white block from on top of yellow block.
+- Effects: white block is now held by the robotic arm, yellow block becomes clear.
+- Resulting State: holding(white), clear(yellow)
+
+**State 2:**
+- on(black1, orange)
+- on_table(orange), clear(orange)
+- on_table(yellow), clear(yellow)
+- on(black2, black1), clear(black2)
+- holding(white)
+
+**Plan Step 3: Stack the white block on the second black block.**
+- Action: Place white block on top of black2.
+- Effects: white block is no longer held, black2 is not clear anymore.
+- Resulting State: on(white, black2), !holding(white), !clear(black2)
+
+**State 3:**
+- on(black1, orange)
+- on_table(orange), clear(orange)
+- on_table(yellow), clear(yellow)
+- on(black2, black1), !clear(black2)
+- on(white, black2)
+
+**Plan Step 4: Unstack the second black block from the first black block.**
+- Action: Remove black2 from on top of black1.
+- Effects: black2 is now held by the robotic arm, black1 becomes clear.
+- Resulting State: holding(black2), clear(black1)
+
+**State 4:**
+- on(black1, orange), clear(black1)
+- on_table(orange), clear(orange)
+- on_table(yellow), clear(yellow)
+- holding(black2)
+- on(white, black2)
+
+**Plan Step 5: Pickup the white block.**
+- Action: Remove white block from on top of black2.
+- Effects: white block is now held by the robotic arm, black2 becomes clear.
+- Resulting State: holding(white), clear(black2)
+
+**State 5:**
+- on(black1, orange), clear(black1)
+- on_table(orange), clear(orange)
+- on_table(yellow), clear(yellow)
+- clear(black2)
+- holding(white)
+
+**Plan Step 6: Stack the white block on the orange block.**
+- Action: Place white block on top of orange block.
+- Effects: white block is no longer held, orange block is not clear anymore.
+- Resulting State: on(white, orange), !holding(white), !clear(orange)
+
+**State 6:**
+- on(black1, orange), clear(black1)
+- on_table(orange)
+- on_table(yellow), clear(yellow)
+- clear(black2)
+- on(white, orange)",False,5,failed,"WHAT WENT WRONG: The plan failed because the first black block was not clear when it needed to be, preventing the white block from being picked up at the right time.
+ HOW TO FIX: You need to ensure that the first black block is clear before you attempt to pick up the white block. Consider rearranging the sequence so that the first black block is placed on the orange block later in the plan, after the white block has been picked up."
+2026-02-06 09:02:26,110,blocksworld,4,"The domain we're dealing with is a classic blocksworld scenario. Imagine a table and a set of blocks that can be stacked on top of each other or placed directly on the table. The blocks are all the same size, and you can build towers of any height. There's no limit to how many blocks you can have on the table. You control a robotic arm that can hold only one block at a time, which is a key limitation in this domain.","In this specific problem, we have five blocks: a purple block number 1, a brown block number 1, a yellow block number 1, a purple block number 2, and a black block number 1. Initially, the purple block number 1 and the brown block number 1 are on the table. The yellow block number 1 is on top of the brown block number 1. The purple block number 2 is on top of the purple block number 1, and the black block number 1 is on top of the purple block number 2. The yellow block number 1 and the black block number 1 are clear, meaning nothing is on top of them. You start off not holding any block. The goal is to make the purple block number 1 clear, meaning there should be no block on top of it.","In this blocksworld, you have four main actions you can perform:
+
+1. **Pickup**: You can pick up a block from the table, but only if the block is clear (nothing is on top of it), it's on the table, and you're not already holding another block.
+
+2. **Putdown**: You can put down a block onto the table, but only if you're currently holding that block.
+
+3. **Stack**: You can place a block you're holding on top of another block, but only if the block you're placing it on is clear (nothing is on top of it).
+
+4. **Unstack**: You can pick up a block from on top of another block, but only if the block you're picking up is clear (nothing is on top of it) and you're not already holding another block.
+
+These actions allow you to move blocks around, but remember, you can only hold one block at a time, so you have to plan your moves carefully.","The goal is to make the purple block number 1 clear, which means there should be no block on top of it.","1. At some point, the black block number 1 must be on the table.
+2. If the black block number 1 is on the table, there must have been a previous state where either the yellow block number 1 was not clear or the brown block number 1 was not on the table.
+3. At some point, the purple block number 2 must be on top of the black block number 1.
+4. At some point, you must be holding the brown block number 1.
+5. At some point, the yellow block number 1 must not be on the table.
+6. If the yellow block number 1 is not on the table at some state, then at that state or later, either the brown block number 1 must be on top of the purple block number 2 or the yellow block number 1 must be on the table.",F(clear_purple1) & F(on_table_black1) & ((!clear_yellow1 | !on_table_brown1) U on_table_black1) & F(on_black1_purple2) & F(holding_brown1) & F(!on_table_yellow1) & G(!on_table_yellow1 -> F(on_purple2_brown1 | on_table_yellow1)),"1. **Goal**: The goal is to make the purple block number 1 clear. This means that at some point in the future, the purple block number 1 will be clear. This is expressed as F(clear_purple1).
+
+2. **Constraint 1**: The black block number 1 must be on the table at some point. This is a simple constraint that can be expressed as F(on_table_black1).
+
+3. **Constraint 2**: If the black block number 1 is on the table, there must have been a previous state where either the yellow block number 1 was not clear or the brown block number 1 was not on the table. This is a precedence constraint, so we use the UNTIL operator: (!clear_yellow1 | !on_table_brown1) U on_table_black1.
+
+4. **Constraint 3**: The purple block number 2 must be on top of the black block number 1 at some point. This is a simple constraint, expressed as F(on_black1_purple2).
+
+5. **Constraint 4**: You must be holding the brown block number 1 at some point. This is a simple constraint, expressed as F(holding_brown1).
+
+6. **Constraint 5**: The yellow block number 1 must not be on the table at some point. This is a simple constraint, expressed as F(!on_table_yellow1).
+
+7. **Constraint 6**: If the yellow block number 1 is not on the table at some state, then at that state or later, either the brown block number 1 must be on top of the purple block number 2 or the yellow block number 1 must be on the table. This is a consequence constraint, so we use the IMPLIES operator with F: G(!on_table_yellow1 -> F(on_purple2_brown1 | on_table_yellow1)).
+
+Combining all these, we get the complete LTL formula.","Fluents are predicates that describe the state of the blocks. For example, clear_purple1 means the purple block number 1 is clear, on_table_black1 means the black block number 1 is on the table, and holding_brown1 means the robotic arm is holding the brown block number 1.","1. Place black block number 1 on the table.
+2. Hold yellow block number 1.
+3. Place purple block number 2 on black block number 1.
+4. Hold brown block number 1.
+5. Return yellow block number 1 to the table.
+6. Clear purple block number 1.","### Initial State Analysis
+- Purple block number 1 is on the table.
+- Brown block number 1 is on the table.
+- Yellow block number 1 is on top of the brown block number 1.
+- Purple block number 2 is on top of the purple block number 1.
+- Black block number 1 is on top of the purple block number 2.
+- Yellow block number 1 and black block number 1 are clear.
+- The robotic arm is not holding any block.
+
+### Goal Analysis
+- The goal is to make the purple block number 1 clear, meaning no block should be on top of it.
+
+### Constraint Analysis
+1. Black block number 1 must be on the table at some point.
+2. If black block number 1 is on the table, either yellow block number 1 was not clear or brown block number 1 was not on the table previously.
+3. Purple block number 2 must be on top of black block number 1 at some point.
+4. You must be holding brown block number 1 at some point.
+5. Yellow block number 1 must not be on the table at some point.
+6. If yellow block number 1 is not on the table, then either brown block number 1 must be on top of purple block number 2 or yellow block number 1 must be on the table later.
+
+### Subgoal Sequence
+1. **Make Black Block Number 1 on the Table**: Unstack black block number 1 from purple block number 2 and put it on the table. This satisfies constraint 1.
+2. **Ensure Yellow Block Number 1 is Not Clear**: Unstack yellow block number 1 from brown block number 1 and hold it. This satisfies constraint 2.
+3. **Place Purple Block Number 2 on Black Block Number 1**: Unstack purple block number 2 from purple block number 1 and stack it on black block number 1. This satisfies constraint 3.
+4. **Hold Brown Block Number 1**: Pickup brown block number 1 from the table. This satisfies constraint 4.
+5. **Ensure Yellow Block Number 1 is Not on the Table**: Hold yellow block number 1. This satisfies constraint 5.
+6. **Return Yellow Block Number 1 to the Table**: Put down yellow block number 1 on the table. This satisfies constraint 6.
+7. **Clear Purple Block Number 1**: With purple block number 2 and black block number 1 moved, purple block number 1 is clear, achieving the goal.
+
+### Prototype Plan
+1. Place black block number 1 on the table.
+   - **State**: Black block number 1 is on the table, purple block number 2 is clear.
+2. Hold yellow block number 1.
+   - **State**: Yellow block number 1 is held, brown block number 1 is clear.
+3. Place purple block number 2 on black block number 1.
+   - **State**: Purple block number 2 is on black block number 1, purple block number 1 is clear.
+4. Hold brown block number 1.
+   - **State**: Brown block number 1 is held, yellow block number 1 is not on the table.
+5. Return yellow block number 1 to the table.
+   - **State**: Yellow block number 1 is on the table, brown block number 1 is held.
+6. Clear purple block number 1.
+   - **State**: Purple block number 1 is clear, achieving the goal.","[['on_table_purple1', 'on_table_brown1', 'on_yellow1_brown1', 'on_purple2_purple1', 'on_black1_purple2', 'clear_yellow1', 'clear_black1', '!holding_any'], ['on_table_purple1', 'on_table_brown1', 'on_yellow1_brown1', 'on_table_black1', 'clear_purple2'], ['on_table_purple1', 'on_table_brown1', 'holding_yellow1', 'on_table_black1', 'clear_brown1'], ['on_table_purple1', 'on_table_brown1', 'on_black1_purple2', 'holding_yellow1', 'clear_purple1'], ['on_table_purple1', 'holding_brown1', 'on_black1_purple2', 'clear_purple1'], ['on_table_purple1', 'on_table_yellow1', 'holding_brown1', 'on_black1_purple2', 'clear_purple1'], ['on_table_purple1', 'on_table_yellow1', 'holding_brown1', 'on_black1_purple2', 'clear_purple1']]","### Initial State Analysis (State 0):
+- We have five blocks: purple block number 1, brown block number 1, yellow block number 1, purple block number 2, and black block number 1.
+- Purple block number 1 is on the table, so on_table_purple1 is true.
+- Brown block number 1 is on the table, so on_table_brown1 is true.
+- Yellow block number 1 is on top of brown block number 1, so on_yellow1_brown1 is true.
+- Purple block number 2 is on top of purple block number 1, so on_purple2_purple1 is true.
+- Black block number 1 is on top of purple block number 2, so on_black1_purple2 is true.
+- Yellow block number 1 is clear, so clear_yellow1 is true.
+- Black block number 1 is clear, so clear_black1 is true.
+- The robotic arm is not holding any block, so !holding_any is true.
+
+### Plan Execution:
+
+#### Step 1: Place black block number 1 on the table.
+- Action: Move black block number 1 from purple block number 2 to the table.
+- Certainties: on_table_black1 is true, !on_black1_purple2 is true, clear_purple2 is true.
+- Resulting State: Black block number 1 is on the table, purple block number 2 is clear.
+
+#### Step 2: Hold yellow block number 1.
+- Action: Pick up yellow block number 1 from brown block number 1.
+- Certainties: holding_yellow1 is true, !on_yellow1_brown1 is true, clear_brown1 is true.
+- Resulting State: Yellow block number 1 is held by the robotic arm, brown block number 1 is clear.
+
+#### Step 3: Place purple block number 2 on black block number 1.
+- Action: Move purple block number 2 from purple block number 1 to black block number 1.
+- Certainties: on_black1_purple2 is true, !on_purple2_purple1 is true, clear_purple1 is true.
+- Resulting State: Purple block number 2 is on black block number 1, purple block number 1 is clear.
+
+#### Step 4: Hold brown block number 1.
+- Action: Pick up brown block number 1 from the table.
+- Certainties: holding_brown1 is true, !on_table_brown1 is true.
+- Resulting State: Brown block number 1 is held by the robotic arm.
+
+#### Step 5: Return yellow block number 1 to the table.
+- Action: Place yellow block number 1 on the table.
+- Certainties: on_table_yellow1 is true, !holding_yellow1 is true.
+- Resulting State: Yellow block number 1 is on the table.
+
+#### Step 6: Clear purple block number 1.
+- Action: Ensure no block is on top of purple block number 1.
+- Certainties: clear_purple1 is true.
+- Resulting State: Purple block number 1 is clear.",False,5,failed,"WHAT WENT WRONG: The plan does not ensure that the yellow block number 1 is off the table at some point, and it fails to meet the condition that if the yellow block number 1 is not on the table, then the brown block number 1 must be on top of the purple block number 2 or the yellow block number 1 must be returned to the table.
+ HOW TO FIX: You need to ensure that the yellow block number 1 is not on the table at some point in the plan. Additionally, make sure that when the yellow block number 1 is not on the table, either the brown block number 1 is placed on top of the purple block number 2 or the yellow block number 1 is returned to the table later in the sequence."
+2026-02-06 09:03:31,111,blocksworld,4,"The domain we're dealing with here is a classic blocksworld scenario. Imagine a table and a set of blocks that can be stacked on top of each other or placed directly on the table. The blocks are all the same size, and you can build towers of any height. There's no limit to how many blocks you can have on the table. You're controlling a robotic arm that can only hold one block at a time, which is a key limitation in this domain.","In this specific problem, we have five blocks: a yellow block number 1, a grey block number 1, a black block number 1, a yellow block number 2, and a purple block number 1. Initially, the yellow block number 1, grey block number 1, and yellow block number 2 are on the table. The black block number 1 is on top of the grey block number 1, and the purple block number 1 is on top of the yellow block number 2. The yellow block number 1, black block number 1, and purple block number 1 are clear, meaning nothing is on top of them. You start off not holding any block. The goal is to have the grey block number 1 on top of the yellow block number 2.","In this blocksworld, you have four main actions you can perform with the blocks:
+
+1. **Pickup**: You can pick up a block from the table, but only if there's nothing on top of it (it's clear), it's directly on the table, and you're not already holding another block.
+
+2. **Putdown**: You can put down a block onto the table, but only if you're currently holding that block.
+
+3. **Stack**: You can place one block on top of another, but only if you're holding the block you want to place, and the block you want to place it on is clear (nothing on top of it).
+
+4. **Unstack**: You can pick up a block from the top of another block, but only if the block you're picking up is clear (nothing on top of it), it's on top of another block, and you're not already holding another block.
+
+These actions are constrained by the fact that you can only hold one block at a time, and you must meet the preconditions for each action before you can perform it.",The goal is to rearrange the blocks so that the grey block number 1 is on top of the yellow block number 2.,"1. At some point, both yellow block number 2 and yellow block number 1 must not be on the table.
+2. At some point, either yellow block number 1 is not on the table or you are holding yellow block number 1.
+3. At some point, grey block number 1 must be on the table.
+4. If grey block number 1 is on the table at any point, then either purple block number 1 must be on top of yellow block number 2 or you must be holding yellow block number 2 at that time or later.
+5. Purple block number 1 must never be on the table.","F(on(grey_1, yellow_2)) & F(!on_table(yellow_2) & !on_table(yellow_1)) & F(!on_table(yellow_1) | holding(yellow_1)) & F(on_table(grey_1)) & G(on_table(grey_1) -> F(on(purple_1, yellow_2) | holding(yellow_2))) & G(!on_table(purple_1))","1. **Goal**: We need to ensure that grey block 1 is on top of yellow block 2. This is a final state goal, so we use the 'Finally' operator: F(on(grey_1, yellow_2)).
+
+2. **Constraint 1**: At some point, both yellow block 2 and yellow block 1 must not be on the table. This is a simple constraint that must be true at least once, so we use: F(!on_table(yellow_2) & !on_table(yellow_1)).
+
+3. **Constraint 2**: At some point, either yellow block 1 is not on the table or you are holding yellow block 1. This is another simple constraint that must be true at least once, so we use: F(!on_table(yellow_1) | holding(yellow_1)).
+
+4. **Constraint 3**: At some point, grey block 1 must be on the table. This is a simple constraint that must be true at least once, so we use: F(on_table(grey_1)).
+
+5. **Constraint 4**: If grey block 1 is on the table at any point, then either purple block 1 must be on top of yellow block 2 or you must be holding yellow block 2 at that time or later. This is a consequence constraint, so we use: G(on_table(grey_1) -> F(on(purple_1, yellow_2) | holding(yellow_2))).
+
+6. **Constraint 5**: Purple block 1 must never be on the table. This is an always true constraint, so we use: G(!on_table(purple_1)).
+
+Combining all these, we get the complete LTL formula.","Fluents are predicates that describe the state of the blocks, such as on(block1, block2) meaning block1 is on block2, on_table(block) meaning block is on the table, and holding(block) meaning the robotic arm is holding the block.","1. Move purple block number 1 from yellow block number 2 to yellow block number 1.
+2. Unstack black block number 1 from grey block number 1 and place it on the table.
+3. Ensure grey block number 1 is on the table.
+4. Place purple block number 1 back on yellow block number 2.
+5. Move grey block number 1 from the table to yellow block number 2.","### Initial State Analysis
+- Yellow block number 1, grey block number 1, and yellow block number 2 are on the table.
+- Black block number 1 is on top of grey block number 1.
+- Purple block number 1 is on top of yellow block number 2.
+- Yellow block number 1, black block number 1, and purple block number 1 are clear.
+- The robotic arm is not holding any block.
+
+### Goal Analysis
+- The final configuration requires grey block number 1 to be on top of yellow block number 2.
+
+### Constraint Analysis
+1. At some point, both yellow block number 2 and yellow block number 1 must not be on the table.
+2. At some point, either yellow block number 1 is not on the table or you are holding yellow block number 1.
+3. At some point, grey block number 1 must be on the table.
+4. If grey block number 1 is on the table at any point, then either purple block number 1 must be on top of yellow block number 2 or you must be holding yellow block number 2 at that time or later.
+5. Purple block number 1 must never be on the table.
+
+### Subgoal Sequence
+1. **Remove Purple Block Number 1**: To ensure purple block number 1 is never on the table, we need to move it from yellow block number 2 to another block or hold it.
+2. **Free Grey Block Number 1**: Unstack black block number 1 from grey block number 1 to make grey block number 1 available for movement.
+3. **Move Grey Block Number 1 to Table**: Place grey block number 1 on the table temporarily to rearrange other blocks.
+4. **Ensure Yellow Block Number 2 is Held or Purple Block Number 1 is on Top**: After placing grey block number 1 on the table, ensure purple block number 1 is on top of yellow block number 2 or hold yellow block number 2.
+5. **Stack Grey Block Number 1 on Yellow Block Number 2**: Finally, achieve the goal by stacking grey block number 1 on yellow block number 2.
+
+### Prototype Plan
+1. **Remove Purple Block Number 1**: Move purple block number 1 from yellow block number 2 to yellow block number 1 to ensure it is not on the table.
+   - **State**: Purple block number 1 is on yellow block number 1, yellow block number 2 is clear.
+2. **Free Grey Block Number 1**: Unstack black block number 1 from grey block number 1 and place it on the table.
+   - **State**: Grey block number 1 is clear and on the table, black block number 1 is on the table.
+3. **Move Grey Block Number 1 to Table**: Ensure grey block number 1 is on the table.
+   - **State**: Grey block number 1 is on the table, yellow block number 2 is clear.
+4. **Ensure Yellow Block Number 2 is Held or Purple Block Number 1 is on Top**: Place purple block number 1 back on yellow block number 2.
+   - **State**: Purple block number 1 is on yellow block number 2, grey block number 1 is on the table.
+5. **Stack Grey Block Number 1 on Yellow Block Number 2**: Move grey block number 1 from the table to yellow block number 2.
+   - **State**: Grey block number 1 is on yellow block number 2, achieving the goal configuration.","[['on_table(yellow_1)', 'on_table(grey_1)', 'on_table(yellow_2)', 'on(black_1, grey_1)', 'on(purple_1, yellow_2)', 'clear(yellow_1)', 'clear(black_1)', 'clear(purple_1)', '!holding(yellow_1)', '!holding(yellow_2)'], ['on(purple_1, yellow_1)', 'clear(yellow_2)'], ['on_table(black_1)', 'clear(grey_1)'], ['on_table(grey_1)'], ['on(purple_1, yellow_2)', 'clear(yellow_1)'], ['on(grey_1, yellow_2)']]","**Initial State Reasoning (State 0):**
+- We have five blocks: yellow block number 1, grey block number 1, black block number 1, yellow block number 2, and purple block number 1.
+- Yellow block number 1, grey block number 1, and yellow block number 2 are on the table.
+- Black block number 1 is on top of grey block number 1.
+- Purple block number 1 is on top of yellow block number 2.
+- Yellow block number 1, black block number 1, and purple block number 1 are clear.
+- The robotic arm is not holding any block.
+
+**State 0:**
+- on_table(yellow_1)
+- on_table(grey_1)
+- on_table(yellow_2)
+- on(black_1, grey_1)
+- on(purple_1, yellow_2)
+- clear(yellow_1)
+- clear(black_1)
+- clear(purple_1)
+- !holding(yellow_1)
+- !holding(yellow_2)
+
+**Plan Step 1 Reasoning:**
+- Move purple block number 1 from yellow block number 2 to yellow block number 1.
+- After this step, purple block number 1 is on yellow block number 1.
+- Yellow block number 2 becomes clear.
+
+**State 1:**
+- on(purple_1, yellow_1)
+- clear(yellow_2)
+
+**Plan Step 2 Reasoning:**
+- Unstack black block number 1 from grey block number 1 and place it on the table.
+- After this step, black block number 1 is on the table.
+- Grey block number 1 becomes clear.
+
+**State 2:**
+- on_table(black_1)
+- clear(grey_1)
+
+**Plan Step 3 Reasoning:**
+- Ensure grey block number 1 is on the table.
+- Grey block number 1 is already on the table, so no change in fluents.
+
+**State 3:**
+- on_table(grey_1)
+
+**Plan Step 4 Reasoning:**
+- Place purple block number 1 back on yellow block number 2.
+- After this step, purple block number 1 is on yellow block number 2.
+- Yellow block number 1 becomes clear.
+
+**State 4:**
+- on(purple_1, yellow_2)
+- clear(yellow_1)
+
+**Plan Step 5 Reasoning:**
+- Move grey block number 1 from the table to yellow block number 2.
+- After this step, grey block number 1 is on yellow block number 2.
+
+**State 5:**
+- on(grey_1, yellow_2)",True,2,completed,
+2026-02-06 09:06:39,112,blocksworld,4,"The domain we're dealing with here is a classic blocksworld scenario. Imagine a table and a set of blocks, each of which can be placed either directly on the table or on top of another block. All the blocks are the same size, and you can stack them as high as you want or have as many as you like on the table. You're controlling a robotic arm that can only hold one block at a time, which is a key limitation in this world.","In this specific problem, we have five blocks: two black blocks, two brown blocks, and one orange block. Initially, the first black block and the first brown block are on the table. The second brown block is on top of the first black block, and the second black block is on top of the orange block. The first brown block, the second brown block, and the second black block are all clear, meaning there's nothing on top of them. The robotic arm isn't holding any block at the start. The goal is to make the orange block clear, meaning nothing should be on top of it.","In this blocksworld, you have four main actions you can perform with the robotic arm:
+
+1. **Pickup**: You can pick up a block from the table, but only if there's nothing on top of it (it's clear), it's on the table, and you're not already holding another block.
+
+2. **Putdown**: You can put down a block onto the table, but only if you're currently holding that block.
+
+3. **Stack**: You can place a block you're holding on top of another block, but only if the block you're placing it on is clear (nothing on top of it).
+
+4. **Unstack**: You can pick up a block from on top of another block, but only if the block you're picking up is clear and you're not already holding another block.
+
+These actions allow you to move blocks around, but remember, you can only hold one block at a time, and you need to make sure the blocks you're interacting with are clear when required.","The goal is to make sure that the orange block is clear, meaning there should be no block on top of it.","1. At some point, there must be a block on top of the second black block, making it not clear.
+2. If the second black block is not clear at some point, there must have been an earlier state where either the first brown block was on top of the second brown block or the first black block was clear.
+3. At some point, you must be holding the second brown block while the first brown block is not clear.
+4. At some point, you must be holding the second black block.
+5. If you are holding the second black block at some point, there must have been an earlier state where either the second brown block was not clear or the second black block was on top of the first black block.
+6. At some point, the orange block must be on top of the second brown block, and the first brown block must not be on the table.",F(clear_orange) & F(!clear_second_black) & ((!clear_first_black | on_first_brown_second_brown) U !clear_second_black) & F(holding_second_brown & !clear_first_brown) & F(holding_second_black) & ((!clear_second_brown | on_second_black_first_black) U holding_second_black) & F(on_orange_second_brown & !on_first_brown_table),"1. **Goal**: The goal is to make the orange block clear. This is a simple goal that must be true in the final state, so we use the formula F(clear_orange).
+
+2. **Constraint 1**: At some point, there must be a block on top of the second black block, making it not clear. This is a simple constraint that must happen at least once, so we use F(!clear_second_black).
+
+3. **Constraint 2**: If the second black block is not clear at some point, there must have been an earlier state where either the first brown block was on top of the second brown block or the first black block was clear. This is a precedence constraint, so we use (!clear_first_black | on_first_brown_second_brown) U !clear_second_black.
+
+4. **Constraint 3**: At some point, you must be holding the second brown block while the first brown block is not clear. This is a simple constraint that must happen at least once, so we use F(holding_second_brown & !clear_first_brown).
+
+5. **Constraint 4**: At some point, you must be holding the second black block. This is a simple constraint that must happen at least once, so we use F(holding_second_black).
+
+6. **Constraint 5**: If you are holding the second black block at some point, there must have been an earlier state where either the second brown block was not clear or the second black block was on top of the first black block. This is a precedence constraint, so we use (!clear_second_brown | on_second_black_first_black) U holding_second_black.
+
+7. **Constraint 6**: At some point, the orange block must be on top of the second brown block, and the first brown block must not be on the table. This is a simple constraint that must happen at least once, so we use F(on_orange_second_brown & !on_first_brown_table).
+
+Combining all these, we get the final LTL formula.","Fluents are predicates that describe the state of the blocks and the robot arm. For example, clear_orange means the orange block is clear, !clear_second_black means the second black block is not clear, holding_second_brown means the robot is holding the second brown block, and on_orange_second_brown means the orange block is on top of the second brown block.","1. Move the second brown block from the first black block to the first brown block.
+2. Place the first brown block on the second black block.
+3. Pick up the second brown block.
+4. Pick up the second black block.
+5. Place the orange block on the second brown block.","### Initial State Analysis
+- Blocks: Two black blocks (B1, B2), two brown blocks (Br1, Br2), and one orange block (O).
+- Initial Configuration:
+  - B1 and Br1 are on the table.
+  - Br2 is on top of B1.
+  - B2 is on top of O.
+- Clear Blocks: Br1, Br2, and B2 are clear.
+- The robotic arm is not holding any block.
+
+### Goal Analysis
+- The goal is to make the orange block (O) clear, meaning no block should be on top of it.
+
+### Constraint Analysis
+1. At some point, there must be a block on top of B2, making it not clear.
+2. If B2 is not clear, there must have been an earlier state where either Br1 was on top of Br2 or B1 was clear.
+3. At some point, you must be holding Br2 while Br1 is not clear.
+4. At some point, you must be holding B2.
+5. If you are holding B2, there must have been an earlier state where either Br2 was not clear or B2 was on top of B1.
+6. At some point, O must be on top of Br2, and Br1 must not be on the table.
+
+### Subgoal Sequence
+1. **Ensure B2 is not clear**: Place a block on top of B2. This can be achieved by stacking Br1 on B2.
+2. **Establish earlier state for B2 not clear**: Before making B2 not clear, ensure Br1 is on Br2 or B1 is clear. Initially, Br2 is on B1, so B1 is not clear. We can move Br2 to Br1 to make B1 clear.
+3. **Hold Br2 while Br1 is not clear**: Pick up Br2 while Br1 is on B2.
+4. **Hold B2**: Pick up B2 after ensuring the condition that Br2 was not clear or B2 was on B1.
+5. **Establish earlier state for holding B2**: Ensure Br2 is not clear or B2 is on B1 before picking up B2. Initially, B2 is on O, so we need to move B2 to B1.
+6. **Make O clear**: Move O to be on top of Br2, ensuring Br1 is not on the table.
+
+### Prototype Plan
+1. **Make B1 clear**: Move Br2 from B1 to Br1.
+   - State: B1 is clear, Br1 is on Br2, B2 is on O.
+2. **Make B2 not clear**: Place Br1 on B2.
+   - State: Br1 is on B2, B2 is on O, B1 is clear.
+3. **Hold Br2 while Br1 is not clear**: Pick up Br2.
+   - State: Holding Br2, Br1 is on B2.
+4. **Hold B2**: Pick up B2.
+   - State: Holding B2, Br1 is on B2.
+5. **Make O clear**: Place O on Br2, ensuring Br1 is not on the table.
+   - State: O is on Br2, Br1 is on B2, B2 is on the table.
+
+This plan ensures that all constraints are met in sequence, leading to the final goal of making the orange block clear.","[['on_first_brown_table', 'on_second_brown_first_black', 'on_second_black_orange', 'clear_first_brown', 'clear_second_brown', 'clear_second_black', '!clear_orange', '!holding_second_brown', '!holding_second_black'], ['on_first_brown_second_brown', 'clear_first_black', 'clear_second_brown'], ['on_first_brown_second_black', '!clear_first_brown'], ['holding_second_brown', 'clear_first_brown'], ['holding_second_black', 'clear_orange'], ['on_orange_second_brown', '!on_first_brown_table']]","**Initial State Reasoning (State 0):**
+- We have five blocks: two black blocks, two brown blocks, and one orange block.
+- The first black block and the first brown block are on the table.
+- The second brown block is on top of the first black block.
+- The second black block is on top of the orange block.
+- The first brown block, the second brown block, and the second black block are clear.
+- The robotic arm is not holding any block.
+
+From this, we can derive the following fluents:
+- on_first_brown_table: The first brown block is on the table.
+- on_second_brown_first_black: The second brown block is on the first black block.
+- on_second_black_orange: The second black block is on the orange block.
+- clear_first_brown: The first brown block is clear.
+- clear_second_brown: The second brown block is clear.
+- clear_second_black: The second black block is clear.
+- clear_orange: The orange block is not clear because the second black block is on it.
+- !holding_second_brown: The robotic arm is not holding the second brown block.
+- !holding_second_black: The robotic arm is not holding the second black block.
+
+**Plan Step 1 Reasoning (State 1):**
+- Action: Move the second brown block from the first black block to the first brown block.
+- After this step, the second brown block is on the first brown block.
+- The first black block becomes clear.
+
+Fluents:
+- on_first_brown_second_brown: The second brown block is on the first brown block.
+- clear_first_black: The first black block is now clear.
+- clear_second_brown: The second brown block is clear.
+
+**Plan Step 2 Reasoning (State 2):**
+- Action: Place the first brown block on the second black block.
+- After this step, the first brown block is on the second black block.
+- The first brown block is no longer clear.
+
+Fluents:
+- on_first_brown_second_black: The first brown block is on the second black block.
+- !clear_first_brown: The first brown block is not clear.
+
+**Plan Step 3 Reasoning (State 3):**
+- Action: Pick up the second brown block.
+- After this step, the robotic arm is holding the second brown block.
+- The first brown block becomes clear.
+
+Fluents:
+- holding_second_brown: The robotic arm is holding the second brown block.
+- clear_first_brown: The first brown block is now clear.
+
+**Plan Step 4 Reasoning (State 4):**
+- Action: Pick up the second black block.
+- After this step, the robotic arm is holding the second black block.
+- The orange block becomes clear.
+
+Fluents:
+- holding_second_black: The robotic arm is holding the second black block.
+- clear_orange: The orange block is now clear.
+
+**Plan Step 5 Reasoning (State 5):**
+- Action: Place the orange block on the second brown block.
+- After this step, the orange block is on the second brown block.
+
+Fluents:
+- on_orange_second_brown: The orange block is on the second brown block.
+- !on_first_brown_table: The first brown block is not on the table.",False,5,failed,"WHAT WENT WRONG: The plan did not satisfy the requirement to hold the second brown block while the first brown block was not clear, meaning the first brown block was never covered when you were holding the second brown block.
+ HOW TO FIX: You need to rearrange the sequence so that at some point, the first brown block is covered by another block while you are holding the second brown block. Consider placing another block on the first brown block before picking up the second brown block."

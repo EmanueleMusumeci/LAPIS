@@ -52,6 +52,7 @@ def save_statistics(
     phase,
     dir,
     workflow_iteration,
+    subgoal_id=None,
     pddl_refinement_iteration=None,
     plan_successful=None,
     pddlenv_error_log=None,
@@ -61,6 +62,7 @@ def save_statistics(
     VAL_grounding_log=None,
     scene_graph_grounding_log=None,
     grounding_success_percentage=None,
+    db_entries=None,
     exception=None,
     domain_generation_time=None,
     scene_pruning_time=None,
@@ -74,6 +76,8 @@ def save_statistics(
 ):
 
     data = {
+        "subgoal_id": subgoal_id,
+        "pddl_refinement_iteration": pddl_refinement_iteration,
         "plan_successful": plan_successful,
         "pddlenv_error_log": pddlenv_error_log,
         "planner_error_log": planner_error_log,
@@ -82,6 +86,7 @@ def save_statistics(
         "VAL_grounding_log": VAL_grounding_log,
         "scene_graph_grounding_log": scene_graph_grounding_log,
         "grounding_success_percentage": grounding_success_percentage,
+        "db_entries": db_entries,
         "domain_generation_time": domain_generation_time,
         "scene_pruning_time": scene_pruning_time,
         "problem_generation_time": problem_generation_time,
@@ -115,16 +120,19 @@ def save_statistics(
         if str(workflow_iteration) not in statistics["statistics"]:
             statistics["statistics"][str(workflow_iteration)] = {}
 
+        target_stats = statistics["statistics"][str(workflow_iteration)]
+        if subgoal_id is not None:
+             subgoal_key = f"subgoal_{subgoal_id}"
+             if subgoal_key not in target_stats:
+                 target_stats[subgoal_key] = {}
+             target_stats = target_stats[subgoal_key]
+
         if phase == "PDDL_REFINEMENT":
-            if (
-                "PDDL_REFINEMENT"
-                not in statistics["statistics"][str(workflow_iteration)]
-            ):
-                statistics["statistics"][str(workflow_iteration)][phase] = []
-            else:
-                statistics["statistics"][str(workflow_iteration)][phase].append(data)
+            if phase not in target_stats:
+                target_stats[phase] = []
+            target_stats[phase].append(data)
         else:
-            statistics["statistics"][str(workflow_iteration)][phase] = data
+            target_stats[phase] = data
 
     if exception is not None:
         statistics["exception"] = {

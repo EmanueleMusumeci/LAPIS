@@ -1,0 +1,63 @@
+================================================================================
+PROBLEM 111 - GENERATION HISTORY
+================================================================================
+
+LTL FORMULA:
+F(on(grey1, yellow2)) & F(!onTable(yellow2) & !onTable(yellow1))
+
+
+================================================================================
+ATTEMPT 1
+================================================================================
+
+REASONING:
+### Initial State Analysis
+- **Yellow Block Number 1**: On the table, clear.
+- **Grey Block Number 1**: On the table, with Black Block Number 1 on top.
+- **Black Block Number 1**: On top of Grey Block Number 1, clear.
+- **Yellow Block Number 2**: On the table, with Purple Block Number 1 on top.
+- **Purple Block Number 1**: On top of Yellow Block Number 2, clear.
+- **Robotic Arm**: Not holding any block.
+
+### Goal Analysis
+- **Goal**: Grey Block Number 1 must be on top of Yellow Block Number 2.
+
+### Constraint Analysis
+1. **Constraint**: At some point, both Yellow Block Number 2 and Yellow Block Number 1 must not be on the table.
+   - This requires moving both yellow blocks off the table at some point during the plan.
+
+### Subgoal Sequence
+1. **Remove Purple Block Number 1**: To free Yellow Block Number 2, Purple Block Number 1 must be moved.
+2. **Remove Black Block Number 1**: To access Grey Block Number 1, Black Block Number 1 must be moved.
+3. **Move Yellow Block Number 1**: To satisfy the constraint, Yellow Block Number 1 must be moved off the table.
+4. **Stack Grey Block Number 1 on Yellow Block Number 2**: Achieve the goal configuration.
+
+### Prototype Plan
+1. **Free Yellow Block Number 2**: Move Purple Block Number 1 to the table to clear Yellow Block Number 2.
+   - **State**: Purple Block Number 1 is on the table, Yellow Block Number 2 is clear.
+2. **Free Grey Block Number 1**: Move Black Block Number 1 to the table to clear Grey Block Number 1.
+   - **State**: Black Block Number 1 is on the table, Grey Block Number 1 is clear.
+3. **Move Yellow Block Number 1**: Temporarily stack Yellow Block Number 1 on another block to satisfy the constraint.
+   - **State**: Yellow Block Number 1 is not on the table.
+4. **Achieve Goal**: Stack Grey Block Number 1 on Yellow Block Number 2.
+   - **State**: Grey Block Number 1 is on top of Yellow Block Number 2, achieving the goal configuration.
+
+GENERATED PLAN:
+1. Move Purple Block Number 1 to the table.
+2. Move Black Block Number 1 to the table.
+3. Temporarily stack Yellow Block Number 1 on another block.
+4. Stack Grey Block Number 1 on Yellow Block Number 2.
+
+VALID: True
+
+================================================================================
+FINAL RESULT
+================================================================================
+
+STATUS: SUCCESS
+
+FINAL PLAN:
+1. Move Purple Block Number 1 to the table.
+2. Move Black Block Number 1 to the table.
+3. Temporarily stack Yellow Block Number 1 on another block.
+4. Stack Grey Block Number 1 on Yellow Block Number 2.

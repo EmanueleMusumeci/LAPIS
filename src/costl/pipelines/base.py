@@ -16,7 +16,7 @@ class BasePipeline(ABC):
                  splits,
                  agent,
                  generate_domain,
-                 ground_in_sg):
+                 ground_in_sg=False):
         self.base_dir: str = base_dir
         self.data_dir: str = data_dir
         self.results_dir: str = results_dir
@@ -26,6 +26,8 @@ class BasePipeline(ABC):
         self.ground_in_sg: bool = ground_in_sg
 
         self._name: str = "BasePipeline"
+        
+
         
         self.experiment_name: str = self._construct_experiment_name()
         self.timestamp: str = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -47,7 +49,8 @@ class BasePipeline(ABC):
         results_dir = os.path.join(self.results_dir, self.experiment_name, self.timestamp)
         os.makedirs(results_dir, exist_ok=True)
         
-        for task_name in self.splits:
+        for task_idx, task_name in enumerate(self.splits, 1):
+            print(f"\n[Pipeline] Task {task_idx}/{len(self.splits)}: {task_name}")
             self._process_task(task_name, results_dir)
 
     @abstractmethod

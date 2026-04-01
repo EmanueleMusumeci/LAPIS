@@ -1,0 +1,4 @@
+p0 = holding(green_block_1)
+p1 = onTable(purple_block_1)
+p2 = onTop(purple_block_1, black_block_2)
+p3 = holding(black_block_1)

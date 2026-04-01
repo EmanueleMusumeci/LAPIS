@@ -1,0 +1,4 @@
+Unlock green_door_1 or green_door_2
+Navigate to room_3 through the unlocked door
+Ensure the yellow ball is present in room_3
+Confirm that you are in room_3 with the yellow ball

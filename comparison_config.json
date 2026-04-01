@@ -1,0 +1,13 @@
+{
+    "COSTL": {
+        "data_1": "results/statistics/COSTL_data_1.csv",
+        "data_2": "results/statistics/COSTL_data_2.csv"
+    },
+    "LEXICON": {
+        "data_1": "results/statistics/lexicon_real_run_100_data_1.csv",
+        "data_2": "results/statistics/lexicon_real_run_100_data_2.csv",
+        "data_3": "results/statistics/lexicon_real_run_100_data_3.csv",
+        "data_4": "results/statistics/lexicon_real_run_100_data_4.csv",
+        "data_5": "results/statistics/lexicon_real_run_100_data_5.csv"
+    }
+}

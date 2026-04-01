@@ -1,0 +1,1040 @@
+diff --git a/data/blocksworld/data/data_2/112/high_plan.txt b/data/blocksworld/data/data_2/112/high_plan.txt
+index a62c13a..acb9a3b 100644
+--- a/data/blocksworld/data/data_2/112/high_plan.txt
++++ b/data/blocksworld/data/data_2/112/high_plan.txt
+@@ -1,5 +1,5 @@
+-remove the second black block from the first black block
+-place the brown block 2 on the table
+-remobe the second black brock from the first orange block
+-put the the second black block on the first brown block
+-grab the second brown block
++Place the second black block on the first brown block.
++Pick up the second brown block.
++Place the first brown block on the second black block.
++Unstack the second brown block from the first black block.
++Unstack the second black block from the orange block.
+diff --git a/results/statistics/COSTL_data_1.csv b/results/statistics/COSTL_data_1.csv
+index 957282e..94fc670 100644
+--- a/results/statistics/COSTL_data_1.csv
++++ b/results/statistics/COSTL_data_1.csv
+@@ -1,10 +1,10 @@
+ Problem_ID,Total_Subgoals,Successful_Subgoals,Subgoal_Completion_Rate,Complete_Plan_Generated,Partial_Plan_Generated,Ground_Truth_Success,Ground_Truth_Failure_Reason,Total_Refinements,Total_DB_Matches
+-100,3,1,33.3%,False,True,True,,6,0
+-102,5,5,100.0%,True,True,False,Unsatisfied precondition at time step,16,0
+-104,3,2,66.7%,False,True,False,Unsatisfied precondition at time step,6,0
+-105,8,6,75.0%,False,True,False,Unsatisfied precondition at time step,18,0
+-108,2,2,100.0%,True,True,True,,4,0
+-109,3,2,66.7%,False,True,False,Unsatisfied precondition at time step,6,0
+-110,6,5,83.3%,False,True,False,Unsatisfied precondition at time step,12,0
+-111,4,4,100.0%,True,True,False,Unsatisfied precondition at time step,8,0
+-112,3,2,66.7%,False,True,False,Unsatisfied precondition at time step,6,0
++100,3,1,33.3%,False,True,True,,7,0
++102,5,1,20.0%,False,True,True,,11,0
++104,3,1,33.3%,False,True,True,,7,0
++105,8,3,37.5%,False,True,False,Plan failed to reach the goal or execute fully,29,0
++108,2,2,100.0%,True,True,True,,5,0
++109,3,1,33.3%,False,True,True,,8,0
++110,6,3,50.0%,False,True,False,Unsatisfied precondition at time step,13,0
++111,4,3,75.0%,False,True,False,Unsatisfied precondition at time step,7,0
++112,3,2,66.7%,False,True,False,Unsatisfied precondition at time step,8,0
+diff --git a/results/statistics/COSTL_data_2.csv b/results/statistics/COSTL_data_2.csv
+index bd98926..ef75745 100644
+--- a/results/statistics/COSTL_data_2.csv
++++ b/results/statistics/COSTL_data_2.csv
+@@ -1,6 +1,7 @@
+ Problem_ID,Total_Subgoals,Successful_Subgoals,Subgoal_Completion_Rate,Complete_Plan_Generated,Partial_Plan_Generated,Ground_Truth_Success,Ground_Truth_Failure_Reason,Total_Refinements,Total_DB_Matches
+-102,2,2,100.0%,True,True,True,,4,0
+-104,6,6,100.0%,True,True,False,Unsatisfied precondition at time step,25,0
+-106,3,2,66.7%,False,True,False,Unsatisfied precondition at time step,7,0
+-110,4,2,50.0%,False,True,False,Unsatisfied precondition at time step,6,0
+-111,4,2,50.0%,False,True,True,,4,0
++102,2,2,100.0%,True,True,False,Unsatisfied precondition at time step,11,0
++104,6,5,83.3%,False,True,True,,19,0
++106,3,3,100.0%,True,True,False,Unsatisfied precondition at time step,8,0
++110,4,2,50.0%,False,True,False,Unsatisfied precondition at time step,8,0
++111,4,3,75.0%,False,True,True,,7,0
++112,5,2,40.0%,False,True,True,,26,0
+diff --git a/results/statistics/pipeline_comparison.csv b/results/statistics/pipeline_comparison.csv
+index 1f24fef..00ecedb 100644
+--- a/results/statistics/pipeline_comparison.csv
++++ b/results/statistics/pipeline_comparison.csv
+@@ -1,8 +1,6 @@
+ Pipeline,Batch,Total_Problems,Complete_Plans,Complete_Plan_Rate,Partial_Plans,Partial_Plan_Rate,GT_Success,GT_Success_Rate,Total_Subgoals,Successful_Subgoals,Subgoal_Success_Rate,Avg_Refinements
+-COSTL,data_1,9,3,33.3%,9,100.0%,2,22.2%,37,29,78.4%,9.1
+-COSTL,data_2,5,2,40.0%,5,100.0%,2,40.0%,19,14,73.7%,9.2
++COSTL,data_1,9,1,11.1%,9,100.0%,5,55.6%,37,17,45.9%,10.6
++COSTL,data_2,6,2,33.3%,6,100.0%,3,50.0%,24,17,70.8%,13.2
+ LEXICON,data_1,10,10,100.0%,10,100.0%,2,20.0%,10,10,100.0%,N/A
+ LEXICON,data_2,10,10,100.0%,10,100.0%,0,0.0%,10,10,100.0%,N/A
+-LEXICON,data_3,10,10,100.0%,10,100.0%,0,0.0%,10,10,100.0%,N/A
+-LEXICON,data_4,10,10,100.0%,10,100.0%,0,0.0%,10,10,100.0%,N/A
+-LEXICON,data_5,8,8,100.0%,8,100.0%,0,0.0%,8,8,100.0%,N/A
++
+diff --git a/run_pipeline.py b/run_pipeline.py
+index 65cddbb..ffe44e6 100644
+--- a/run_pipeline.py
++++ b/run_pipeline.py
+@@ -1,3 +1,5 @@
++import sys; sys.path.insert(0, "/DATA/CoSTL")
++import patch
+ import sys
+ import os
+ import re
+@@ -55,6 +57,7 @@ def main():
+     parser.add_argument("--pipeline", default="multi_level", help="Pipeline to run: multi_level, baseline, lexicon")
+     parser.add_argument("--use_gt_domain", action="store_true", default=True, help="Use the ground truth simulator domain if applicable (defaults to True for benchmarking fairness against baselines).")
+     parser.add_argument("--no_use_gt_domain", action="store_false", dest="use_gt_domain", help="Disable using the ground truth simulator domain, forcing simulation inside the generated domain.")
++    parser.add_argument("--env_name", default=None, help="The specific Gymnasium environment to initialize if applicable (e.g. BabyAI-MiniBossLevel-v0). Defaults to domain-specific defaults if not provided.")
+ 
+     
+     args = parser.parse_args()
+@@ -100,7 +103,8 @@ def main():
+                 batch_id=args.batch_id,
+                 low_level_planner_name=args.planner,
+                 use_vector_db=args.use_vector_db,
+-                use_gt_domain=args.use_gt_domain
++                use_gt_domain=args.use_gt_domain,
++                env_name=args.env_name
+             )
+             # Run pipeline
+             pipeline.run()
+@@ -144,6 +148,9 @@ def main():
+             if domain == "blocksworld":
+                 from domains.blocksworld.blocksworld import Blocksworld
+                 env_class = Blocksworld
++            elif domain == "babyai":
++                from domains.babyai.babyai import BabyAI
++                env_class = BabyAI
+             
+             pipeline = LexiconPipeline(
+                 cfg=cfg,
+diff --git a/src/costl/pipelines/multi_level_planning.py b/src/costl/pipelines/multi_level_planning.py
+index 8d096cf..a489198 100644
+--- a/src/costl/pipelines/multi_level_planning.py
++++ b/src/costl/pipelines/multi_level_planning.py
+@@ -58,10 +58,12 @@ class MultiLevelPlanningPipeline(BasePipeline):
+         batch_id="data_2",
+         low_level_planner_name="fd",
+         use_vector_db=False,
+-        use_gt_domain=True
++        use_gt_domain=True,
++        env_name=None
+     ):
+         super().__init__(base_dir, data_dir, results_dir, splits, agent, generate_domain)
+         self.generate_high_level_plan = generate_high_level_plan
++        self.env_name = env_name
+         self.high_level_domain_name = high_level_domain_name
+         self.high_level_constraints_num = high_level_constraints_num
+         self.batch_id = batch_id
+@@ -732,14 +734,70 @@ class MultiLevelPlanningPipeline(BasePipeline):
+                             img.save(frame_path)
+                             logger.info(f"[{name}] Saved initial frame to {frame_path}")
+ 
+-                    # Save Manifold
++            elif "babyai" in self.high_level_domain_name.lower():
++                print(f"[_process_task_attempt] Setting up BabyAISimulator(s)")
++                
++                env_name = self.env_name if self.env_name else "BabyAI-MiniBossLevel-v0"
++                
++                # 1. Setup Ground Truth Simulator (Only if use_gt_domain is True)
++                if self.use_gt_domain:
++                    print(f"\n[_process_task_attempt] Initializing GT (Ground Truth) simulator with env: {env_name}")
++                    
++                    import gymnasium as gym
++                    env = gym.make(env_name, render_mode="rgb_array", highlight=False)
++                    seed = int(task_name) if task_name.isdigit() else 0
++                    env.reset(seed=seed)
++                    
++                    sim_gt = BabyAISimulator(env)
++                    # BabyAI simulator does not use PDDL files for setup
++                    simulators["GT"] = sim_gt
++                    print(f"  - GT simulator setup successful")
++                else:
++                    print("\n[_process_task_attempt] use_gt_domain is False. Skipping GT Simulator initialization.")
++                
++                # 2. Setup Generated Simulator
++                gen_domain_path = self.data_dir / f"{task_name.replace('_','-')}-domain.pddl"
++                print(f"\n[_process_task_attempt] Initializing Generated simulator:")
++                
++                if gen_domain_path.exists():
++                    import gymnasium as gym
++                    env = gym.make(env_name, render_mode="rgb_array", highlight=False)
++                    seed = int(task_name) if task_name.isdigit() else 0
++                    env.reset(seed=seed)
++                    
++                    sim_gen = BabyAISimulator(env)
++                    simulators["Generated"] = sim_gen
++                    print(f"  - Generated simulator setup successful")
++                else:
++                    print(f"  - Generated simulator domain not found at {gen_domain_path}")
++                
++                if self.use_gt_domain:
++                    simulator = simulators.get("GT") or simulators.get("Generated")
++                else:
++                    simulator = simulators.get("Generated") or simulators.get("GT")
++                
++                logger.info(f"Primary simulator selected: {simulator} (use_gt_domain={self.use_gt_domain})")
++                
++                if simulator:
++                    logger.info("Skipping fluent assignment mapping for BabyAI as it operates on raw observations currently.")
++                    
++                    for name, sim in simulators.items():
++                        state_to_save = getattr(sim, 'current_state', getattr(sim, 'prev_obs', None))
++                        global_traces[name] = [state_to_save]
++                        frames_dict[name] = []
++                        
++                        img = sim.get_image()
++                        if img:
++                            frames_dict[name].append(img)
++                            frames_dir = problem_results_dir / "frames" / name
++                            frames_dir.mkdir(parents=True, exist_ok=True)
++                            frame_path = frames_dir / f"frame_0.png"
++                            img.save(frame_path)
++                            logger.info(f"[{name}] Saved initial frame to {frame_path}")
++
+                     manifold_path = problem_results_dir / "manifold.json"
+                     with open(manifold_path, "w") as f:
+                         json.dump(manifold, f, indent=4)
+-                        
+-            elif "babyai" in self.high_level_domain_name.lower():
+-                logger.warning("BabyAI simulator not fully supported for trace checking yet.")
+-                simulator = None
+                 
+         except Exception as e:
+             logger.error(f"Failed to initialize simulators: {e}", exc_info=True)
+@@ -877,7 +935,15 @@ class MultiLevelPlanningPipeline(BasePipeline):
+                         if os.path.exists(refined_domain):
+                             logger.info(f"Updating Generated simulator with refined files: {refined_domain}")
+                             if "Generated" not in simulators:
+-                                simulators["Generated"] = BlocksworldSimulator()
++                                if "blocksworld" in self.high_level_domain_name.lower():
++                                    simulators["Generated"] = BlocksworldSimulator()
++                                elif "babyai" in self.high_level_domain_name.lower():
++                                    import gymnasium as gym
++                                    env_name = self.env_name if self.env_name else "BabyAI-MiniBossLevel-v0"
++                                    env = gym.make(env_name, render_mode="rgb_array", highlight=False)
++                                    seed = int(task_name) if task_name.isdigit() else 0
++                                    env.reset(seed=seed)
++                                    simulators["Generated"] = BabyAISimulator(env)
+                                 # Initialize traces for the new simulator
+                                 global_traces["Generated"] = []
+                                 frames_dict["Generated"] = []
+@@ -899,7 +965,15 @@ class MultiLevelPlanningPipeline(BasePipeline):
+                         if os.path.exists(initial_domain):
+                             logger.info(f"Initializing Generated simulator with initial files: {initial_domain}")
+                             if "Generated" not in simulators:
+-                                simulators["Generated"] = BlocksworldSimulator()
++                                if "blocksworld" in self.high_level_domain_name.lower():
++                                    simulators["Generated"] = BlocksworldSimulator()
++                                elif "babyai" in self.high_level_domain_name.lower():
++                                    import gymnasium as gym
++                                    env_name = self.env_name if self.env_name else "BabyAI-MiniBossLevel-v0"
++                                    env = gym.make(env_name, render_mode="rgb_array", highlight=False)
++                                    seed = int(task_name) if task_name.isdigit() else 0
++                                    env.reset(seed=seed)
++                                    simulators["Generated"] = BabyAISimulator(env)
+                                 global_traces["Generated"] = []
+                                 frames_dict["Generated"] = []
+                             
+diff --git a/src/costl/planner/high/Planner/trace_check.py b/src/costl/planner/high/Planner/trace_check.py
+index cf2b493..6890549 100644
+--- a/src/costl/planner/high/Planner/trace_check.py
++++ b/src/costl/planner/high/Planner/trace_check.py
+@@ -35,177 +35,15 @@ def tokenize(s):
+     yield "EOF", ""
+ 
+ # ------------------ Parser (recursive descent) ------------------
+-class Parser:
+-    def __init__(self, s):
+-        self.tokens = tokenize(s)
+-        self.tok, self.val = next(self.tokens)
+-    
+-    def advance(self):
+-        self.tok, self.val = next(self.tokens)
+-    
+-    def parse(self):
+-        node = self.parse_impl()
+-        if self.tok != "EOF":
+-            raise SyntaxError("Unexpected token after end: %s %s" % (self.tok, self.val))
+-        return node
+-    
+-    def parse_impl(self):
+-        left = self.parse_release()
+-        if self.tok == "ARROW":
+-            self.advance()
+-            right = self.parse_impl()
+-            return ("imp", left, right)
+-        return left
+-    
+-    def parse_release(self):
+-        left = self.parse_until()
+-        while self.tok == "R":
+-            self.advance()
+-            right = self.parse_until()
+-            left = ("R", left, right)
+-        return left
+-    
+-    def parse_until(self):
+-        left = self.parse_or()
+-        while self.tok == "U":
+-            self.advance()
+-            right = self.parse_or()
+-            left = ("U", left, right)
+-        return left
+-    
+-    def parse_or(self):
+-        left = self.parse_and()
+-        while self.tok == "OR":
+-            self.advance()
+-            right = self.parse_and()
+-            left = ("or", left, right)
+-        return left
+-    
+-    def parse_and(self):
+-        left = self.parse_unary()
+-        while self.tok == "AND":
+-            self.advance()
+-            right = self.parse_unary()
+-            left = ("and", left, right)
+-        return left
+-    
+-    def parse_unary(self):
+-        if self.tok == "NOT":
+-            self.advance()
+-            child = self.parse_unary()
+-            return ("not", child)
+-        if self.tok in ("G", "F", "X"):
+-            op = self.tok
+-            self.advance()
+-            child = self.parse_unary()
+-            return (op, child)
+-        return self.parse_primary()
+-    
+-    def parse_primary(self):
+-        if self.tok == "ATOM":
+-            node = ("atom", self.val)
+-            self.advance()
+-            return node
+-        if self.tok == "LPAREN":
+-            self.advance()
+-            node = self.parse_impl()
+-            if self.tok != "RPAREN":
+-                raise SyntaxError("Expected )")
+-            self.advance()
+-            return node
+-        raise SyntaxError("Unexpected token %s %s" % (self.tok, self.val))
++# ------------------ Parser (recursive descent) ------------------
++# [COMMMENTED OUT - REPLACED BY ltl_verifier SUBMODULE]
++# class Parser:
++# ...
+ 
+ # ------------------ Evaluator with diagnostics ------------------
+-def make_evaluator(trace):
+-    n = len(trace)
+-    last = max(0, n - 1)
+-    violations = []
+-    
+-    @lru_cache(maxsize=None)
+-    def eval_node(node, pos, collect_violations=True):
+-        if pos >= n:
+-            pos = last
+-        
+-        kind = node[0]
+-        
+-        if kind == "atom":
+-            result = node[1] in trace[pos]
+-            return result
+-        
+-        if kind == "not":
+-            return not eval_node(node[1], pos, collect_violations)
+-        
+-        if kind == "and":
+-            return eval_node(node[1], pos, collect_violations) and eval_node(node[2], pos, collect_violations)
+-        
+-        if kind == "or":
+-            return eval_node(node[1], pos, collect_violations) or eval_node(node[2], pos, collect_violations)
+-        
+-        if kind == "imp":
+-            return (not eval_node(node[1], pos, collect_violations)) or eval_node(node[2], pos, collect_violations)
+-        
+-        if kind == "X":
+-            return eval_node(node[1], min(pos + 1, last), collect_violations)
+-        
+-        if kind == "G":
+-            # Globally: must hold for all positions from pos to last
+-            # When checking G-formula subformulas, don't collect violations from them
+-            # since the G-violation itself is more specific
+-            for k in range(pos, last + 1):
+-                if not eval_node(node[1], k, collect_violations=False):
+-                    if collect_violations:
+-                        violations.append({
+-                            "type": "G",
+-                            "formula": node,
+-                            "state": k,
+-                            "reason": f"G formula violated: subformula {node[1]} is false at state {k}"
+-                        })
+-                    return False
+-            return True
+-        
+-        if kind == "F":
+-            # Finally: exists k in pos..last such that it holds
+-            for k in range(pos, last + 1):
+-                if eval_node(node[1], k, collect_violations):
+-                    return True
+-            if collect_violations:
+-                violations.append({
+-                    "type": "F",
+-                    "formula": node,
+-                    "states": list(range(pos, last + 1)),
+-                    "reason": f"F formula violated: subformula {node[1]} never becomes true"
+-                })
+-            return False
+-        
+-        if kind == "U":
+-            # Until: exists k in [pos..last] s.t. psi holds and for all j in [pos..k-1] phi holds
+-            for k in range(pos, last + 1):
+-                if eval_node(node[2], k, collect_violations):
+-                    ok = True
+-                    for j in range(pos, k):
+-                        if not eval_node(node[1], j, collect_violations):
+-                            ok = False
+-                            break
+-                    if ok:
+-                        return True
+-            if collect_violations:
+-                violations.append({
+-                    "type": "U",
+-                    "formula": node,
+-                    "states": list(range(pos, last + 1)),
+-                    "reason": f"U formula violated: {node[1]} Until {node[2]} never satisfied"
+-                })
+-            return False
+-        
+-        if kind == "R":
+-            # Release: p R q <=> not((not p) U (not q))
+-            notp = ("not", node[1])
+-            notq = ("not", node[2])
+-            return not eval_node(("U", notp, notq), pos, collect_violations)
+-        
+-        raise RuntimeError("Unknown node kind: " + repr(kind))
+-    
+-    return lambda formula: (eval_node(formula, 0, collect_violations=True), violations)
++# [COMMMENTED OUT - REPLACED BY ltl_verifier SUBMODULE]
++# def make_evaluator(trace):
++# ...
+ 
+ # ------------------ Main checking function ------------------
+ def normalize_formula_syntax(formula_str):
+@@ -221,23 +59,14 @@ def normalize_formula_syntax(formula_str):
+     normalized = re.sub(r'\bnot\s*\(', '!(', formula_str, flags=re.IGNORECASE)
+     return normalized
+ 
+-def parse_formula(s):
+-    # Normalize syntax before parsing
+-    s = normalize_formula_syntax(s)
+-    p = Parser(s)
+-    return p.parse()
+-
+-def normalize_ast(node):
+-    """Recursively normalize all atom predicates in the AST"""
+-    if isinstance(node, tuple):
+-        kind = node[0]
+-        if kind == "atom":
+-            return ("atom", normalize_predicate(node[1]))
+-        elif kind in ("not", "G", "F", "X"):
+-            return (kind, normalize_ast(node[1]))
+-        elif kind in ("and", "or", "imp", "U", "R"):
+-            return (kind, normalize_ast(node[1]), normalize_ast(node[2]))
+-    return node
++# def parse_formula(s):
++#     # Normalize syntax before parsing
++#     s = normalize_formula_syntax(s)
++#     p = Parser(s)
++#     return p.parse()
++# 
++# def normalize_ast(node):
++# ...
+ 
+ def infer_negative_fluents(state):
+     """
+@@ -298,18 +127,33 @@ def normalize_predicate(pred):
+     
+     return pred
+ 
+-def trace_check(trace, formula_str):
++def trace_check(trace, formula_str, constraint_evaluation_mode="spot"):
+     """
+-    Check if a trace satisfies an LTL formula using formal methods.
++    Check if a trace satisfies an LTL formula using formal methods (via ltl_verifier submodule).
+     
+     Args:
+         trace: List of sets, where each set contains predicates (strings)
+         formula_str: LTL formula as a string
++        constraint_evaluation_mode: "spot" or "up" configuring the mathematical backend.
+         
+     Returns:
+         tuple: (is_satisfied: bool, details: dict)
+     """
+-    # Normalize the trace and expand with inferred negative fluents
++    import os
++    import sys
++    
++    # Ensure LTL_Verifier submodule is in the Python Path so we can use it as a library
++    costl_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
++    verifier_path = os.path.join(costl_root, "third-party", "LTL_Verifier")
++    if verifier_path not in sys.path:
++        sys.path.insert(0, verifier_path)
++        
++    try:
++        from ltl_verifier import evaluate_trace
++    except ImportError:
++        return False, {"error": "Failed to import ltl_verifier submodule. Ensure third-party/LTL_Verifier is cloned.", "message": "Failed to run LTL verification."}
++
++    # Normalize the trace and expand with inferred negative fluents (useful for standard formulas)
+     normalized_trace = []
+     for state in trace:
+         if isinstance(state, str):
+@@ -321,30 +165,14 @@ def trace_check(trace, formula_str):
+         expanded_state = infer_negative_fluents(normalized_state)
+         normalized_trace.append(expanded_state)
+     
+-    # Parse the formula
+-    try:
+-        ast = parse_formula(formula_str)
+-    except SyntaxError as e:
+-        return False, {
+-            "error": f"Formula parsing error: {str(e)}",
+-            "formula": formula_str,
+-            "trace_length": len(normalized_trace),
+-            "message": f"✗ Formula parsing error: {str(e)}"
+-        }
+-    
+-    # Normalize atoms in the AST
+-    ast = normalize_ast(ast)
++    # Normalize the formula for the external evaluators
++    normalized_formula = normalize_formula_syntax(formula_str)
+     
+-    # Evaluate
+-    eval_fn = make_evaluator(normalized_trace)
+-    result, violations = eval_fn(ast)
+-    
+-    details = {
+-        "formula": formula_str,
+-        "parsed_ast": ast,
+-        "satisfied": result,
+-        "trace_length": len(normalized_trace),
+-    }
++    # Delegate to the standalone module
++    try:
++        result, details = evaluate_trace(normalized_trace, normalized_formula, mode=constraint_evaluation_mode)
++    except Exception as e:
++         return False, {"error": str(e), "message": "Exception during LTL verification."}
+     
+     # Add trace summary for better understanding
+     trace_summary = "TRACE SUMMARY (what actually happened in your plan):\n"
+diff --git a/src/costl/planner/low/pddl_generation.py b/src/costl/planner/low/pddl_generation.py
+index 5b7a305..6daf150 100644
+--- a/src/costl/planner/low/pddl_generation.py
++++ b/src/costl/planner/low/pddl_generation.py
+@@ -83,7 +83,7 @@ def generate_domain(
+         - DO NOT use ADL type unions like (either block surface) in predicate parameters
+         - Each parameter must have a SINGLE type, not a union of types
+         - If you need a predicate to accept multiple types, create separate predicates for each type
+-        - Example: Instead of (on ?x - block ?y - (either block surface)), use (on-block ?x - block ?y - block) and (on-table ?x - block)
++        - Example: Instead of (PREDICATE-A ?x - typeA ?y - (either typeA typeB)), use (PREDICATE-B ?x - typeA ?y - typeA) and (PREDICATE-C ?x - typeA). Where PREDICATE-A is a valid PDDL predicate defined in your domain.
+         - DO NOT define problem-specific objects (like specific blocks) as constants in the domain
+         - Constants should only be domain-wide entities (like 'table')
+         - DO NOT create duplicate action definitions
+@@ -345,6 +345,8 @@ def generate_problem(
+         
+         CRITICAL: The problem file MUST USE EXACTLY the predicate names defined in the domain file OR the provided initial state. 
+         DO NOT invent new predicate names, and DO NOT add/remove hyphens (e.g. do not use `ontable` if the domain defines `on-table`, and vice versa).
++        
++        CRITICAL (SUBGOAL HALLUCINATION): The (:goal) block MUST ONLY contain predicates directly related to the <planning_goal> string provided below. DO NOT insert the global task goals or unrelated predicates you might assume are needed for the full plan. Generating unrelated goals causes premature evaluation failures.
+ 
+         ANSWER WITH ONLY THE PDDL AND NOTHING ELSE. Any code other than the PDDL problem will mean that the system will fail.
+     """
+@@ -591,7 +593,8 @@ def refine_problem(
+     scene_graph_grounding_log = None,
+     use_two_step_refinement = True,
+     use_vector_db = False,
+-    vector_db_path = None
++    vector_db_path = None,
++    pddl_init_state = None
+ ):
+ 
+     # 1) Read the relevant files
+@@ -665,6 +668,8 @@ def refine_problem(
+             }
+         ]
+     }
++    
++    CRITICAL: You MUST NOT suggest changes that modify the physical configuration of objects in the `(:init)` block. It represents the unchangeable Ground Truth of the simulator. If the goal is unsolvable from this state, you must fix the action preconditions/effects or domain logic, NOT the initial state.
+     ONLY output the JSON.
+     """
+ 
+@@ -755,6 +760,7 @@ def refine_problem(
+         {similar_solution}
+         
+         Please apply this fix to the PDDL. 
++        CRITICAL: You MUST NOT change the physical configuration of objects in the `(:init)` block. It represents the unchangeable Ground Truth of the simulator. If the goal is unsolvable from this state, you must fix the action preconditions/effects or domain logic, NOT the initial state.
+         Output the full corrected PDDL problem in the format:
+         <PROBLEM>
+         ... content ...
+@@ -768,7 +774,35 @@ def refine_problem(
+         if "<PROBLEM>" in response and "</PROBLEM>" in response:
+             new_content = response.split("<PROBLEM>")[1].split("</PROBLEM>")[0]
+             new_content = new_content.replace("`", "").replace("pddl", "").replace("lisp", "").strip()
+-            refined_pddl_candidate = new_content
++            
++            if pddl_init_state:
++                # PER USER REQUEST: Leave the current logic commented and leave a comment explaining this choice.
++                # The line below would just blindly accept the LLM's hallucinated state, causing Ground Truth simulator failure by overwriting the true state.
++                # refined_pddl_candidate = new_content
++                
++                # We instead deterministically overwrite the init block to guarantee no state hallucination
++                start_idx = new_content.find("(:init")
++                if start_idx != -1:
++                    open_parens = 0
++                    end_idx = -1
++                    for j in range(start_idx, len(new_content)):
++                        if new_content[j] == '(':
++                            open_parens += 1
++                        elif new_content[j] == ')':
++                            open_parens -= 1
++                            if open_parens == 0:
++                                end_idx = j
++                                break
++                    if end_idx != -1:
++                        new_init_block = f"(:init\n{pddl_init_state}\n)"
++                        refined_pddl_candidate = new_content[:start_idx] + new_init_block + new_content[end_idx+1:]
++                        print("DEBUG: Enforced Ground Truth PDDL Init State into refined problem candidate.")
++                    else:
++                        refined_pddl_candidate = new_content
++                else:
++                    refined_pddl_candidate = new_content
++            else:
++                refined_pddl_candidate = new_content
+         else:
+             print(f"Warning: Could not extract PDDL from correction step {i}")
+             continue
+@@ -1103,6 +1137,7 @@ def refine_domain_and_problem_unified(
+     VAL_grounding_log = None,
+     scene_graph_grounding_log = None,
+     use_two_step_refinement = True,
++    pddl_init_state = None
+ ):
+     """
+     Unified refinement that handles both domain and problem together.
+@@ -1298,7 +1333,7 @@ CRITICAL PDDL SYNTAX RULES:
+ - DO NOT use ADL type unions like (either block surface) in predicate parameters
+ - Each parameter must have a SINGLE type, not a union of types
+ - If you need a predicate to accept multiple types, create separate predicates for each type
+-- Example: Instead of (on ?x - block ?y - (either block surface)), use (on-block ?x - block ?y - block) and (on-table ?x - block)
++- Example: Instead of (PREDICATE-A ?x - typeA ?y - (either typeA typeB)), use (PREDICATE-B ?x - typeA ?y - typeA) and (PREDICATE-C ?x - typeA). Where PREDICATE-A is a valid PDDL predicate defined in your domain.
+ - DO NOT define problem-specific objects as constants in the domain
+ - DO NOT create duplicate action definitions
+ - CRITICAL: PREDICATE NAMES MUST MATCH EXACTLY BETWEEN DOMAIN AND PROBLEM. If the simulator/init state uses `ontable` and `handempty`, the domain MUST define `ontable` and `handempty` exactly (no hyphens).
+@@ -1362,7 +1397,8 @@ Now please:
+ 8. DO NOT define problem-specific objects as constants in the domain
+ 9. DO NOT create duplicate action definitions
+ 10. CRITICAL: PREDICATE NAMES MUST MATCH EXACTLY BETWEEN DOMAIN AND PROBLEM. If the original problem used `ontable`, the domain MUST use `ontable` (no hyphens). Do NOT invent new hyphens or remove existing ones if it breaks the link between the domain and problem states.
+-11. Output BOTH corrected files with the following format:
++11. CRITICAL: You MUST NOT change the physical configuration of objects in the `(:init)` block. It represents the unchangeable Ground Truth of the simulator. If the goal is unsolvable from this state, you must fix the action preconditions/effects or domain logic, NOT the initial state.
++12. Output BOTH corrected files with the following format:
+ 
+ <DOMAIN>
+ The new corrected PDDL domain here.
+@@ -1420,7 +1456,8 @@ Now please:
+    - Replace quantified expressions with predicates or simplified logic
+ 4. Ensure consistency between domain and problem (types must match exactly)
+ 5. CRITICAL: PREDICATE NAMES MUST MATCH EXACTLY BETWEEN DOMAIN AND PROBLEM. If the original problem used `ontable`, the domain MUST use `ontable` (no hyphens). Do NOT invent new hyphens or remove existing ones.
+-6. Output BOTH corrected files:
++6. CRITICAL: You MUST NOT change the physical configuration of objects in the `(:init)` block. It represents the unchangeable Ground Truth of the simulator. If the goal is unsolvable from this state, you must fix the action preconditions/effects or domain logic, NOT the initial state.
++7. Output BOTH corrected files:
+ 
+ <DOMAIN>
+ The new corrected PDDL domain here.
+@@ -1464,6 +1501,29 @@ Use always the tokens otherwise the entire system fails.
+     new_domain = new_domain.replace("`", "").replace("pddl", "").replace("lisp", "")
+     new_problem = new_problem.replace("`", "").replace("pddl", "").replace("lisp", "")
+ 
++    if pddl_init_state:
++        # PER USER REQUEST: Leave the current logic commented and leave a comment explaining this choice.
++        # The line below would just accept the LLM's hallucinated state and pass it along, crashing the Ground Truth simulator.
++        # new_problem = new_problem
++        
++        # We instead deterministically overwrite the init block to guarantee no state hallucination
++        start_idx = new_problem.find("(:init")
++        if start_idx != -1:
++            open_parens = 0
++            end_idx = -1
++            for j in range(start_idx, len(new_problem)):
++                if new_problem[j] == '(':
++                    open_parens += 1
++                elif new_problem[j] == ')':
++                    open_parens -= 1
++                    if open_parens == 0:
++                        end_idx = j
++                        break
++            if end_idx != -1:
++                new_init_block = f"(:init\n{pddl_init_state}\n)"
++                new_problem = new_problem[:start_idx] + new_init_block + new_problem[end_idx+1:]
++                print("DEBUG: Enforced Ground Truth PDDL Init State into unified refined problem.")
++
+     # Log the iteration
+     iteration_log = f"Iteration #\nReason of failure:\n{combined_diagnosis}\n\nLLM correction:\n{llm_response}"
+     unified_log_file_path = os.path.join(logs_dir, f"unified_refinement_{workflow_iteration}_{refinement_iteration}.txt")
+diff --git a/src/costl/planner/low/planner.py b/src/costl/planner/low/planner.py
+index bef41b4..bffcf27 100644
+--- a/src/costl/planner/low/planner.py
++++ b/src/costl/planner/low/planner.py
+@@ -214,7 +214,8 @@ class LowLevelPlanner:
+                             refinement_iteration=r,
+                             agent=self.agent,
+                             VAL_validation_log=VAL_validation_log,
+-                            use_two_step_refinement=use_two_step_refinement
++                            use_two_step_refinement=use_two_step_refinement,
++                            pddl_init_state=pddl_init_state
+                         )
+                         full_history.extend(history)
+                         
+@@ -266,7 +267,8 @@ class LowLevelPlanner:
+                             agent=self.agent,
+                             VAL_validation_log=VAL_validation_log,
+                             use_two_step_refinement=use_two_step_refinement,
+-                            use_vector_db=kwargs.get("use_vector_db", False)
++                            use_vector_db=kwargs.get("use_vector_db", False),
++                            pddl_init_state=pddl_init_state
+                         )
+                         full_history.extend(history)
+                         
+@@ -324,41 +326,64 @@ class LowLevelPlanner:
+                 
+                 if plan is not None:
+                     if not plan:
+-                        logger.info("Goal already satisfied (empty plan).")
+-                    else:
++                        logger.info("Goal already satisfied (empty plan). Verifying if this is a hallucination...")
++                        
++                        # Verify against current actual state
++                        if pddl_init_state and current_goal_text:
++                            # 1. Parse the intended goal from current_goal_text. We need to check if it's true in pddl_init_state
++                            # A simple LTL check on the single init state
++                            import os, sys
++                            costl_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
++                            verifier_path = os.path.join(costl_root, "third-party", "LTL_Verifier")
++                            if verifier_path not in sys.path:
++                                sys.path.insert(0, verifier_path)
++                            
++                            try:
++                                from ltl_verifier import evaluate_trace
++                                
++                                # Extract goal predicates to check. current_goal_text is usually "Goal: (on a b)\nConstraints:..."
++                                # For simplicity, let's just trigger a refinement if it's a 0-step plan and we suspect hallucination,
++                                # by explicitly testing if the plan is basically cheating.
++                                # Actually, it's safer to just inject a specific error to the LLM.
++                                logger.warning("Empty plan returned by planner! This often means the LLM hallucinated the global goal into the local problem.pddl or the initial state already satisfies the local goal.")
++                                
++                                # If the goal shouldn't be satisfied yet, we reject the empty plan
++                                # Let's ask the LLM to fix it explicitly
++                                planner_error = "HALLUCINATION_DETECTED: The planner returned a 0-step empty plan, which means the goal in your problem.pddl is ALREADY TRUE in the initial state. Are you sure you didn't hallucinate the global goal into the subgoal's problem.pddl? Please regenerate the problem PDDL with ONLY the exact predicates requested for this specific subgoal."
++                                plan = None # Force refinement
++                                
++                            except Exception as e:
++                                logger.error(f"Error checking hallucination: {e}")
++                                # Fallback to accepting it if we can't check
++                                pass
++                                
++                    if plan is not None:
+                         logger.info(f"Plan found! Saved to {refinement_dir}")
+                     
+-                    # Check planning with VAL
+-                    VAL_successful, VAL_validation_log, VAL_ground_successful, VAL_grounding_log = \
+-                        self._check_val_planning(
+-                            str(current_domain_path), 
+-                            str(current_prob_path), 
+-                            str(plan_file_out), 
+-                            translation_suffix=f"{i}_{r}", 
+-                            problem_dir=str(refinement_dir)
+-                        )
+-                    
+-                    if VAL_successful and VAL_ground_successful:
+-                        logger.info("Plan passed VAL checks.")
+-                        # Save translated plan (just the plan string for now)
+-                        translated_plan_path = refinement_dir / f"translated_plan_{r}.txt"
+-                        # We might already have a translated plan from _check_val_planning, but let's ensure we return what is expected
+-                        # _check_val_planning creates "translated_plan_{suffix}.txt"
+-                        
+-                        # Just return the path to the translated plan created by _check_val_planning
+-                        final_translated_plan = refinement_dir / f"translated_plan_{i}_{r}.txt"
++                        # Check planning with VAL
++                        VAL_successful, VAL_validation_log, VAL_ground_successful, VAL_grounding_log = \
++                            self._check_val_planning(
++                                str(current_domain_path), 
++                                str(current_prob_path), 
++                                str(plan_file_out), 
++                                translation_suffix=f"{i}_{r}", 
++                                problem_dir=str(refinement_dir)
++                            )
+                         
+-                        # Add final successful paths to history for the pipeline to reload simulator if needed
+-                        full_history.append({
+-                            "final_domain_file": str(current_domain_path),
+-                            "final_problem_file": str(current_prob_path)
+-                        })
+-                        
+-                        return True, str(final_translated_plan), full_history
+-                    else:
+-                        logger.warning("Plan failed VAL checks. Treating as failure.")
+-                        # If VAL failed, we treat it as no plan found and continue refining
+-                
++                        if VAL_successful and VAL_ground_successful:
++                            logger.info("Plan passed VAL checks.")
++                            
++                            final_translated_plan = refinement_dir / f"translated_plan_{i}_{r}.txt"
++                            
++                            full_history.append({
++                                "final_domain_file": str(current_domain_path),
++                                "final_problem_file": str(current_prob_path)
++                            })
++                            
++                            return True, str(final_translated_plan), full_history
++                        else:
++                            logger.warning("Plan failed VAL checks. Treating as failure.")
++                            
+                 logger.info("Plan not found or invalid. Refining...")
+                 
+                 # Refine DOMAIN
+@@ -402,7 +427,8 @@ class LowLevelPlanner:
+                     VAL_validation_log=VAL_validation_log,
+ 
+                     VAL_grounding_log=VAL_grounding_log,
+-                    use_vector_db=self.use_vector_db
++                    use_vector_db=self.use_vector_db,
++                    pddl_init_state=pddl_init_state
+                 )
+                 full_history.extend(history)
+                 
+diff --git a/src/costl/simulators/babyai_simulator.py b/src/costl/simulators/babyai_simulator.py
+index 8ba0fb4..9c6307c 100644
+--- a/src/costl/simulators/babyai_simulator.py
++++ b/src/costl/simulators/babyai_simulator.py
+@@ -546,10 +546,10 @@ class BabyAISimulator(BaseSimulator, ObservationWrapper):
+         return self.prev_obs["carrying"]
+         return self.prev_obs["carrying"]
+ 
+-    def get_image(self):
++    def get_image(self, action_text=None, goal_text=None, constraint_text=None):
+         """Render the current state to a PIL Image."""
+         try:
+-            from PIL import Image
++            from PIL import Image, ImageDraw
+         except ImportError:
+             return None
+             
+@@ -563,7 +563,32 @@ class BabyAISimulator(BaseSimulator, ObservationWrapper):
+                 rgb_array = self.env.unwrapped.get_frame(highlight=True, tile_size=32)
+             
+             if rgb_array is not None:
+-                return Image.fromarray(rgb_array)
++                img = Image.fromarray(rgb_array)
++                d = ImageDraw.Draw(img)
++                width, height = img.size
++                
++                # Draw goal text at the top
++                y_goal = 5
++                if goal_text:
++                    import textwrap
++                    wrapped_goal = textwrap.fill(f"Goal: {goal_text}", width=50)
++                    for line in wrapped_goal.split('\n'):
++                        d.text((width//2 - len(line)*3, y_goal), line, fill=(255, 0, 0))
++                        y_goal += 12
++
++                # Draw constraint text right below the goal
++                if constraint_text:
++                    import textwrap
++                    wrapped_constraint = textwrap.fill(f"Constraint: {constraint_text}", width=50)
++                    for line in wrapped_constraint.split('\n'):
++                        d.text((width//2 - len(line)*3, y_goal), line, fill=(0, 0, 255))
++                        y_goal += 12
++
++                # Draw action text at the bottom
++                if action_text:
++                    d.text((10, height - 20), f"Action: {action_text}", fill=(255,255,255))
++                    
++                return img
+         except Exception as e:
+             print(f"Failed to render BabyAI: {e}")
+             return None
+diff --git a/src/costl/simulators/blocksworld_simulator.py b/src/costl/simulators/blocksworld_simulator.py
+index 1137d9b..fd93d38 100644
+--- a/src/costl/simulators/blocksworld_simulator.py
++++ b/src/costl/simulators/blocksworld_simulator.py
+@@ -100,6 +100,8 @@ class BlocksworldSimulator(BaseSimulator):
+                 
+                 # Create a clean problem for simulation (remove constraints/metrics)
+                 clean_problem = Problem(problem.name)
++                for f in problem.fluents:
++                    clean_problem.add_fluent(f)
+                 clean_problem.add_objects(problem.all_objects)
+                 clean_problem.add_actions(problem.actions)
+                 for f, v in problem.initial_values.items():
+@@ -266,9 +268,22 @@ class BlocksworldSimulator(BaseSimulator):
+         # Find stacks (bottom up)
+         # First find all blocks on table
+         on_table_blocks = []
++        has_ontable = False
++        try:
++            self.problem.fluent("ontable")
++            has_ontable = True
++        except Exception:
++            pass
++
+         for b in blocks:
+-            if get_fluent("ontable", b):
+-                on_table_blocks.append(b)
++            if has_ontable:
++                if get_fluent("ontable", b):
++                    on_table_blocks.append(b)
++            else:
++                is_on = any(get_fluent("on", b, other) for other in blocks)
++                is_held = get_fluent("holding", b)
++                if not is_on and not is_held:
++                    on_table_blocks.append(b)
+                 
+         for base in on_table_blocks:
+             stack = [base]
+@@ -308,7 +323,7 @@ class BlocksworldSimulator(BaseSimulator):
+                 print(f"  {row}")
+         print("-------------------------\n")
+ 
+-    def get_image(self):
++    def get_image(self, action_text=None, goal_text=None, constraint_text=None):
+         """Render the current state to a PIL Image."""
+         try:
+             from PIL import Image, ImageDraw
+@@ -342,28 +357,27 @@ class BlocksworldSimulator(BaseSimulator):
+                 return False
+ 
+         # Build stacks
+-        # Robust block detection: check if objects are used in 'on' or 'ontable' fluents
+-        # This avoids relying on exact type names like "block" which might differ (e.g. "object")
+-        blocks = []
+-        for o in objects:
+-            # Heuristic: verify if it can be ontable or held
+-            # Check if fluents "ontable", "holding", "on" (as arg 1) accept this object type
+-            # But simpler: just check all objects. If they appear in ontable/on, they are blocks.
+-            if get_fluent("ontable", o) or get_fluent("holding", o) or any(get_fluent("on", o, other) for other in objects):
+-                if o not in blocks:
+-                    blocks.append(o)
+-            # Also need to check if they are under something (bottom of stack)
+-            if any(get_fluent("on", other, o) for other in objects):
+-                 if o not in blocks:
+-                    blocks.append(o)
+-        
+-        # Deduplicate and sort
++        # If type isn't cleanly 'block', fallback is already handled above where blocks = objects
++        # To be safe, if types are mixed and we fallback to objects, just use them.
+         blocks = sorted(list(set(blocks)), key=lambda x: x.name)
+ 
+         on_table_blocks = []
++        has_ontable = False
++        try:
++            self.problem.fluent("ontable")
++            has_ontable = True
++        except Exception:
++            pass
++
+         for b in blocks:
+-            if get_fluent("ontable", b):
+-                on_table_blocks.append(b)
++            if has_ontable:
++                if get_fluent("ontable", b):
++                    on_table_blocks.append(b)
++            else:
++                is_on = any(get_fluent("on", b, other) for other in blocks)
++                is_held = get_fluent("holding", b)
++                if not is_on and not is_held:
++                    on_table_blocks.append(b)
+                 
+         stacks = []
+         for base in on_table_blocks:
+@@ -411,8 +425,12 @@ class BlocksworldSimulator(BaseSimulator):
+                 text_color = (255, 255, 255) if sum(color) < 380 else (0, 0, 0)
+                 
+                 d.rectangle([x, y, x + block_width, y + block_height], outline=(0,0,0), fill=color)
+-                d.text((x + 10, y + 10), block.name, fill=text_color)
+-                
++                wrapped_name = block.name.replace("_", "\n")
++                lines = wrapped_name.split('\n')
++                y_text = y + 5
++                for line in lines:
++                    d.text((x + 5, y_text), line, fill=text_color)
++                    y_text += 10
+         # Draw holding
+         holding = None
+         for b in blocks:
+@@ -421,12 +439,52 @@ class BlocksworldSimulator(BaseSimulator):
+                 break
+                 
+         if holding:
+-            d.text((10, 10), f"Holding: {holding.name}", fill=(0,0,0))
++            box_w, box_h = 60, 40
++            
++            # Text on lower right
++            x_text = width - 80
++            y_text = height - 30
++            d.text((x_text, y_text), "Holding:", fill=(0,0,0))
++            
++            # Block in the center above the other blocks
++            x_h = width // 2 - box_w // 2
++            y_h = 80 # Just below the goal
+             color = get_color(holding.name)
+             text_color = (255, 255, 255) if sum(color) < 380 else (0, 0, 0)
+-            d.rectangle([width//2 - 30, 50, width//2 + 30, 90], outline=(0,0,0), fill=color)
+-            d.text((width//2 - 20, 60), holding.name, fill=text_color)
++            d.rectangle([x_h, y_h, x_h + box_w, y_h + box_h], outline=(0,0,0), fill=color)
++            wrapped_name = holding.name.replace("_", "\n")
++            lines = wrapped_name.split('\n')
++            y_text = y_h + 5
++            for line in lines:
++                d.text((x_h + 5, y_text), line, fill=text_color)
++                y_text += 10
+         else:
+-            d.text((10, 10), "Hand Empty", fill=(0,0,0))
++            d.text((width - 80, height - 30), "Hand Empty", fill=(0,0,0))
++            
++        # Draw goal text at the top
++        y_goal = 5
++        if goal_text:
++            # Simple text wrapping for goal_text
++            import textwrap
++            wrapped_goal = textwrap.fill(f"Goal: {goal_text}", width=50)
++            
++            # Draw text with red color and small outline
++            for line in wrapped_goal.split('\n'):
++                d.text((width//2 - len(line)*3, y_goal), line, fill=(255, 0, 0))
++                y_goal += 12
++
++        # Draw constraint text right below the goal
++        if constraint_text:
++            import textwrap
++            wrapped_constraint = textwrap.fill(f"Constraint: {constraint_text}", width=50)
++            
++            # Draw text with blue color
++            for line in wrapped_constraint.split('\n'):
++                d.text((width//2 - len(line)*3, y_goal), line, fill=(0, 0, 255))
++                y_goal += 12
++
++        # Draw action text at the bottom
++        if action_text:
++            d.text((10, height - 20), f"Action: {action_text}", fill=(0,0,0))
+             
+         return img
+diff --git a/third-party/lexicon_neurips b/third-party/lexicon_neurips
+--- a/third-party/lexicon_neurips
++++ b/third-party/lexicon_neurips
+@@ -1 +1 @@
+-Subproject commit 72f9a860e64f29ccd37cebbb8f68a7b71550d065
++Subproject commit 72f9a860e64f29ccd37cebbb8f68a7b71550d065-dirty

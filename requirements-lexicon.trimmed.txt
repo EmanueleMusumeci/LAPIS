@@ -57,6 +57,10 @@ up-lpg==0.1.2
 up-pyperplan==1.1.0
 up-tamer==1.1.5
 websockets==15.0.1
+dotenv
+dotmap
+gymnasium
+minigrid
 
 # Notes
 #   to match the original project environment. If you prefer a lightweight install,

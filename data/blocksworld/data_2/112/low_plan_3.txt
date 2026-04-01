@@ -1,0 +1,2 @@
+(unstack black_block_2 orange_block_1)
+(stack black_block_2 brown_block_1)

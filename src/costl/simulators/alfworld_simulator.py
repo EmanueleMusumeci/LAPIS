@@ -71,6 +71,13 @@ class AlfWorldSimulator(BaseSimulator):
         self.inventory = []
         self.location = None
 
+    def setup(self, **kwargs) -> bool:
+        """Setup the simulator.
+        
+        AlfWorld simulator is set up during initialization.
+        """
+        return True
+
     def reset(self, seed: Optional[int] = None, **kwargs) -> Tuple[Dict, Dict]:
         """Reset the AlfWorld environment.
         

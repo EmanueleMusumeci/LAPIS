@@ -1,0 +1,4 @@
+(unstack black_block_2 black_block_1)
+(putdown black_block_2)
+(unstack white_block_1 yellow_block_1)
+(stack white_block_1 orange_block_1)

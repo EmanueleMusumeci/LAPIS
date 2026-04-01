@@ -1,0 +1,14 @@
+services:
+  high_level_planner:
+    build:
+      context: ./src/costl/planner/high/
+      dockerfile: Dockerfile
+    container_name: costl-planner
+    environment:
+      - API_KEY=${OPENAI_API_KEY}
+    volumes:
+      # Mount the entire workspace root
+      - .:/workspace
+    working_dir: /workspace/src/costl/planner/high
+    stdin_open: true
+    tty: true

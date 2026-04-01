@@ -1,0 +1,64 @@
+================================================================================
+PROBLEM 112 - GENERATION HISTORY
+================================================================================
+
+LTL FORMULA:
+F(clear(orange)) & F(!clear(black2)) & G(!clear(black2) -> ((on(brown1, brown2) | clear(black1)) U !clear(black2)))
+
+
+================================================================================
+ATTEMPT 1
+================================================================================
+
+REASONING:
+### Initial State Analysis
+- There are five blocks: two black blocks, two brown blocks, and one orange block.
+- The first black block and the first brown block are on the table.
+- The second brown block is on top of the first black block.
+- The second black block is on top of the orange block.
+- The first brown block, the second brown block, and the second black block are clear.
+
+### Goal Analysis
+- The goal is to make the orange block clear, meaning no block should be on top of it.
+
+### Constraint Analysis
+1. At some point, there must be a block on top of the second black block, making it not clear.
+2. If the second black block is not clear at some point, then before that, either the first brown block must be on top of the second brown block, or the first black block must be clear.
+
+### Subgoal Sequence
+1. **Ensure the first brown block is on top of the second brown block.**
+   - This satisfies the condition that either the first brown block is on top of the second brown block or the first black block is clear before the second black block becomes not clear.
+
+2. **Place a block on top of the second black block.**
+   - This satisfies the constraint that at some point, there must be a block on top of the second black block, making it not clear.
+
+3. **Make the orange block clear.**
+   - This is the final goal, ensuring that no block is on top of the orange block.
+
+### Prototype Plan
+1. **Ensure the first brown block is on top of the second brown block.**
+   - Move the first brown block onto the second brown block. This ensures that the condition for the second constraint is met.
+
+2. **Place a block on top of the second black block.**
+   - Move the first black block onto the second black block. This satisfies the first constraint.
+
+3. **Make the orange block clear.**
+   - Unstack the second black block from the orange block, ensuring the orange block is clear.
+
+GENERATED PLAN:
+1. Ensure the first brown block is on top of the second brown block.
+2. Place a block on top of the second black block.
+3. Make the orange block clear.
+
+VALID: True
+
+================================================================================
+FINAL RESULT
+================================================================================
+
+STATUS: SUCCESS
+
+FINAL PLAN:
+1. Ensure the first brown block is on top of the second brown block.
+2. Place a block on top of the second black block.
+3. Make the orange block clear.

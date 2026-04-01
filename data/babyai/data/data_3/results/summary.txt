@@ -1,0 +1,11 @@
+Detailed Results:
+  ✗ Problem 101: Failed (Attempts: 5)
+  ✗ Problem 103: Failed (Attempts: 5)
+  ✗ Problem 105: Failed (Attempts: 5)
+  ✓ Problem 108: Success (Attempts: 2)
+  ✓ Problem 113: Success (Attempts: 1)
+  ✓ Problem 114: Success (Attempts: 1)
+  ✓ Problem 118: Success (Attempts: 2)
+  ✓ Problem 125: Success (Attempts: 1)
+  ✓ Problem 127: Success (Attempts: 1)
+  ✓ Problem 130: Success (Attempts: 5)

@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 # Add lexicon to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../third-party/lexicon_neurips")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../third-party/lexicon_neurips")))
 
 try:
     from lexicon import evaluate_llms, cfg_mapper

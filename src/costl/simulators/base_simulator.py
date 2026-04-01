@@ -1,7 +1,10 @@
 """Base simulator interface for all domain simulators."""
 
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Any, Optional, Dict
+from typing import List, Tuple, Any, Optional, Dict, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .scenario import Scenario
 
 
 class BaseSimulator(ABC):
@@ -12,13 +15,17 @@ class BaseSimulator(ABC):
     planning framework.
     """
 
-    def __init__(self, env):
+    def __init__(self, env, scenario: Optional['Scenario'] = None):
         """Initialize the simulator with an environment.
         
         Args:
             env: The underlying environment (e.g., gym environment)
+            scenario: The scenario associated with this simulator
         """
         self.env = env
+        self.scenario = scenario
+        if self.scenario:
+            self.scenario.set_simulator(self)
         self.prev_obs = None
 
     @abstractmethod
@@ -32,6 +39,18 @@ class BaseSimulator(ABC):
         Returns:
             observation: Initial observation
             info: Additional information dictionary
+        """
+        pass
+
+    @abstractmethod
+    def setup(self, **kwargs) -> bool:
+        """Setup the simulator with necessary data (e.g. loading domains/problems).
+
+        Args:
+            **kwargs: Setup parameters (e.g. domain_path, problem_path)
+
+        Returns:
+            bool: True if setup successful, False otherwise
         """
         pass
 

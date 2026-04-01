@@ -3,6 +3,14 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Heavy local assets — not tracked in this repo
+outputs/
+nohup.out
+app.log
+*.log
+mock_agent_debug.log
+costl_benchmark.log
+
 # C extensions
 *.so
 
@@ -222,3 +230,11 @@ __marimo__/
 
 # Habitat scene datasets (large files)
 data/habitat_scenes/
+key.sh
+results/*
+third-party/alfworld
+third-party/lexicon_neurips
+third-party/symk_wrapper
+third-party/virtualhome
+third-party/VAL
+test*.py

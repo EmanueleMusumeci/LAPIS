@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 from enum import IntEnum
-from typing import Optional, Tuple, List, Set, Dict
+from typing import Optional, Tuple, List, Set, Dict, Any
 
 import numpy as np
 from dotmap import DotMap
@@ -217,6 +217,97 @@ def get_all_empty_positions(target_room: List[Tuple], fwd_pos: Tuple, grid: Grid
     return empty_positions
 
 
+from .scenario import Scenario
+
+class BabyAIScenario(Scenario):
+    """Scenario for BabyAI domain."""
+    
+    def compute_cost(self, action: Any, state: Any = None) -> float:
+        """Compute cost for BabyAI actions.
+        
+        Actions have unitary cost apart from movement between not adjacent cells.
+        For movement actions (goto), the cost is the length of the path.
+        """
+        if self.simulator is None:
+            # Cannot compute cost without simulator context (grid, etc.)
+            return 1.0
+
+        # We need to map PDDL action to simulator action to understand what it is
+        try:
+            mapped_action, target = self.simulator.map_pddl2simulator(action)
+        except Exception:
+            # If mapping fails, fallback to unitary cost
+            return 1.0
+
+        if mapped_action == self.simulator.actions.goto:
+            # Calculate path length
+            # We need agent position and grid
+            # If state is provided and has info, use it, otherwise use current env state
+            env = self.simulator.env.unwrapped
+            grid = env.grid
+            
+            # If state is provided, we might need to extract agent_pos from it
+            # For now, we'll use the current environment state as a baseline
+            # or if state is a dict with 'agent_pos', use that.
+            agent_pos = env.agent_pos
+            if state is not None and isinstance(state, dict) and 'agent_pos' in state:
+                agent_pos = state['agent_pos']
+            
+            rooms = get_rooms(grid)
+            
+            target_pos = None
+            if target is None:
+                # gotoempty or similar, handled in step but complex to predict exact target here
+                # We can estimate or find nearest empty
+                target_room = get_agent_room(agent_pos, rooms)
+                empty_positions = get_all_empty_positions(rooms[target_room - 1], env.front_pos, grid)
+                if not empty_positions:
+                    return float('inf')
+                # Find nearest empty position
+                min_dist = float('inf')
+                for pos in empty_positions:
+                    path = get_shortest_path(agent_pos, pos, grid)
+                    if path is not None:
+                        dist = len(path)
+                        if dist < min_dist:
+                            min_dist = dist
+                return float(min_dist) if min_dist != float('inf') else float('inf')
+                
+            elif isinstance(target, Room):
+                # gotoroom
+                # Find nearest empty pos in target room
+                target_room = target.room_id
+                empty_positions = get_all_empty_positions(rooms[target_room - 1], env.front_pos, grid)
+                if not empty_positions:
+                    return float('inf')
+                min_dist = float('inf')
+                for pos in empty_positions:
+                    path = get_shortest_path(agent_pos, pos, grid)
+                    if path is not None:
+                        dist = len(path)
+                        if dist < min_dist:
+                            min_dist = dist
+                return float(min_dist) if min_dist != float('inf') else float('inf')
+
+            elif isinstance(target, (Object, Door)):
+                if isinstance(target, Object):
+                    target_pos = get_object_pos(target, grid, rooms)
+                else:
+                    target_pos = get_door_pos(target, grid, rooms)
+                
+                if target_pos is None:
+                    return float('inf')
+                
+                path = get_shortest_path(agent_pos, target_pos, grid)
+                if path is None:
+                    return float('inf')
+                return float(len(path))
+            
+            return 1.0
+        else:
+            return 1.0
+
+
 class BabyAISimulator(BaseSimulator, ObservationWrapper):
     """BabyAI simulator with PDDL action mapping.
     
@@ -224,8 +315,11 @@ class BabyAISimulator(BaseSimulator, ObservationWrapper):
     PDDL action translation and execution.
     """
 
-    def __init__(self, env):
-        BaseSimulator.__init__(self, env)
+    def __init__(self, env, scenario: Optional[Scenario] = None):
+        if scenario is None:
+            scenario = BabyAIScenario()
+            
+        BaseSimulator.__init__(self, env, scenario=scenario)
         ObservationWrapper.__init__(self, env)
         
         self.goal = None
@@ -241,6 +335,13 @@ class BabyAISimulator(BaseSimulator, ObservationWrapper):
         self.observation_space = spaces.Dict(
             {**self.observation_space.spaces, "image": new_image_space}
         )
+
+    def setup(self, **kwargs) -> bool:
+        """Setup the simulator.
+        
+        BabyAI simulator is set up during initialization.
+        """
+        return True
 
     def reset(self, seed: Optional[int] = None, **kwargs) -> Tuple[Dict, Dict]:
         """Reset the BabyAI environment."""
@@ -443,3 +544,52 @@ class BabyAISimulator(BaseSimulator, ObservationWrapper):
         assert target_color == color
         assert target_type == type
         return self.prev_obs["carrying"]
+        return self.prev_obs["carrying"]
+
+    def get_image(self, action_text=None, goal_text=None, constraint_text=None):
+        """Render the current state to a PIL Image."""
+        try:
+            from PIL import Image, ImageDraw
+        except ImportError:
+            return None
+            
+        # Use minigrid render        
+        try:
+            rgb_array = self.env.render()
+            if rgb_array is None:
+                # Try creating a temporary renderer or check render_mode
+                # If render_mode was not 'rgb_array', render() might return None or open a window
+                # We can try to force render
+                rgb_array = self.env.unwrapped.get_frame(highlight=True, tile_size=32)
+            
+            if rgb_array is not None:
+                img = Image.fromarray(rgb_array)
+                d = ImageDraw.Draw(img)
+                width, height = img.size
+                
+                # Draw goal text at the top
+                y_goal = 5
+                if goal_text:
+                    import textwrap
+                    wrapped_goal = textwrap.fill(f"Goal: {goal_text}", width=50)
+                    for line in wrapped_goal.split('\n'):
+                        d.text((width//2 - len(line)*3, y_goal), line, fill=(255, 0, 0))
+                        y_goal += 12
+
+                # Draw constraint text right below the goal
+                if constraint_text:
+                    import textwrap
+                    wrapped_constraint = textwrap.fill(f"Constraint: {constraint_text}", width=50)
+                    for line in wrapped_constraint.split('\n'):
+                        d.text((width//2 - len(line)*3, y_goal), line, fill=(0, 0, 255))
+                        y_goal += 12
+
+                # Draw action text at the bottom
+                if action_text:
+                    d.text((10, height - 20), f"Action: {action_text}", fill=(255,255,255))
+                    
+                return img
+        except Exception as e:
+            print(f"Failed to render BabyAI: {e}")
+            return None
+        return None

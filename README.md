@@ -269,5 +269,63 @@ After installation, run the test script to verify all simulators:
 python test_all_simulators.py
 ```
 
-This will test all 5 integrated simulators: BabyAI, AlfWorld, VirtualHome, AI2THOR, and Habitat.
+## Benchmark Analysis
+
+### Known Issues & Failures
+
+#### Problem 102: State Hallucination in Refinement
+In `data_1/102`, the pipeline failed during Ground Truth execution due to an **unsatisfied precondition**. 
+
+**Analysis:**
+- **The Issue**: During Subgoal 5, the agent was still holding a block from the previous subgoal.
+- **LLM "Cheating"**: The PDDL refinement loop (LLM) encountered a failure because the physical state was "unsolvable" for the desired goal from that starting position. Instead of fixing the plan sequence, the LLM **hallucinated a new initial state** in the PDDL problem file (e.g., teleporting blocks to the table to clear the hand).
+- **Consequence**: The internal planner found a "valid" plan for this imaginary state, but the real Ground Truth simulator crashed immediately when the first action (`unstack`) was not applicable in the actual world state.
+
+**Status**: Root cause identified. Requires "Syntax-Aware State Injection" to force the refinement loop to respect the simulator's physical state while allowing syntax fixes.
+
+---
+
+## Low-Level Planner Selection
+
+The symbolic planner used for low-level PDDL planning is **configurable** via the `--planner` CLI argument.
+
+### Available planners
+
+| `--planner` | Backend | Notes |
+|-------------|---------|-------|
+| `pyperplan` *(default)* | [Pyperplan](https://github.com/aibasel/pyperplan) via Unified Planning | Pure Python — no binary needed. Handles `:strips :typing`. Recommended. |
+| `up_fd` | [FastDownward](https://www.fast-downward.org/) via Unified Planning | Install: `pip install up-fast-downward`. Bundles FD binary. |
+| `fd` | FastDownward direct subprocess | Requires `fast-downward` binary on `PATH` or at `downward/fast-downward.py`. |
+| `symk` | [SymK](https://github.com/speckdavid/symk) via local wrapper | Requires SymK binary compiled in `third-party/symk_wrapper`. |
+
+### Install planner packages
+
+```bash
+pip install up-pyperplan        # Pyperplan (default, always install)
+pip install up-fast-downward    # FastDownward via UP (optional, larger)
+```
+
+### CLI usage
+
+```bash
+# Default (pyperplan, recommended)
+python run_pipeline.py --domain babyai --pipeline multi_level --batch_id data_1
+
+# FastDownward via UP
+python run_pipeline.py --domain babyai --pipeline multi_level --batch_id data_1 --planner up_fd
+
+# Native FastDownward subprocess (requires binary)
+python run_pipeline.py --domain babyai --pipeline multi_level --batch_id data_1 --planner fd
+```
+
+### Why PDDLGym was removed
+
+[PDDLGym](https://github.com/tomsilver/pddlgym) (the previous backend) is no longer maintained:
+
+- No commits on the `main` branch
+- Open issue [#101](https://github.com/tomsilver/pddlgym/issues/101): migration from deprecated `gym` to `gymnasium` never merged
+- Parser rejects valid PDDL constructs: `(when ...)`, `(either ...)`, conditional effects, and nested type hierarchies
+- The local `pddlgym_planners/fd.py` was a **stub** that always returned an empty plan
+
+It has been replaced by the [Unified Planning](https://unified-planning.readthedocs.io/) framework (`unified-planning` package v1.3+), which is actively maintained, accepts full PDDL 2.1, and supports multiple planner backends.
 
