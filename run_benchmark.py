@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-run_benchmark.py — CoSTL low-level planner benchmark on Lexicon problems.
+run_benchmark.py — LAPIS low-level planner benchmark on Lexicon problems.
 
 Usage:
     python run_benchmark.py --domain blocksworld --batch_id data_2 --model gpt-4o
@@ -78,7 +78,7 @@ DOMAIN_DEFAULTS = {
 
 
 def main():
-    parser = argparse.ArgumentParser(description="CoSTL low-level planner benchmark")
+    parser = argparse.ArgumentParser(description="LAPIS low-level planner benchmark")
     parser.add_argument("--domain", default="blocksworld", help="Domain name (blocksworld or babyai)")
     parser.add_argument("--batch_id", default=None,
                         help="Batch ID subfolder (default: data_2 for blocksworld, data/data_1 for babyai)")
@@ -102,9 +102,9 @@ def main():
     print(f"Problems: {problems}\n")
 
     # Import after path setup to catch import errors early
-    from src.costl.agents.gpt import GPTAgent
-    from src.costl.agents.claude import ClaudeAgent
-    from src.costl.pipelines.lexicon_low_level import LexiconLowLevelPipeline
+    from src.lapis.agents.gpt import GPTAgent
+    from src.lapis.agents.claude import ClaudeAgent
+    from src.lapis.pipelines.lapis_low_level import LAPISLowLevelPipeline
 
     if args.model.startswith("claude"):
         agent = ClaudeAgent(model=args.model)
@@ -113,7 +113,7 @@ def main():
 
     experiment_name = f"benchmark_{args.domain}_{batch_id}_{args.model.replace('-', '_')}"
 
-    pipeline = LexiconLowLevelPipeline(
+    pipeline = LAPISLowLevelPipeline(
         domain_name=args.domain,
         batch_id=batch_id,
         # LowLevelPlanningPipeline kwargs

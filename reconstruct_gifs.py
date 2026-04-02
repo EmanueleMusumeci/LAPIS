@@ -6,10 +6,10 @@ from pathlib import Path
 import pprint
 
 # Add workspace to path
-sys.path.append("/DATA/CoSTL")
+sys.path.append("/DATA/LAPIS")
 
-from src.costl.simulators.blocksworld_simulator import BlocksworldSimulator
-from src.costl.simulators.babyai_simulator import BabyAISimulator
+from src.lapis.simulators.blocksworld_simulator import BlocksworldSimulator
+from src.lapis.simulators.babyai_simulator import BabyAISimulator
 
 from dataclasses import dataclass
 
@@ -143,17 +143,17 @@ def main():
     parser.add_argument("--frame-delay", type=int, default=300, help="Delay between frames in milliseconds")
     parser.add_argument("--domain", type=str, default="blocksworld", help="Domain name (e.g., blocksworld, babyai)")
     parser.add_argument("--env-name", type=str, default=None, help="Gymnasium environment name (e.g., BabyAI-MiniBossLevel-v0) if domain is babyai")
-    parser.add_argument("--results-base", type=str, default="/DATA/CoSTL/results/final_bench", help="Results base directory")
+    parser.add_argument("--results-base", type=str, default="/DATA/LAPIS/results/final_bench", help="Results base directory")
     
     args = parser.parse_args()
 
     results_base = Path(args.results_base)
-    domain_data_dir = f"/DATA/CoSTL/data/{args.domain}/data"
+    domain_data_dir = f"/DATA/LAPIS/data/{args.domain}/data"
     
     if args.domain == "babyai":
         batches = ["babyai_test"]
         # run_pipeline.py saves to real_run_100 by default in run_pipeline
-        results_base = Path("/DATA/CoSTL/results/real_run_100")
+        results_base = Path("/DATA/LAPIS/results/real_run_100")
     else:
         batches = ["data_1", "data_2"]
 

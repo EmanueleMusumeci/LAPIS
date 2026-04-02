@@ -136,10 +136,10 @@ def _make_agent(model_id: str):
     if MOCK_MODE:
         return None
     if model_id.startswith("claude"):
-        from src.costl.agents.claude import ClaudeAgent
+        from src.lapis.agents.claude import ClaudeAgent
         return ClaudeAgent(model=model_id)
     else:
-        from src.costl.agents.gpt import GPTAgent
+        from src.lapis.agents.gpt import GPTAgent
         return GPTAgent(model=model_id)
 
 
@@ -313,7 +313,7 @@ def _try_render_blocksworld(result: RunResult, container):
         return False
 
     try:
-        from src.costl.plan_renderer import render_blocksworld_gif
+        from src.lapis.plan_renderer import render_blocksworld_gif
         gif_path = str(Path(result.domain_file_path).parent / "plan.gif")
         ok = render_blocksworld_gif(
             domain_file=result.domain_file_path,

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-run_llmpp_benchmark.py — CoSTL benchmark on LLM+P (IPC) domains.
+run_llmpp_benchmark.py — LAPIS benchmark on LLM+P (IPC) domains.
 
 Usage:
     # Single method runs:
-    python run_llmpp_benchmark.py --domain blocksworld --method costl
+    python run_llmpp_benchmark.py --domain blocksworld --method lapis
     python run_llmpp_benchmark.py --domain blocksworld --method llmpp
-    python run_llmpp_benchmark.py --domain barman --method costl --generate_domain
+    python run_llmpp_benchmark.py --domain barman --method lapis --generate_domain
 
     # Side-by-side comparison (runs both methods, prints table):
     python run_llmpp_benchmark.py --domain blocksworld --method compare
@@ -14,8 +14,8 @@ Usage:
 
 Methods:
     llmpp  — LLM+P baseline: generate problem once, plan, no refinement (pddl_gen_iterations=0)
-    costl  — CoSTL:          generate problem + iterative VAL-guided refinement (pddl_gen_iterations=3)
-    compare — run both llmpp and costl, print side-by-side comparison table
+    lapis  — LAPIS:          generate problem + iterative VAL-guided refinement (pddl_gen_iterations=3)
+    compare — run both llmpp and lapis, print side-by-side comparison table
 
 Domain generation (--generate_domain):
     When set, both methods also generate the PDDL domain from domain.nl.
@@ -50,8 +50,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 LLMPP_DOMAINS = ["barman", "blocksworld", "floortile", "grippers", "storage", "termes", "tyreworld"]
 
-# CoSTL: number of VAL-guided refinement iterations after initial generation
-COSTL_REFINEMENTS = 3
+# LAPIS: number of VAL-guided refinement iterations after initial generation
+LAPIS_REFINEMENTS = 3
 # LLM+P: no refinement
 LLMPP_REFINEMENTS = 0
 
@@ -111,17 +111,17 @@ ABLATION_FLAGS = {
 
 
 def run_method(domain, method, problems, agent, args, generate_domain):
-    from src.costl.pipelines.lexicon_low_level import LexiconLowLevelPipeline
+    from src.lapis.pipelines.lapis_low_level import LAPISLowLevelPipeline
 
     ablation = getattr(args, "ablation", "full")
     clean_domain_prompt, inject_domain_schema, check_adequacy = ABLATION_FLAGS.get(ablation, (True, True, False))
 
-    pddl_gen_iterations = COSTL_REFINEMENTS if method == "costl" else LLMPP_REFINEMENTS
+    pddl_gen_iterations = LAPIS_REFINEMENTS if method == "lapis" else LLMPP_REFINEMENTS
     gen_suffix = "_domgen" if generate_domain else ""
     abl_suffix = f"_{ablation}" if ablation != "full" else ""
     experiment_name = f"benchmark_llmpp_{domain}_{method}{gen_suffix}{abl_suffix}_{args.model.replace('-', '_')}"
 
-    pipeline = LexiconLowLevelPipeline(
+    pipeline = LAPISLowLevelPipeline(
         domain_name=domain,
         batch_id="",
         llmpp_source_dir=str(Path(__file__).parent / "third-party" / "llm-pddl" / "domains"),
@@ -158,7 +158,7 @@ def print_comparison_table(summaries_by_domain: dict, generate_domain: bool):
     domain_gen_note = " (domain generated from NL)" if generate_domain else " (GT domain provided)"
 
     print(f"\n{'='*72}")
-    print(f"  CoSTL vs LLM+P Comparison{domain_gen_note}")
+    print(f"  LAPIS vs LLM+P Comparison{domain_gen_note}")
     print(f"{'='*72}")
 
     header = f"{'Domain':<14} {'Method':<8} {'Plan%':>6} {'VAL%':>6} {'AvgLen':>7} {'AvgRef':>7} {'AvgTime':>8}"
@@ -183,14 +183,14 @@ def print_comparison_table(summaries_by_domain: dict, generate_domain: bool):
     print("Plan%  = problems where planner found a plan")
     print("VAL%   = plans valid under VAL" + (" (generated domain+problem)" if generate_domain else " (GT domain+problem)"))
     print("AvgLen = avg plan length (successful plans only)")
-    print("AvgRef = avg PDDL refinement iterations (CoSTL only)")
+    print("AvgRef = avg PDDL refinement iterations (LAPIS only)")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="CoSTL vs LLM+P benchmark on IPC domains")
+    parser = argparse.ArgumentParser(description="LAPIS vs LLM+P benchmark on IPC domains")
     parser.add_argument("--domain", default="blocksworld", choices=LLMPP_DOMAINS + ["all"])
-    parser.add_argument("--method", default="compare", choices=["costl", "llmpp", "compare"],
-                        help="costl=iterative refinement, llmpp=single-shot, compare=both")
+    parser.add_argument("--method", default="compare", choices=["lapis", "llmpp", "compare"],
+                        help="lapis=iterative refinement, llmpp=single-shot, compare=both")
     parser.add_argument("--generate_domain", action="store_true",
                         help="Generate PDDL domain from NL (reads domain.nl from llm-pddl source)")
     parser.add_argument("--ablation", default="full",
@@ -199,7 +199,7 @@ def main():
     parser.add_argument("--model", default="claude-sonnet-4-6")
     parser.add_argument("--problems", nargs="*", default=None)
     parser.add_argument("--pddl_gen_iterations", type=int, default=None,
-                        help="Override PDDL refinement iterations (default: 3 for costl, 0 for llmpp)")
+                        help="Override PDDL refinement iterations (default: 3 for lapis, 0 for llmpp)")
     parser.add_argument("--planner_timeout", type=int, default=180,
                         help="Timeout for symbolic planner in seconds (default: 180)")
     parser.add_argument("--data_dir", default="data/llm-pddl")
@@ -207,15 +207,15 @@ def main():
     args = parser.parse_args()
 
     # Override defaults if explicitly set
-    global COSTL_REFINEMENTS
+    global LAPIS_REFINEMENTS
     if args.pddl_gen_iterations is not None:
-        COSTL_REFINEMENTS = args.pddl_gen_iterations
+        LAPIS_REFINEMENTS = args.pddl_gen_iterations
 
     domains = LLMPP_DOMAINS if args.domain == "all" else [args.domain]
-    methods = ["llmpp", "costl"] if args.method == "compare" else [args.method]
+    methods = ["llmpp", "lapis"] if args.method == "compare" else [args.method]
 
-    from src.costl.agents.gpt import GPTAgent
-    from src.costl.agents.claude import ClaudeAgent
+    from src.lapis.agents.gpt import GPTAgent
+    from src.lapis.agents.claude import ClaudeAgent
 
     if args.model.startswith("claude"):
         agent = ClaudeAgent(model=args.model)

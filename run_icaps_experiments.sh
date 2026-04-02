@@ -130,7 +130,7 @@ filter_domains domains_gt
 
 for domain in "${domains_gt[@]}"; do
     run_experiment_gt "$domain" "llmpp" "full"
-    run_experiment_gt "$domain" "costl" "full"
+    run_experiment_gt "$domain" "lapis" "full"
 done
 
 # ─── LAPIS/full (Condition C) ────────────────────────────────────────────────
@@ -139,7 +139,7 @@ domains_full=("${DOMAINS_FULL[@]}")
 filter_domains domains_full
 
 for domain in "${domains_full[@]}"; do
-    run_experiment "$domain" "costl" "full"
+    run_experiment "$domain" "lapis" "full"
 done
 
 # ─── LAPIS/full+adequacy (Condition D) ───────────────────────────────────────
@@ -148,7 +148,7 @@ domains_adequacy=("${DOMAINS_ADEQUACY[@]}")
 filter_domains domains_adequacy
 
 for domain in "${domains_adequacy[@]}"; do
-    run_experiment "$domain" "costl" "full_adequacy"
+    run_experiment "$domain" "lapis" "full_adequacy"
 done
 
 # ─── LLMPP-GEN Baseline (Condition B' - Fair Baseline) ───────────────────────

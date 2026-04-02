@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 # Set path to allow imports
-sys.path.insert(0, "/DATA/CoSTL")
+sys.path.insert(0, "/DATA/LAPIS")
 
 import logging
 # Configure logger to see output in console
@@ -16,7 +16,7 @@ if not logger.handlers:
     handler.setFormatter(logging.Formatter('[%(levelname)s] - %(message)s'))
     logger.addHandler(handler)
 
-from src.costl.pipelines.multi_level_planning import MultiLevelPlanningPipeline
+from src.lapis.pipelines.multi_level_planning import MultiLevelPlanningPipeline
 
 from pathlib import Path
 
@@ -60,7 +60,7 @@ class TestTraceCheckFlow(unittest.TestCase):
         
         # Mock logic utils
         pipeline._apply_assignment_substitution = MagicMock(side_effect=lambda x, y: x)
-        import src.costl.utils.logic_utils as logic_utils
+        import src.lapis.utils.logic_utils as logic_utils
         logic_utils.convert_trace_to_strings = MagicMock(return_value=[{'a'}])
         
         # Mock file operations to strict minimum
@@ -69,8 +69,8 @@ class TestTraceCheckFlow(unittest.TestCase):
                 with patch('os.makedirs'):
                     with patch('shutil.copy'):
                         with patch('json.dump'): # Don't write real json
-                            with patch('src.costl.pipelines.multi_level_planning.nl_description_generation', return_value=("d", "p", [], "g", "c")):
-                                import src.costl.pipelines.multi_level_planning as mlp_mod
+                            with patch('src.lapis.pipelines.multi_level_planning.nl_description_generation', return_value=("d", "p", [], "g", "c")):
+                                import src.lapis.pipelines.multi_level_planning as mlp_mod
                                 MockSim = MagicMock()
                                 # Setup mock simulator
                                 mock_sim_instance = MockSim.return_value
@@ -103,7 +103,7 @@ class TestTraceCheckFlow(unittest.TestCase):
                             
                             # CRITICAL: Mock check_trace
                             # We want to count how many times it's called
-                            with patch('src.costl.pipelines.multi_level_planning.check_trace') as mock_check:
+                            with patch('src.lapis.pipelines.multi_level_planning.check_trace') as mock_check:
                                 mock_check.return_value = (True, {})
                                 
                                 # Run the attempt

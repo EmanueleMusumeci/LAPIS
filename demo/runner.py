@@ -283,7 +283,7 @@ class LAPISRunner:
             run_dir = self._new_run_dir()
             return _mock_run(method, on_stage_update, run_dir)
 
-        from src.costl.planner.low.pddl_generation import (
+        from src.lapis.planner.low.pddl_generation import (
             generate_domain,
             generate_problem,
             check_domain_adequacy,
@@ -292,8 +292,8 @@ class LAPISRunner:
             extract_schema,
             _format_schema_block,
         )
-        from src.costl.planner.low.pddl_verification import VAL_validate
-        from src.costl.planner.low.planner_utils import plan_with_output
+        from src.lapis.planner.low.pddl_verification import VAL_validate
+        from src.lapis.planner.low.planner_utils import plan_with_output
 
         run_dir = self._new_run_dir()
         logs_dir = os.path.join(run_dir, "logs")
@@ -570,9 +570,9 @@ def _plan_refine_loop(
 
     Returns (plan_actions, refinement_history, val_log, n_refinements).
     """
-    from src.costl.planner.low.pddl_generation import refine_problem
-    from src.costl.planner.low.pddl_verification import VAL_validate
-    from src.costl.planner.low.planner_utils import plan_with_output
+    from src.lapis.planner.low.pddl_generation import refine_problem
+    from src.lapis.planner.low.pddl_verification import VAL_validate
+    from src.lapis.planner.low.planner_utils import plan_with_output
 
     refinement_history: list[dict] = []
     val_log = ""

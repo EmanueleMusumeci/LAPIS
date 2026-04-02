@@ -285,7 +285,7 @@ Add try-except blocks around external calls:
 
 ```python
 try:
-    from src.costl.plan_renderer import render_blocksworld_gif
+    from src.lapis.plan_renderer import render_blocksworld_gif
 except ImportError:
     render_blocksworld_gif = None  # Graceful degradation
 ```

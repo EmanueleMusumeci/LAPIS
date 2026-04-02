@@ -158,7 +158,7 @@ run_experiment() {
 
     run_cmd "$PYTHON" run_llmpp_benchmark.py \
         --domain "$domain" \
-        --method costl \
+        --method lapis \
         --generate_domain \
         --ablation "$ablation" \
         --model "$MODEL" \
@@ -229,7 +229,7 @@ fi
 
 ### 1. Add Planner Timeout Support
 
-**File:** `src/costl/planner/low/planner_utils.py`
+**File:** `src/lapis/planner/low/planner_utils.py`
 
 The `plan_with_output()` function already has a `timeout` parameter. Ensure it's properly propagated:
 
@@ -255,7 +255,7 @@ parser.add_argument("--planner_timeout", type=int, default=180,
 
 Pass to pipeline:
 ```python
-pipeline = LexiconLowLevelPipeline(
+pipeline = LAPISLowLevelPipeline(
     # ... existing args ...
     planner_timeout=args.planner_timeout,
 )
@@ -263,7 +263,7 @@ pipeline = LexiconLowLevelPipeline(
 
 ### 3. Update Pipeline to Accept Timeout
 
-**File:** `src/costl/pipelines/lexicon_low_level.py`
+**File:** `src/lapis/pipelines/lapis_low_level.py`
 
 Add `planner_timeout` parameter to `__init__` and pass to `plan_with_output()` calls.
 

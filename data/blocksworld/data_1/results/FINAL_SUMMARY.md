@@ -29,16 +29,16 @@
 
 | Problem ID | Status | Attempts | Unsatisfied | Report |
 |------------|--------|----------|-------------|--------|
-| 100 | ✓ SUCCESS | 0 | 0 | [View Report](/home/alessio/Workspace/CoSTL-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/100/100_detailed_report.md) |
-| 102 | ✓ SUCCESS | 1 | 0 | [View Report](/home/alessio/Workspace/CoSTL-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/102/102_detailed_report.md) |
-| 104 | ✓ SUCCESS | 4 | 0 | [View Report](/home/alessio/Workspace/CoSTL-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/104/104_detailed_report.md) |
-| 105 | ✓ SUCCESS | 4 | 0 | [View Report](/home/alessio/Workspace/CoSTL-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/105/105_detailed_report.md) |
-| 106 | ✓ SUCCESS | 4 | 0 | [View Report](/home/alessio/Workspace/CoSTL-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/106/106_detailed_report.md) |
-| 108 | ✓ SUCCESS | 0 | 0 | [View Report](/home/alessio/Workspace/CoSTL-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/108/108_detailed_report.md) |
-| 109 | ✓ SUCCESS | 0 | 0 | [View Report](/home/alessio/Workspace/CoSTL-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/109/109_detailed_report.md) |
-| 110 | ✓ SUCCESS | 0 | 0 | [View Report](/home/alessio/Workspace/CoSTL-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/110/110_detailed_report.md) |
-| 111 | ✓ SUCCESS | 0 | 0 | [View Report](/home/alessio/Workspace/CoSTL-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/111/111_detailed_report.md) |
-| 112 | ✓ SUCCESS | 4 | 0 | [View Report](/home/alessio/Workspace/CoSTL-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/112/112_detailed_report.md) |
+| 100 | ✓ SUCCESS | 0 | 0 | [View Report](/home/alessio/Workspace/LAPIS-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/100/100_detailed_report.md) |
+| 102 | ✓ SUCCESS | 1 | 0 | [View Report](/home/alessio/Workspace/LAPIS-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/102/102_detailed_report.md) |
+| 104 | ✓ SUCCESS | 4 | 0 | [View Report](/home/alessio/Workspace/LAPIS-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/104/104_detailed_report.md) |
+| 105 | ✓ SUCCESS | 4 | 0 | [View Report](/home/alessio/Workspace/LAPIS-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/105/105_detailed_report.md) |
+| 106 | ✓ SUCCESS | 4 | 0 | [View Report](/home/alessio/Workspace/LAPIS-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/106/106_detailed_report.md) |
+| 108 | ✓ SUCCESS | 0 | 0 | [View Report](/home/alessio/Workspace/LAPIS-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/108/108_detailed_report.md) |
+| 109 | ✓ SUCCESS | 0 | 0 | [View Report](/home/alessio/Workspace/LAPIS-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/109/109_detailed_report.md) |
+| 110 | ✓ SUCCESS | 0 | 0 | [View Report](/home/alessio/Workspace/LAPIS-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/110/110_detailed_report.md) |
+| 111 | ✓ SUCCESS | 0 | 0 | [View Report](/home/alessio/Workspace/LAPIS-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/111/111_detailed_report.md) |
+| 112 | ✓ SUCCESS | 4 | 0 | [View Report](/home/alessio/Workspace/LAPIS-CommonSense-enhanced-Temporal-Logics-planning/data/blocksworld/data/data_1/112/112_detailed_report.md) |
 
 ## Successful Problems
 

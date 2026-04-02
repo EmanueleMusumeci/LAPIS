@@ -1,4 +1,4 @@
-# CoSTL — Quick start
+# LAPIS — Quick start
 
 A compact guide to get you started with the LexiCon benchmark and tools.
 
@@ -69,7 +69,7 @@ This installs the pip requirements listed at the repository root. If `pip instal
 - editing `requirements-lexicon.txt` to remove the heaviest packages, install the rest, and add heavy binaries later when you have disk space or a prepared system-level CUDA runtime.
 
 More details and full examples are in `third-party/lexicon_neurips/README.md` and the `setup_lexicon_env.sh` helper. Ask me to expand any section.
-# CoSTL-CommonSense-enhanced-Temporal-Logics-planning
+# LAPIS-CommonSense-enhanced-Temporal-Logics-planning
 LLM-based temporal logics planner for commonsense based formal domain generation and refinement with temporal constraints and self-supervised fluent grounding
 
 Simulator Installation
@@ -229,13 +229,13 @@ The simulator automatically checks these environment variables:
 
 To persist these settings, add them to your `~/.bashrc` or source the generated config file:
 ```bash
-source /DATA/CoSTL/.habitat_datasets.conf
+source /DATA/LAPIS/.habitat_datasets.conf
 ```
 
 
 **Quick Test**:
 ```python
-from costl.simulators import HabitatSimulator
+from lapis.simulators import HabitatSimulator
 
 # Initialize with your scene file
 sim = HabitatSimulator(

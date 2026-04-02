@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Goal
 
-This workspace produces benchmark results and an extended abstract for the **ICAPS 2026 Demo track** (deadline: see `https://icaps26.icaps-conference.org/calls/demos/`). The demo showcases **ContextMatters** (arxiv: 2506.15828), using the faster CoSTL implementation from `/DATA/CoSTL` as the engine (the original prototype is at `/DATA/context-matters`).
+This workspace produces benchmark results and an extended abstract for the **ICAPS 2026 Demo track** (deadline: see `https://icaps26.icaps-conference.org/calls/demos/`). The demo showcases **ContextMatters** (arxiv: 2506.15828), using the faster LAPIS implementation from `/DATA/LAPIS` as the engine (the original prototype is at `/DATA/context-matters`).
 
 The scope is the **low-level planner only, without LTL constraints**, evaluated on unconstrained environments from the Lexicon benchmark. Primary targets: **Blocksworld** and **BabyAI** (no environment feedback). Secondary (time-permitting): **AI2Thor / AlfWorld / VirtualHome** (with environment feedback, requires 3DSG reintegration).
 
 ## Setup
 
-The working repo is a copy of `/DATA/CoSTL` placed here. Install dependencies:
+The working repo is a copy of `/DATA/LAPIS` placed here. Install dependencies:
 
 ```bash
 # Automated (creates venv, installs requirements-lexicon.txt):
@@ -47,12 +47,12 @@ python run_pipeline.py --domain blocksworld --pipeline multi_level --batch_id da
 ## Architecture
 
 ```
-src/costl/
+src/lapis/
   pipelines/
     base.py                    # BasePipeline ABC: run() iterates splits -> _process_task()
     low_level_planning.py      # LowLevelPlanningPipeline: PDDL gen+refine+plan+VAL loop
     multi_level_planning.py    # Adds HighLevelPlanner + LTL trace checking above LLP
-    multi_level_planning_3dsg.py  # 3DSG variant (needs 3DSG submodule, stripped from CoSTL)
+    multi_level_planning_3dsg.py  # 3DSG variant (needs 3DSG submodule, stripped from LAPIS)
     lexicon.py                 # LexiconPipeline: thin wrapper for Lexicon benchmark eval
     baseline.py                # BaselinePipeline: direct Lexicon library integration
 
@@ -108,19 +108,19 @@ third-party/
 ## Key Design Decisions
 
 **Two pipeline paths:**
-1. **LTL path** (`multi_level_planning.py`): `HighLevelPlanner` generates LTL formulas, traces are formally verified via `trace_check`, then `LowLevelPlanner` decomposes each subgoal. This is the full CoSTL system.
+1. **LTL path** (`multi_level_planning.py`): `HighLevelPlanner` generates LTL formulas, traces are formally verified via `trace_check`, then `LowLevelPlanner` decomposes each subgoal. This is the full LAPIS system.
 2. **Unconstrained / demo path** (target): `LowLevelPlanningPipeline` or `LexiconPipeline` directly. No LTL formula generation, no trace verification, no `Planner/` or `Planner_ConstraintDriven/` involvement.
 
 **LTL components to remove/comment for the demo:**
-- `src/costl/planner/high/Planner/formula_generator.py` — LTL formula generation
-- `src/costl/planner/high/Planner/trace_generator.py` and `trace_check.py` — trace generation + verification
-- `src/costl/planner/high/Planner_ConstraintDriven/` — entire constraint-driven planner
+- `src/lapis/planner/high/Planner/formula_generator.py` — LTL formula generation
+- `src/lapis/planner/high/Planner/trace_generator.py` and `trace_check.py` — trace generation + verification
+- `src/lapis/planner/high/Planner_ConstraintDriven/` — entire constraint-driven planner
 - `third-party/LTL_Verifier/` — LTL verifier submodule
 - In `multi_level_planning.py`: imports from `trace_check`, `formula_generator`, and `unified_planning` LTL operators (`Always`, `Sometime`, etc.)
 
 **3DSG reintegration (for embodied env pipeline):**
-- `multi_level_planning_3dsg.py` is the pipeline variant that grounded plans in a 3D Scene Graph; this was removed from CoSTL but exists in the original ContextMatters at `/DATA/context-matters`.
-- The 3DSG adapter and graph utilities live in `src/costl/planner/low/utils/graph.py` (partially) and need restoration from `/DATA/context-matters/src/context_matters/`.
+- `multi_level_planning_3dsg.py` is the pipeline variant that grounded plans in a 3D Scene Graph; this was removed from LAPIS but exists in the original ContextMatters at `/DATA/context-matters`.
+- The 3DSG adapter and graph utilities live in `src/lapis/planner/low/utils/graph.py` (partially) and need restoration from `/DATA/context-matters/src/context_matters/`.
 - For the embodied envs (AI2Thor/AlfWorld/VirtualHome), re-add 3DSG support as a git submodule (only 3DSG + adapter, not full ContextMatters).
 
 **Lexicon benchmark data flow:**
@@ -140,6 +140,6 @@ third-party/
 ## Notes
 
 - Planner backend is configurable: `pyperplan` (default, pure Python), `up_fd` (FastDownward via UP), `fd` (native binary), `symk` (local wrapper).
-- The `LexiconPipeline` uses `env_class` (e.g., `Blocksworld` from lexicon) to handle NL prompt construction and response parsing — it wraps Lexicon's own eval loop rather than the CoSTL PDDL refinement loop.
+- The `LexiconPipeline` uses `env_class` (e.g., `Blocksworld` from lexicon) to handle NL prompt construction and response parsing — it wraps Lexicon's own eval loop rather than the LAPIS PDDL refinement loop.
 - `VAL` binary is in `third-party/VAL/`; `translate_plan` converts unified-planning plan format to VAL-parseable format before validation.
-- The high-level planner's `Domains/{domain}/data_{n}/` folders are separate from `third-party/lexicon_neurips/domains/{domain}/data/` — the former is CoSTL's own dataset (Gibson scenes, NL task descriptions), the latter is Lexicon's benchmark.
+- The high-level planner's `Domains/{domain}/data_{n}/` folders are separate from `third-party/lexicon_neurips/domains/{domain}/data/` — the former is LAPIS's own dataset (Gibson scenes, NL task descriptions), the latter is Lexicon's benchmark.

@@ -4,10 +4,10 @@ import unittest
 from unittest.mock import MagicMock, patch
 import os
 
-# Adjust path to import costl
-sys.path.append("/DATA/CoSTL/src")
+# Adjust path to import lapis
+sys.path.append("/DATA/LAPIS/src")
 
-from costl.pipelines.multi_level_planning import MultiLevelPlanningPipeline
+from lapis.pipelines.multi_level_planning import MultiLevelPlanningPipeline
 
 class TestTraceCheckMove(unittest.TestCase):
     def test_trace_check_called_only_at_end(self):
@@ -35,7 +35,7 @@ class TestTraceCheckMove(unittest.TestCase):
         pipeline.low_level_planner.plan.return_value = (True, "path/to/plan", [])
         
         # Mock trace check
-        with patch('costl.pipelines.multi_level_planning.check_trace', return_value=(True, {})) as check_trace_mock:
+        with patch('lapis.pipelines.multi_level_planning.check_trace', return_value=(True, {})) as check_trace_mock:
             # Mock file reading/writing
             with patch('builtins.open', unittest.mock.mock_open(read_data="action1\naction2")):
                 with patch('os.path.exists', return_value=True):
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     # I will perform a static check on the file content to ensure 
     # check_trace is not called inside the loop.
     
-    with open("/DATA/CoSTL/src/costl/pipelines/multi_level_planning.py", "r") as f:
+    with open("/DATA/LAPIS/src/lapis/pipelines/multi_level_planning.py", "r") as f:
         content = f.read()
     
     import re

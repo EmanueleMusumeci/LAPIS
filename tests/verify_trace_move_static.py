@@ -2,7 +2,7 @@
 import sys
 
 def verify_file_content():
-    file_path = "/DATA/CoSTL/src/costl/pipelines/multi_level_planning.py"
+    file_path = "/DATA/LAPIS/src/lapis/pipelines/multi_level_planning.py"
     
     try:
         with open(file_path, "r") as f:

@@ -8,7 +8,7 @@
 
 - **Working repo:** `/DATA/lapis`
 - **Official paper:** `LAPIS__Language_Adaptive_PDDL_Iterative_Synthesis.zip`
-- **Engine:** CoSTL low-level planner (LTL path disabled)
+- **Engine:** LAPIS low-level planner (LTL path disabled)
 
 ---
 
@@ -64,10 +64,10 @@
 ## Key Files
 
 ```
-src/costl/
+src/lapis/
   pipelines/
     low_level_planning.py          # Core LLP loop
-    lexicon_low_level.py           # Lexicon benchmark pipeline
+    lapis_low_level.py           # Lexicon benchmark pipeline
   planner/
     low/
       pddl_generation.py           # Domain/problem gen + adequacy checks
@@ -118,10 +118,10 @@ Required env vars: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`
 
 # Or manually:
 source key.sh
-python run_llmpp_benchmark.py --domain storage --method costl \
+python run_llmpp_benchmark.py --domain storage --method lapis \
     --generate_domain --ablation full --model claude-sonnet-4-6
 
-python run_llmpp_benchmark.py --domain storage --method costl \
+python run_llmpp_benchmark.py --domain storage --method lapis \
     --generate_domain --ablation full_adequacy --model claude-sonnet-4-6
 ```
 

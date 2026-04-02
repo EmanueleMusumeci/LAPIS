@@ -1,4 +1,4 @@
-import sys; sys.path.insert(0, "/DATA/CoSTL")
+import sys; sys.path.insert(0, "/DATA/LAPIS")
 import patch
 import sys
 import os
@@ -28,14 +28,14 @@ else:
 sys.path.append(str(workspace_root))
 
 
-from src.costl.pipelines.multi_level_planning import MultiLevelPlanningPipeline
-from src.costl.pipelines.baseline import BaselinePipeline
+from src.lapis.pipelines.multi_level_planning import MultiLevelPlanningPipeline
+from src.lapis.pipelines.baseline import BaselinePipeline
 try:
-    from src.costl.pipelines.lexicon import LexiconPipeline
+    from src.lapis.pipelines.lexicon import LexiconPipeline
 except ImportError:
     LexiconPipeline = None
 
-from src.costl.agents.gpt import GPTAgent
+from src.lapis.agents.gpt import GPTAgent
 
 
 import json
@@ -45,7 +45,7 @@ def main():
     workspace_root = Path(__file__).parent.absolute()
     default_results_dir = str(workspace_root / "results" / "real_run_100")
     
-    parser = argparse.ArgumentParser(description="Run CoSTL Pipeline")
+    parser = argparse.ArgumentParser(description="Run LAPIS Pipeline")
     parser.add_argument("--config", help="Path to benchmark config JSON file")
     parser.add_argument("--domain", default="blocksworld", help="High level domain name")
     parser.add_argument("--problem_ids", nargs="+", default=["100","101","102","103","104","105","106","107","108","109","110","111","112"], help="List of problem IDs")

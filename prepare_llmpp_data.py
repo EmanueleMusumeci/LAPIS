@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-prepare_llmpp_data.py — Convert LLM+P dataset to CoSTL benchmark format.
+prepare_llmpp_data.py — Convert LLM+P dataset to LAPIS benchmark format.
 
 Reads from:
     third-party/llm-pddl/domains/{domain}/

@@ -8,12 +8,12 @@ from pathlib import Path
 
 # Mock dependencies before importing the pipeline
 import sys
-sys.modules['costl.planner.low'] = MagicMock()
-sys.modules['costl.utils'] = MagicMock()
+sys.modules['lapis.planner.low'] = MagicMock()
+sys.modules['lapis.utils'] = MagicMock()
 
 # Mock the specific classes we need
-from costl.pipelines.multi_level_planning import MultiLevelPlanningPipeline
-from costl.planner.low.low_level_planner import LowLevelPlanner
+from lapis.pipelines.multi_level_planning import MultiLevelPlanningPipeline
+from lapis.planner.low.low_level_planner import LowLevelPlanner
 
 class TestStopOnFailure(unittest.TestCase):
     def setUp(self):
@@ -45,11 +45,11 @@ class TestStopOnFailure(unittest.TestCase):
         with open(self.problem_dir / "problem.pddl", "w") as f:
             f.write("(define (problem test) (:domain test))")
 
-    @patch('costl.pipelines.multi_level_planning.HighLevelPlanner')
-    @patch('costl.pipelines.multi_level_planning.LowLevelPlanner')
-    @patch('costl.pipelines.multi_level_planning.BlocksworldSimulator') # Mock simulator to avoid setup
-    @patch('costl.pipelines.multi_level_planning.check_trace')
-    @patch('costl.pipelines.multi_level_planning.logic_utils')
+    @patch('lapis.pipelines.multi_level_planning.HighLevelPlanner')
+    @patch('lapis.pipelines.multi_level_planning.LowLevelPlanner')
+    @patch('lapis.pipelines.multi_level_planning.BlocksworldSimulator') # Mock simulator to avoid setup
+    @patch('lapis.pipelines.multi_level_planning.check_trace')
+    @patch('lapis.pipelines.multi_level_planning.logic_utils')
     def test_stop_on_failure(self, mock_logic_utils, mock_check_trace, mock_sim_class, MockLowPlanner, MockHighPlanner):
         # Setup mocks
         mock_agent = MagicMock()

@@ -14,7 +14,7 @@ fi
 show_menu() {
     echo ""
     echo "=========================================="
-    echo "    CoSTL Simulator Demo"
+    echo "    LAPIS Simulator Demo"
     echo "=========================================="
     echo "1) BabyAI Simulator"
     echo "2) AI2THOR Simulator"
@@ -33,7 +33,7 @@ run_babyai() {
     echo "Opening visual window..."
     python3 << 'EOF'
 import gymnasium as gym
-from src.costl.simulators import BabyAISimulator
+from src.lapis.simulators import BabyAISimulator
 import time
 
 print("Creating BabyAI environment with rendering...")
@@ -64,7 +64,7 @@ run_ai2thor() {
     echo "=== Running AI2THOR Simulator ==="
     echo "Opening visual window..."
     python3 << 'EOF'
-from src.costl.simulators import AI2THORSimulator
+from src.lapis.simulators import AI2THORSimulator
 import time
 
 print("Initializing AI2THOR simulator with rendering...")
@@ -93,7 +93,7 @@ run_alfworld() {
     echo "      There are no graphics - you interact through text commands."
     echo ""
     python3 << 'EOF'
-from src.costl.simulators import AlfWorldSimulator
+from src.lapis.simulators import AlfWorldSimulator
 import textwrap
 
 print("=" * 70)
@@ -170,7 +170,7 @@ run_virtualhome() {
     echo ""
     echo "Connecting to VirtualHome Unity server..."
     python3 << 'EOF'
-from src.costl.simulators import VirtualHomeSimulator
+from src.lapis.simulators import VirtualHomeSimulator
 import time
 import os
 
@@ -324,7 +324,7 @@ run_habitat() {
     echo ""
     echo "Initializing Habitat with scene: $scene_path"
     python3 <<EOF
-from src.costl.simulators import HabitatSimulator
+from src.lapis.simulators import HabitatSimulator
 import time
 
 print("=" * 70)

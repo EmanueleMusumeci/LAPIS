@@ -26,7 +26,7 @@ from utils.utils import (
 from mapper import AlfWorldMapper
 
 # Import the new simulator
-sys.path.append(os.path.join(os.environ.get("COSTL_ROOT", "/DATA/CoSTL")))
+sys.path.append(os.path.join(os.environ.get("LAPIS_ROOT", "/DATA/LAPIS")))
 from simulators import AlfWorldSimulator
 
 

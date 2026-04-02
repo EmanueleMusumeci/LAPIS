@@ -3,7 +3,7 @@
 This document tracks the status of the experiments required for the ICAPS 2026 paper submission, separating the LAPIS framework results from the true LLM+P baseline.
 
 ## 1. LAPIS Framework Execution
-The standard LAPIS conditions successfully executed utilizing the `run_icaps_experiments.sh` script, which correctly mapped to the `costl` refinement method.
+The standard LAPIS conditions successfully executed utilizing the `run_icaps_experiments.sh` script, which correctly mapped to the `lapis` refinement method.
 
 | Condition | Domain | Status | Notes |
 | :--- | :--- | :--- | :--- |
@@ -21,7 +21,7 @@ The standard LAPIS conditions successfully executed utilizing the `run_icaps_exp
 ---
 
 ## 2. LAPIS Ablation (Zero-Shot / No Refinement)
-Previously labeled "LLM+P with Gen Domain" (Condition B'). This condition failed due to the bash script routing it to `costl` (3 refinements) instead of `llmpp` (0 refinements).
+Previously labeled "LLM+P with Gen Domain" (Condition B'). This condition failed due to the bash script routing it to `lapis` (3 refinements) instead of `llmpp` (0 refinements).
 
 | Condition | Domain | Status | Notes |
 | :--- | :--- | :--- | :--- |
