@@ -138,6 +138,7 @@ def run_method(domain, method, problems, agent, args, generate_domain):
         clean_domain_prompt=clean_domain_prompt,
         inject_domain_schema=inject_domain_schema,
         check_adequacy=check_adequacy,
+        planner_timeout=args.planner_timeout,
     )
     pipeline.experiment_name = experiment_name
     pipeline.run()
@@ -199,7 +200,9 @@ def main():
     parser.add_argument("--problems", nargs="*", default=None)
     parser.add_argument("--pddl_gen_iterations", type=int, default=None,
                         help="Override PDDL refinement iterations (default: 3 for costl, 0 for llmpp)")
-    parser.add_argument("--data_dir", default="data/llmpp")
+    parser.add_argument("--planner_timeout", type=int, default=180,
+                        help="Timeout for symbolic planner in seconds (default: 180)")
+    parser.add_argument("--data_dir", default="data/llm-pddl")
     parser.add_argument("--results_dir", default="results_llmpp")
     args = parser.parse_args()
 

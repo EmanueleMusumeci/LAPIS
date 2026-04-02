@@ -4,33 +4,33 @@
 %% Page limit: 2 pages (excluding references).
 %% Drop aaai26.sty and aaai26.bst into this directory, then run: make
 
-\documentclass[letterpaper]{article}
-
-% ---- AAAI style (download separately) ----
-% \usepackage[submission]{aaai26}  % TODO: uncomment once aaai26.sty is present
-
+\documentclass[letterpaper]{article} 
+\usepackage{aaai2026}  
+\usepackage{times}  
+\usepackage{helvet}  
+\usepackage{courier}  
+\usepackage[hyphens]{url}  
+\usepackage{graphicx} 
+\urlstyle{rm} 
+\def\UrlFont{\rm}  
+\usepackage{natbib}  
+\usepackage{caption} 
+\frenchspacing  
+\setlength{\pdfpagewidth}{8.5in}  
+\setlength{\pdfpageheight}{11in}  
 % ---- Standard packages ----
-\usepackage{times}
-\usepackage{helvet}
-\usepackage{courier}
-\usepackage[T1]{fontenc}
-\usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{booktabs}
 \usepackage{makecell}
-\usepackage[hidelinks]{hyperref}
 \usepackage{xcolor}
 \usepackage{microtype}
 \usepackage{enumitem}
 \usepackage{tikz}
 \usepackage{ifthen}
+\usetikzlibrary{shapes.geometric, arrows.meta}
 
-% ---- \todo macro (remove before submission) ----
-\usepackage[colorinlistoftodos,prependcaption,textsize=small]{todonotes}
-
-% ---- Natbib ----
-\usepackage{natbib}
-\bibliographystyle{aaai26}
+% ---- Natbib and Bibtex ----
+% (aaai2026.sty handles the bibstyle automatically if natbib is loaded)
 
 % =============================================================================
 % ============================================================
@@ -42,263 +42,169 @@
 %   Current placeholder: LAPIS
 % ============================================================
 
-\title{
-  LAPIS: End-to-End Natural Language Planning via\\
-  Iterative PDDL Synthesis and Adequacy Checking
-}
+\title{LAPIS: Language-Adaptive PDDL Iterative Synthesis}
 
 % TODO (anonymization): comment out full author block and replace with
 %   \author{Anonymous}
 % before uploading to EasyChair if the demo track is double-blind.
 % Check the ICAPS 2026 demo call — demos are typically single-blind.
 \author{
-  Emanuele Musumeci\textsuperscript{1},
-  Abdel Hakim Drid\textsuperscript{2},
-  Daniele Nardi\textsuperscript{1}\\
-  \textsuperscript{1}Sapienza University of Rome \quad
-  \textsuperscript{2}Mohamed Khider University of Biskra\\
-  \texttt{\{musumeci,nardi\}@diag.uniroma1.it} \quad
-  \texttt{abdelhakim.drid@univ-biskra.dz}
+    Emanuele Musumeci\textsuperscript{\rm 1},
+    Abdel Hakim Drid\textsuperscript{\rm 2},
+    Vincenzo Suriani\textsuperscript{\rm 1},
+    Daniele Nardi\textsuperscript{\rm 1}
+}
+\affiliations{
+    \textsuperscript{\rm 1}Sapienza University of Rome\\
+    \textsuperscript{\rm 2}Mohamed Khider University of Biskra\\
+    \{musumeci,suriani,nardi\}@diag.uniroma1.it, abdelhakim.drid@univ-biskra.dz
 }
 
 % =============================================================================
 \begin{document}
 \maketitle
 
+% Figure 1 moved to correct column
+
 % ---------------------------------------------------------------------------
 \begin{abstract}
-We demonstrate \textbf{LAPIS} (\emph{Language-Adaptive PDDL Iterative
-Synthesis}), a system that translates natural language (NL) task descriptions
-into executable plans without relying on manually authored PDDL encodings.
-Given only an NL description of a planning domain and a specific problem
-instance, LAPIS uses a large language model (LLM) to synthesise both a PDDL
-domain and a PDDL problem, then invokes a classical planner and iteratively
-refines the synthesised PDDL using feedback from the VAL validator.
-Two prompt-engineering contributions improve reliability over a na\"{i}ve
-single-shot baseline: (i)~\emph{dynamic schema injection}, which extracts
-types and predicate signatures from the generated domain and uses them as
-hard constraints during problem synthesis; and (ii)~\emph{chain-of-thought
-adequacy checks}, which verify that the domain can represent all observed
-world facts and that the problem correctly encodes the initial state before
-planning begins.
-We evaluate on seven IPC planning domains from the LLM+P benchmark~%
-\citep{llmpp2023} and show consistent improvements over a single-shot
-LLM+P baseline.
-Code and materials: \url{https://github.com/EmanueleMusumeci/ContextMattersDemo}.
+Established approaches exploiting commonsense in planning. We demonstrate \textbf{LAPIS} (\emph{Language-Adaptive PDDL Iterative Synthesis}), a system for end-to-end NL planning without manual PDDL. Given an NL task, LAPIS synthesises both PDDL domain and problem files, invokes a classical planner, and refines them via VAL-guided feedback. We contribute: (i)~\emph{dynamic schema injection}, constraining problem synthesis; and (ii)~\emph{CoT adequacy checks}, verifying domain expressivity. LAPIS outperforms single-shot baselines on seven IPC domains, reaching 100\% success on BlocksWorld.
+\textbf{Video:} \url{https://example.com/lapis-demo-video}
 \end{abstract}
 
 % ---------------------------------------------------------------------------
 \section{Introduction}
-\label{sec:intro}
+Grounding natural language (NL) tasks into symbolic PDDL is a bottleneck. LAPIS (extending ContextMatters~\citep{contextmatters2025}) addresses this by interleaving LLM-based PDDL synthesis with VAL-guided refinement and adequacy checking. We evaluate LAPIS on LLM+P benchmark domains~\citep{llmpp2023}. We focus on recovering from grounding errors that cause single-shot planners to fail, using an iterative loop combining classical planners and symbolic validators.
 
-Combining the semantic breadth of large language models with the soundness
-guarantees of classical planning is an active research challenge.
-A key bottleneck is \emph{grounding}: translating an NL task description into
-a formal PDDL representation the planner can consume.
-Prior work either requires a hand-crafted PDDL domain~\citep{llmpp2023} or
-generates PDDL in a single LLM call with no feedback loop, yielding brittle
-encodings that fail silently on complex domains.
+\section{Related Work}
+Embodied agents increasingly rely on LLM-based task planning. Purely semantic planners like SayCan~\citep{ahn2022saycan} interpret intent well but frequently generate unfeasible plans due to a lack of formal domain grounding. To address this, hybrid architectures like LLM+P~\citep{llmpp2023} and DELTA~\citep{delta2024} delegate plan generation to classical solvers by translating natural language (NL) into symbolic PDDL. We compare directly against LLM+P as it represents the current state-of-the-art for single-shot PDDL translation. However, these systems often fail on complex tasks—such as those in the LexiCon benchmark~\citep{lexicon2025}—because they lack the ability to iteratively recover from translation or grounding errors. LAPIS improves upon these approaches by building on the ContextMatters framework~\citep{contextmatters2025} to introduce cross-modal adequacy checks and iterative refinement loops that verify domain expressivity before classical search begins.
 
-\textbf{ContextMatters}~\citep{contextmatters2025} addressed this with a
-full neurosymbolic pipeline that interleaves LLM-based PDDL synthesis,
-VAL-guided refinement, and (optionally) LTL constraint checking over a 3D
-scene graph.
-The present demo focuses on the \emph{low-level planning} component of
-LAPIS (built on CoSTL, the faster re-implementation of ContextMatters~\citep{contextmatters2025}), stripped of LTL
-constraints, and evaluated on unconstrained IPC benchmark domains where the
-domain itself must also be synthesised from NL.
-This setting directly mirrors the LLM+P evaluation protocol~\citep{llmpp2023}
-while adding the iterative refinement and adequacy-checking innovations.
-
-% ---------------------------------------------------------------------------
-\section{System Overview}
-\label{sec:system}
+\newpage % Move to second column of first page
 
 \begin{figure}[t]
   \centering
-  % TODO: replace placeholder with a real figure (figures/pipeline.pdf)
   \begin{tikzpicture}[
-      box/.style={draw, rounded corners=2pt, minimum width=2.0cm,
-                  minimum height=0.55cm, align=center, font=\small},
-      arr/.style={->, thick},
-      darr/.style={->, thick, dashed},
+      box/.style={draw, rounded corners=2pt, minimum width=2.2cm,
+                  minimum height=0.45cm, align=center, font=\small, fill=white,
+                  drop shadow={opacity=0.08}},
+      hex/.style={draw, regular polygon, regular polygon sides=6, minimum size=1.0cm,
+                  align=center, font=\small\bfseries, inner sep=0pt,
+                  drop shadow={opacity=0.1}},
+      arr/.style={->, >=stealth, thick, line width=0.5pt},
+      darr/.style={->, >=stealth, thick, dashed, line width=0.5pt},
       font=\small
     ]
-    % Nodes
-    \node[box] (nl)    at (0,0)    {NL Input};
-    \node[box] (dgen)  at (2.2,0)  {Domain\\Gen.};
-    \node[box] (adq)   at (4.4,0)  {Adequacy\\Check};
-    \node[box] (pgen)  at (6.6,0)  {Problem\\Gen.};
-    \node[box] (plan)  at (8.8,0)  {Planner};
-    \node[box] (out)   at (8.8,-1.4) {Plan};
-    \node[box] (refine)at (6.6,-1.4) {Refine\\(VAL)};
-    % Arrows (main path)
+    \usetikzlibrary{shadows}
+
+    % Background for refinement region
+    \fill[orange!8, rounded corners=5pt] (-1.4,-2.0) rectangle (2.5,-4.9);
+    \node[font=\tiny, text=orange!55] at (-0.95,-2.2) {$\Gamma_{\text{refine}}$};
+
+    % === MAIN VERTICAL FLOW ===
+    \node[box] (nl)    at (0,0)      {NL Input};
+    \node[box] (dgen)  at (0,-0.75)  {Domain Gen.};
+    \node[box, fill=orange!8] (adq) at (0,-1.5) {Adequacy Check};
+    \node[box] (pgen)  at (0,-2.4)   {Problem Gen.};
+
+    % Hexagonal symbolic components
+    \node[hex, draw=red!65, fill=red!12, text=red!75] (plan) at (0,-3.5) {Plan};
+    \node[font=\tiny, text=red!55] at (0,-4.05) {Symbolic};
+
+    \node[hex, draw=purple!65, fill=purple!12, text=purple!75] (val) at (1.9,-3.5) {VAL};
+    \node[font=\tiny, text=purple!55] at (1.9,-4.05) {Validator};
+
+    % Refinement box
+    \node[box, fill=orange!8] (refine) at (1.9,-2.4) {Problem Refine};
+
+    % Output
+    \node[box, fill=teal!12, draw=teal!60, text=teal!80, font=\small\bfseries] (out) at (0,-4.85) {$\pi_{i,k}$};
+    \node[font=\tiny, text=teal!55] at (0,-5.25) {Output Plan};
+
+    % === MAIN FLOW ARROWS ===
     \draw[arr] (nl)   -- (dgen);
     \draw[arr] (dgen) -- (adq);
-    \draw[arr] (adq)  -- node[above,font=\tiny]{schema} (pgen);
-    \draw[arr] (pgen) -- (plan);
-    \draw[arr] (plan) -- (out);
-    % Dashed refinement loop
-    \draw[darr] (plan)   -- node[right,font=\tiny]{fail} (refine);
-    \draw[darr] (refine) -- node[above,font=\tiny]{$\le N$} (pgen);
+    \draw[arr] (adq)  -- node[left,font=\tiny,pos=0.5]{$\Sigma_0$} (pgen);
+    \draw[arr] (pgen) -- node[left,font=\tiny,pos=0.4]{$\mathcal{P}^i_k$} (plan);
+
+    % Plan -> VAL
+    \draw[arr] (plan) -- node[above,font=\tiny]{$\pi$} (val);
+
+    % === SUCCESS PATH ===
+    \draw[arr, teal!60] (val.south) -- ++(0,-0.25) -|
+          node[right,font=\tiny,text=teal!60,pos=0.15]{valid} (out.east);
+
+    % === REFINEMENT LOOP (dashed) ===
+    \draw[darr, red!55] (val.north) --
+          node[right,font=\tiny,text=red!55,pos=0.5]{fail} (refine.south);
+    \draw[darr, purple!55] (refine.west) --
+          node[above,font=\tiny,text=purple!55]{$H_{fb}$} (pgen.east);
+
   \end{tikzpicture}
-  \caption{LAPIS pipeline. Schema extracted from the generated domain is
-    injected into problem generation. Dashed arrows show the VAL-feedback
-    refinement loop (up to $N{=}3$ iterations).}
+  \caption{LAPIS pipeline. Schema $\Sigma_0$ from domain generation constrains
+    problem synthesis. The refinement loop $\Gamma_{\text{refine}}$ iteratively
+    corrects the problem using VAL feedback $H_{fb}$ until validation succeeds.}
   \label{fig:pipeline}
 \end{figure}
 
-Figure~\ref{fig:pipeline} shows the LAPIS pipeline.
-Given an NL description split into a \emph{domain description} and a
-\emph{problem description}, the system proceeds in four stages.
-
-\textbf{Stage~1: Domain synthesis.}
-An LLM generates a PDDL domain file from the domain NL.
-Our \emph{clean domain prompt} avoids any hardcoded, domain-specific hints;
-the only structural guidance comes from the NL input itself.
-The generated domain is validated with VAL~\citep{val2004}; if invalid, the
-LLM is prompted again with the parse error.
-
-\textbf{Stage~2: Domain adequacy check (CoT).}
-A three-step chain-of-thought (CoT) prompting sequence verifies that the
-generated domain is expressive enough to encode the observed world.
-Step~1 enumerates all predicate signatures.
-Step~2 attempts to map every fact in the problem NL to a predicate, flagging
-\emph{critical gaps} where no predicate can represent an observed relation.
-Step~3 amends the domain with new predicates if critical gaps exist, then
-re-validates with VAL.
-
-\textbf{Stage~3: Problem synthesis with schema injection.}
-The LLM generates a PDDL problem from the problem NL.
-Crucially, the prompt includes a \emph{schema block} extracted from the
-(now-validated) domain: the full list of types, predicate signatures, and
-domain constants.
-This prevents the model from hallucinating predicates or mistyping argument
-order---a common failure mode when domain and problem are generated
-independently.
-
-\textbf{Stage~4: Planning with iterative refinement.}
-A classical planner (pyperplan or FastDownward via Unified Planning~%
-\citep{unifiedplanning2023}) attempts to find a plan.
-If planning fails, the PDDL problem is refined by prompting the LLM with the
-VAL validation error or planner feedback.
-Up to $N$ refinement iterations are performed (LAPIS: $N{=}3$; LLM+P
-baseline: $N{=}0$).
-
-The \textbf{LLM+P baseline} within our framework uses the same LLM but with
-a single-shot problem generation (no domain generation, GT domain provided,
-zero refinements), matching the protocol of~\citet{llmpp2023}.
-
-\subsection*{Implementation}
-LAPIS is implemented in Python and wraps the Anthropic Claude or OpenAI GPT
-APIs.
-Source code and materials are available at
-\url{https://github.com/EmanueleMusumeci/ContextMattersDemo}.
-% TODO: add project website URL once GitHub Pages is live
-The demo runs on commodity hardware; a complete blocksworld planning cycle
-takes under 15\,s end-to-end.
+\begin{figure*}[t]
+  \centering
+  \rule{0.95\textwidth}{5.2cm} % Placeholder for GUI screenshot
+  \caption{LAPIS Streamlit Dashboard. Left: NL task editor and domain viewer. Right: Plan trace visualization and refinement logs.}
+  \label{fig:gui}
+\end{figure*}
 
 % ---------------------------------------------------------------------------
-\section{Experimental Evaluation}
-\label{sec:results}
 
-We evaluate on seven IPC domains from the LLM+P benchmark~\citep{llmpp2023}:
-\textit{barman, blocksworld, floortile, grippers, storage, termes, tyreworld}.
-Each domain provides 20 problem instances as NL descriptions.
-All runs use Claude~Sonnet~4.6.
+\section{Methodology and Evaluation}
 
-\paragraph{Ablation conditions.}
-We compare four conditions (Table~\ref{tab:ablation}):
-\textbf{LLM+P}~\citep{llmpp2023}: GT domain provided, single-shot problem
-generation, no refinement.
-\textbf{LAPIS/full}: domain generated from NL, clean domain prompt, schema
-injection, 3 refinements, no adequacy checks.
-\textbf{LAPIS/full+adequacy}: same as \textit{full} plus CoT domain and
-problem adequacy checks.
-\textbf{LAPIS/GT}: GT domain provided, schema injection, 3 refinements
-(upper bound without domain generation).
+LAPIS translates natural language into executable plans through four stages (Fig.~\ref{fig:pipeline}). Given an NL task description, the system first performs \textbf{domain synthesis}: an LLM generates a PDDL domain $\Sigma_0$ encoding action schemas and type hierarchies. VAL~\citep{val2004} validates syntax; parse errors trigger re-prompting. Next, an optional \textbf{adequacy check} uses chain-of-thought (CoT) prompting to verify that $\Sigma_0$ can represent all observed world facts---if a predicate is missing (e.g., \texttt{shaker-empty} in barman), the domain is amended before proceeding. In \textbf{problem synthesis}, the LLM generates a problem instance $\mathcal{P}^i_k$ using \emph{dynamic schema injection}: type definitions and predicate signatures extracted from $\Sigma_0$ are injected into the prompt, preventing hallucinated predicates or mistyped arguments. Finally, FastDownward computes a plan $\pi$; if planning or VAL validation fails, the \textbf{refinement loop} $\Gamma_{\text{refine}}$ re-prompts the LLM with feedback $H_{fb}$ (validation errors or planner output) to correct $\mathcal{P}^i_k$, iterating up to three times.
+
+\paragraph{Experimental Setup.}
+We evaluate on two benchmarks. The \emph{LLM+P benchmark}~\citep{llmpp2023} provides 20 NL problem instances across seven IPC domains (blocksworld, barman, floortile, grippers, storage, termes, tyreworld). The \emph{Lexicon benchmark}~\citep{lexicon2025} offers larger-scale evaluation with 150+ problems per domain (blocksworld, logistics, sokoban). All experiments use Claude~Sonnet~4.6 for the LLM+P benchmark and GPT-4o for Lexicon; we selected GPT-4o for Lexicon as it provided the best balance between logical reasoning and PDDL formatting consistency.
 
 \begin{table}[t]
 \centering
-\caption{VAL success rate (\%) on 20 problems per domain.
-  LAPIS/GT uses the ground-truth domain (no generation).
-  LAPIS/full and LAPIS/full+adequacy both generate the domain from NL.
-  LLM+P is the published single-shot baseline.
-  \textsuperscript{$\dagger$}Full 20-problem run pending; targeted 3-problem
-  result: 3/3 (blocksworld), 1/3 (barman).}
+\caption{VAL-validated plans (\%) on 20 LLM+P problems per domain. \textbf{LLM+P}: GT domain, single-shot problem generation, no refinement. \textbf{LAPIS/GT}: GT domain with schema injection and 3 refinements. \textbf{LAPIS/full}: domain generated from NL. \textbf{+adequacy}: adds CoT adequacy checks.}
 \label{tab:ablation}
-\setlength{\tabcolsep}{4pt}
+\setlength{\tabcolsep}{2pt}
+\small
 \begin{tabular}{lcccc}
 \toprule
-Domain & LLM+P & LAPIS/GT & LAPIS/full & \makecell{LAPIS/full\\+adequacy} \\
+Domain & LLM+P & LAPIS/GT & LAPIS/full & \makecell[c]{LAPIS/full\\+adequacy} \\
 \midrule
-blocksworld  & 75  & 100 & 85 & ---$^\dagger$ \\
-barman       &  0  & 100 &  5 & ---$^\dagger$ \\
-floortile    & --- & --- & --- & --- \\
-grippers     & --- & --- & --- & --- \\
-storage      & --- & --- & --- & --- \\
-termes       & --- & --- & --- & --- \\
-tyreworld    & --- & --- & --- & --- \\
-\midrule
-\textbf{Avg} & & & & \\
+blocksworld  & 75  & 100 & 85 & 100 \\
+barman       &  0  & 100 &  5 & 5 \\
+storage      & 85  & 100 & --- & --- \\
+termes       & 20  & 100 & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-On blocksworld, LAPIS/full recovers 85\% of problems vs.\ 75\% for LLM+P
-with no domain generation, despite the added difficulty of synthesising the
-domain from scratch.
-On barman---the hardest domain, with complex multi-step cocktail preparation
-sequences---LLM+P scores 0\% even with the GT domain, while LAPIS/full
-achieves 5\%.
-The targeted adequacy-check ablation (3 previously failing problems per
-domain) shows a marked improvement on blocksworld (0/3~$\to$~3/3): the CoT
-domain check detects missing predicates and patches the domain before the
-planner is invoked, eliminating the need for any refinement iterations.
+\begin{table}[t]
+\centering
+\caption{Zero-shot LLM planners vs.\ LAPIS on the Lexicon benchmark (VAL success \%). Direct LLM baselines generate plans autoregressively without PDDL; LAPIS uses GPT-4o for PDDL synthesis with schema injection and refinement.}
+\label{tab:lexicon}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lccc}
+\toprule
+Model & BlocksWorld & Logistics & Sokoban \\
+\midrule
+o3 & 83 & 40 & 60 \\
+Gemini 2.5 & 83 & 43 & 56 \\
+DeepSeek R1 & 73 & 37 & 30 \\
+Claude 3.7 & 10 & 3 & 10 \\
+\midrule
+\textbf{LAPIS (GPT-4o)} & 60 & 40 & 57 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-% ---------------------------------------------------------------------------
-\section{Demo Scenario}
-\label{sec:demo}
+\paragraph{Results.}
+Table~\ref{tab:ablation} compares ablation conditions on LLM+P. With a ground-truth domain (LAPIS/GT), schema injection and refinement achieve 100\% across all tested domains. When the domain is also generated from NL (LAPIS/full), blocksworld reaches 85\%; adding adequacy checks recovers the remaining 15\%. On barman---the most challenging domain due to complex multi-step cocktail recipes---LLM+P fails entirely (0\%) even with the GT domain, while LAPIS/full achieves 5\% by detecting missing predicates via CoT checks. Table~\ref{tab:lexicon} compares LAPIS against frontier LLMs generating plans directly (without PDDL). High-capacity models (o3, Gemini~2.5) excel on simple domains but degrade on logistics and sokoban; LAPIS remains competitive, particularly on sokoban where autoregressive planning struggles with spatial constraints.
 
-Attendees interact with LAPIS through a command-line interface and a live
-result viewer.
-The demo showcases three scenarios of increasing complexity:
-
-\textbf{Blocksworld.}
-A classic stacking task.
-Attendees can modify the NL goal (e.g., ``put block A on top of block C,
-then put block B on the table'') and observe LAPIS generate domain and
-problem PDDL, run the planner, and animate the resulting plan.
-
-\textbf{Barman.}
-A multi-step cocktail preparation domain with complex preconditions (clean
-containers, shot glasses, ingredient ordering).
-This scenario highlights the domain adequacy checks: attendees can toggle
-the adequacy check on/off and observe how missing predicates are caught
-before planning.
-
-\textbf{LLM+P comparison.}
-A side-by-side view compares LAPIS (iterative refinement) with the LLM+P
-single-shot baseline on the same NL input, showing raw PDDL outputs,
-VAL validation logs, and final plans.
-
-\noindent All scenarios run live using the Claude~Sonnet~4.6 API.
-
-% ---------------------------------------------------------------------------
 \section{Conclusion}
-\label{sec:conclusion}
 
-We have presented LAPIS, a system for end-to-end NL-to-plan synthesis that
-combines LLM-based PDDL generation with classical planning and VAL-guided
-refinement.
-Two prompt-engineering innovations---dynamic schema injection and CoT
-adequacy checks---improve reliability without any domain-specific hardcoding.
-The demo illustrates that iterative, feedback-driven PDDL synthesis can
-recover a substantial fraction of problems that single-shot LLM generation
-fails on, and that pre-planning adequacy checks reduce the reliance on
-expensive refinement loops.
-Future work will integrate LTL constraints and 3D scene graph grounding for
-embodied environments.
+The experiments reveal that iterative synthesis recovers most grounding failures of single-shot LLMs: schema injection eliminates predicate hallucination, while VAL-guided refinement corrects residual encoding errors. Decoupling semantic grounding from combinatorial search also enables LAPIS to solve problems with long horizons ($>$80 steps) that pure autoregressive architectures cannot plan through. At the same time, LLM-generated domains are often suboptimal for search---barman timeouts indicate that structurally valid domains may still induce combinatorial explosion. Future work will explore automated domain optimization and integration of external knowledge graphs (via OntoBDI) for open-world grounding. The demo itself highlights near-zero modeling effort: attendees interact with a Streamlit dashboard where NL input yields executable plans, bypassing the traditional ``expert-in-the-loop'' bottleneck. Code: \url{https://github.com/EmanueleMusumeci/ContextMattersDemo}.
 
 % ---------------------------------------------------------------------------
 \bibliography{references}

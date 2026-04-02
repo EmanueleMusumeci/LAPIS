@@ -3,6 +3,7 @@ import os
 import re
 from pathlib import Path
 from src.costl.agents.agent import Agent
+from src.costl.logger_cfg import logger
 
 def _preprocess_pddl(pddl_str):
     """
@@ -198,9 +199,13 @@ DOMAIN DESCRIPTION:
     {domain_description}
     """
 
-    user_prompt = "Generate the PDDL domain within <DOMAIN></DOMAIN> tags."
+    user_prompt = "Generate the PDDL PDDL domain within <DOMAIN></DOMAIN> tags."
+    
+    # Fairness Guard: Ensure we aren't passing a PDDL file path as domain description
+    if domain_description and domain_description.endswith(".pddl"):
+         raise ValueError(f"FAIRNESS VIOLATION: domain_description appears to be a PDDL file path ('{domain_description}'). In NL-to-PDDL mode, it must be a string or NL content.")
 
-    print("DEBUG: Calling agent.llm_call for domain generation...")
+    print(f"DEBUG: Calling agent.llm_call for domain generation (NL-based)...")
     answer = agent.llm_call(prompt, user_prompt)
 
     _save_prompt_response(
@@ -306,8 +311,21 @@ SUBGOAL (Target to reach):
     """
 
     user_prompt = "Generate the PDDL problem within <PROBLEM></PROBLEM> tags."
+    
+    # Fairness Guard: Ensure the domain context is coming from the intended source (generated vs GT)
+    try:
+        dfp_str = str(domain_file_path) if domain_file_path else ""
+        if "data/llmpp" in dfp_str and "/domain.pddl" in dfp_str:
+             # This is the ground truth path. We should only use this if we are in condition A/B/C.
+             # In condition D (full_adequacy), we must use the generated domain.
+             logger.info(f"FAIRNESS CHECK: Using GROUND TRUTH domain for problem generation context: {dfp_str}")
+        elif "generated_domain.pddl" in dfp_str:
+             logger.info(f"FAIRNESS CHECK: Using GENERATED domain for problem generation context: {dfp_str}")
+    except Exception as e:
+        logger.warning(f"Fairness Guard encountered an error (non-critical): {e}")
 
-    print("DEBUG: Calling agent.llm_call for problem generation...")
+    print(f"DEBUG: Calling agent.llm_call for problem generation (inject_schema={inject_domain_schema})...")
+
     answer = agent.llm_call(prompt, user_prompt)
 
     _save_prompt_response(

@@ -1,0 +1,25 @@
+{
+    "statistics": {
+        "0": {
+            "DOMAIN_GENERATION": {
+                "plan_successful": null,
+                "pddlenv_error_log": null,
+                "planner_error_log": null,
+                "planner_statistics": null,
+                "VAL_validation_log": "",
+                "VAL_grounding_log": null,
+                "scene_graph_grounding_log": null,
+                "grounding_success_percentage": null,
+                "domain_generation_time": 9.749224662780762,
+                "scene_pruning_time": null,
+                "problem_generation_time": null,
+                "problem_decomposition_time": null,
+                "total_inference_time": null,
+                "VAL_validation_log_path": null,
+                "VAL_grounding_log_path": null,
+                "planning_log_path": null,
+                "grounding_log_path": null
+            }
+        }
+    }
+}

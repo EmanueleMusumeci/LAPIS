@@ -1,0 +1,6 @@
+0: (lift(hoist0, crate0, surface-0-0, depot48-1-1, depot48-2-1, depot48))
+1: (drop(hoist0, crate0, surface-0-0, depot48-1-1, depot48-2-1, depot48))
+2: (lift(hoist0, crate1, surface-0-1, depot48-1-1, depot48-2-1, depot48))
+3: (drop(hoist0, crate1, surface-0-0, depot48-1-1, depot48-2-1, depot48))
+4: (lift(hoist0, crate2, surface-0-2, depot48-1-1, depot48-2-1, depot48))
+5: (drop(hoist0, crate2, surface-0-0, depot48-1-1, depot48-2-1, depot48))

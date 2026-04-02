@@ -1,0 +1,63 @@
+{
+    "statistics": {
+        "0": {
+            "DOMAIN_GENERATION": {
+                "plan_successful": null,
+                "pddlenv_error_log": null,
+                "planner_error_log": null,
+                "planner_statistics": null,
+                "VAL_validation_log": "",
+                "VAL_grounding_log": null,
+                "scene_graph_grounding_log": null,
+                "grounding_success_percentage": null,
+                "domain_generation_time": 9.659249782562256,
+                "scene_pruning_time": null,
+                "problem_generation_time": null,
+                "problem_decomposition_time": null,
+                "total_inference_time": null,
+                "VAL_validation_log_path": null,
+                "VAL_grounding_log_path": null,
+                "planning_log_path": null,
+                "grounding_log_path": null
+            },
+            "INITIAL_PLANNING": {
+                "plan_successful": false,
+                "pddlenv_error_log": "Exception in UP parsing/planning: UPTypeError(\"The expression 'connected(dst, src)' is not well-formed\")\nError from line: 30, col 7 to line: 30, col 28\nTraceback (most recent call last):\n  File \"/home/xps/miniconda3/lib/python3.13/site-packages/unified_planning/io/pddl_reader.py\", line 463, in _parse_exp\n    solved.append(self._em.FluentExp(f, tuple(args)))\n                  ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^\n  File \"/home/xps/miniconda3/lib/python3.13/site-packages/unified_planning/model/expression.py\", line 479, in FluentExp\n    return self.create_node(\n           ~~~~~~~~~~~~~~~~^\n        node_type=OperatorKind.FLUENT_EXP, args=tuple(params_exp), payload=fluent\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xps/miniconda3/lib/python3.13/site-packages/unified_planning/model/expression.py\", line 210, in create_node\n    self.environment.type_checker.get_type(n)\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\n  File \"/home/xps/miniconda3/lib/python3.13/site-packages/unified_planning/model/walkers/type_checker.py\", line 45, in get_type\n    raise UPTypeError(\n        \"The expression '%s' is not well-formed\" % str(expression)\n    )\nunified_planning.exceptions.UPTypeError: The expression 'connected(dst, src)' is not well-formed\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/DATA/lapis/src/costl/planner/low/planner_utils.py\", line 72, in run_planner_UP\n    raise parse_e\n  File \"/DATA/lapis/src/costl/planner/low/planner_utils.py\", line 68, in run_planner_UP\n    problem = reader.parse_problem_string(domain_str, problem_str)\n  File \"/home/xps/miniconda3/lib/python3.13/site-packages/unified_planning/io/pddl_reader.py\", line 2127, in parse_problem_string\n    return self._parse_problem(domain_res, domain_str, problem_res, problem_str)\n           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/xps/miniconda3/lib/python3.13/site-packages/unified_planning/io/pddl_reader.py\", line 1665, in _parse_problem\n    self._parse_exp(\n    ~~~~~~~~~~~~~~~^\n        problem,\n        ^^^^^^^^\n    ...<4 lines>...\n        domain_str,\n        ^^^^^^^^^^^\n    )\n    ^\n  File \"/home/xps/miniconda3/lib/python3.13/site-packages/unified_planning/io/pddl_reader.py\", line 471, in _parse_exp\n    raise SyntaxError(\n    ...<2 lines>...\n    )\nSyntaxError: UPTypeError(\"The expression 'connected(dst, src)' is not well-formed\")\nError from line: 30, col 7 to line: 30, col 28\n",
+                "planner_error_log": null,
+                "planner_statistics": null,
+                "VAL_validation_log": "",
+                "VAL_grounding_log": "Type-checking lift\nType problem with proposition (connected dst src) - parameter 1 is incorrectly typed\nConditions fail type-checking.\n",
+                "scene_graph_grounding_log": null,
+                "grounding_success_percentage": null,
+                "domain_generation_time": null,
+                "scene_pruning_time": null,
+                "problem_generation_time": null,
+                "problem_decomposition_time": null,
+                "total_inference_time": null,
+                "VAL_validation_log_path": null,
+                "VAL_grounding_log_path": null,
+                "planning_log_path": null,
+                "grounding_log_path": null
+            },
+            "TOTAL_INFERENCE": {
+                "plan_successful": null,
+                "pddlenv_error_log": null,
+                "planner_error_log": null,
+                "planner_statistics": null,
+                "VAL_validation_log": null,
+                "VAL_grounding_log": null,
+                "scene_graph_grounding_log": null,
+                "grounding_success_percentage": null,
+                "domain_generation_time": 9.659249782562256,
+                "scene_pruning_time": null,
+                "problem_generation_time": 7.944798946380615,
+                "problem_decomposition_time": 0.0,
+                "total_inference_time": 17.60404872894287,
+                "VAL_validation_log_path": null,
+                "VAL_grounding_log_path": null,
+                "planning_log_path": null,
+                "grounding_log_path": null
+            }
+        }
+    }
+}

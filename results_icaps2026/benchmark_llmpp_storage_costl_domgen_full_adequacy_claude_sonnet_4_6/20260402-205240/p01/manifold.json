@@ -1,0 +1,18 @@
+{
+  "problem_id": "p01",
+  "domain": "storage",
+  "batch_id": "",
+  "planning_successful": true,
+  "val_valid": true,
+  "up_sim_valid": false,
+  "up_sim_failure": null,
+  "gif": null,
+  "plan_length": 3,
+  "pddl_refinements": 1,
+  "timing": {
+    "problem_gen_s": 6.29,
+    "refinement_s": 21.03,
+    "total_llm_s": 39.07
+  },
+  "failure_stage": ""
+}

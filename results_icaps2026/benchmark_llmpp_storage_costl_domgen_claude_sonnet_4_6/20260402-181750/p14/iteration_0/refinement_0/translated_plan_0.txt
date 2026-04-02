@@ -1,0 +1,4 @@
+0: (go-out(hoist2, depot48-1-2, loadarea))
+1: (lift(hoist2, crate0, surface0, container-0-0, loadarea, container0))
+2: (go-in(hoist2, loadarea, depot48-1-2))
+3: (drop(hoist2, crate0, surface0, depot48-1-1, depot48-1-2, depot48))

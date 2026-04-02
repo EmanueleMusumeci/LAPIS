@@ -1,0 +1,12 @@
+{
+  "domain": "storage",
+  "method": "costl",
+  "benchmark": "llmpp",
+  "total_problems": 20,
+  "planning_success": 9,
+  "val_success": 9,
+  "success_rate": 0.45,
+  "avg_llm_time_s": 117.89,
+  "avg_plan_length": 8.3,
+  "avg_refinements": 1.8
+}

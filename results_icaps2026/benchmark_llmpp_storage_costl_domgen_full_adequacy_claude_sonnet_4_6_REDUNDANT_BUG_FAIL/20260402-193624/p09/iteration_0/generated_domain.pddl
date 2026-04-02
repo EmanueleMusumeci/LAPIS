@@ -1,0 +1,97 @@
+(define (domain depot)
+  (:requirements :strips :typing)
+
+  (:types
+    place area hoist crate surface - physical-object
+    storearea transitarea - area
+  )
+
+  (:predicates
+    (at ?h - hoist ?a - area)
+    (on ?c - crate ?s - storearea)
+    (in ?s - storearea ?p - place)
+    (clear ?s - storearea)
+    (available ?h - hoist)
+    (lifting ?h - hoist ?c - crate)
+    (connected ?s1 - area ?s2 - area)
+    (crat-in ?c - crate ?p - place)
+  )
+
+  (:action lift
+    :parameters (?h - hoist ?c - crate ?s - storearea ?a - storearea ?p - place)
+    :precondition (and
+      (available ?h)
+      (at ?h ?a)
+      (on ?c ?s)
+      (in ?s ?p)
+      (connected ?a ?s)
+    )
+    :effect (and
+      (not (on ?c ?s))
+      (clear ?s)
+      (not (available ?h))
+      (lifting ?h ?c)
+      (not (crat-in ?c ?p))
+    )
+  )
+
+  (:action drop
+    :parameters (?h - hoist ?c - crate ?s - storearea ?a - area ?p - place)
+    :precondition (and
+      (at ?h ?a)
+      (lifting ?h ?c)
+      (clear ?s)
+      (in ?s ?p)
+      (connected ?a ?s)
+    )
+    :effect (and
+      (not (lifting ?h ?c))
+      (available ?h)
+      (not (clear ?s))
+      (on ?c ?s)
+      (crat-in ?c ?p)
+    )
+  )
+
+  (:action move
+    :parameters (?h - hoist ?from - storearea ?to - storearea)
+    :precondition (and
+      (at ?h ?from)
+      (clear ?to)
+      (connected ?from ?to)
+    )
+    :effect (and
+      (not (at ?h ?from))
+      (at ?h ?to)
+      (not (clear ?from))
+      (clear ?to)
+    )
+  )
+
+  (:action go-out
+    :parameters (?h - hoist ?from - storearea ?to - transitarea)
+    :precondition (and
+      (at ?h ?from)
+      (connected ?from ?to)
+    )
+    :effect (and
+      (not (at ?h ?from))
+      (at ?h ?to)
+      (clear ?from)
+    )
+  )
+
+  (:action go-in
+    :parameters (?h - hoist ?from - transitarea ?to - storearea)
+    :precondition (and
+      (at ?h ?from)
+      (connected ?from ?to)
+      (clear ?to)
+    )
+    :effect (and
+      (not (at ?h ?from))
+      (at ?h ?to)
+      (not (clear ?to))
+    )
+  )
+)

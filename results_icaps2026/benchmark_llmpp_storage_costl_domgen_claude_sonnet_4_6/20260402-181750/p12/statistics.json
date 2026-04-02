@@ -1,0 +1,103 @@
+{
+    "statistics": {
+        "0": {
+            "DOMAIN_GENERATION": {
+                "plan_successful": null,
+                "pddlenv_error_log": null,
+                "planner_error_log": null,
+                "planner_statistics": null,
+                "VAL_validation_log": "",
+                "VAL_grounding_log": null,
+                "scene_graph_grounding_log": null,
+                "grounding_success_percentage": null,
+                "domain_generation_time": 10.387077331542969,
+                "scene_pruning_time": null,
+                "problem_generation_time": null,
+                "problem_decomposition_time": null,
+                "total_inference_time": null,
+                "VAL_validation_log_path": null,
+                "VAL_grounding_log_path": null,
+                "planning_log_path": null,
+                "grounding_log_path": null
+            },
+            "INITIAL_PLANNING": {
+                "plan_successful": false,
+                "pddlenv_error_log": null,
+                "planner_error_log": "UP Planner failed with status: PlanGenerationResultStatus.UNSOLVABLE_INCOMPLETELY",
+                "planner_statistics": null,
+                "VAL_validation_log": "Checking plan: results_icaps2026/benchmark_llmpp_storage_costl_domgen_claude_sonnet_4_6/20260402-181750/p12/iteration_0/refinement_0/translated_plan_0.txt\nBad plan description!\n\n\nFailed plans:\n results_icaps2026/benchmark_llmpp_storage_costl_domgen_claude_sonnet_4_6/20260402-181750/p12/iteration_0/refinement_0/translated_plan_0.txt \n",
+                "VAL_grounding_log": "lift\n0 so far\ndrop\n0 so far\nmove\n0 so far\ngo-out\n2 so far\ngo-in\n4 so far\n4\n(go-out hoist0 container-0-0 loadarea)\n(go-out hoist0 depot48-1-1 loadarea)\n(go-in hoist0 loadarea container-0-0)\n(go-in hoist0 loadarea depot48-1-1)\n\nList of all literals:\n(in depot48-1-1 depot48)\n(in container-0-0 container0)\n(connected container-0-0 loadarea)\n(connected loadarea container-0-0)\n(connected depot48-1-1 loadarea)\n(connected loadarea depot48-1-1)\n(hoist_at hoist0 depot48-1-1)\n(available hoist0)\n(on crate0 container-0-0)\n(in_place crate0 container0)\n(clear depot48-1-1)\n(hoist_at hoist0 loadarea)\n(clear container-0-0)\n(hoist_at hoist0 container-0-0)\n",
+                "scene_graph_grounding_log": null,
+                "grounding_success_percentage": null,
+                "domain_generation_time": null,
+                "scene_pruning_time": null,
+                "problem_generation_time": null,
+                "problem_decomposition_time": null,
+                "total_inference_time": null,
+                "VAL_validation_log_path": null,
+                "VAL_grounding_log_path": null,
+                "planning_log_path": null,
+                "grounding_log_path": null
+            },
+            "PDDL_REFINEMENT": [
+                {
+                    "plan_successful": false,
+                    "pddlenv_error_log": null,
+                    "planner_error_log": "UP Planner failed with status: PlanGenerationResultStatus.UNSOLVABLE_INCOMPLETELY",
+                    "planner_statistics": null,
+                    "VAL_validation_log": "Checking plan: results_icaps2026/benchmark_llmpp_storage_costl_domgen_claude_sonnet_4_6/20260402-181750/p12/iteration_0/refinement_2/translated_plan_2.txt\nBad plan description!\n\n\nFailed plans:\n results_icaps2026/benchmark_llmpp_storage_costl_domgen_claude_sonnet_4_6/20260402-181750/p12/iteration_0/refinement_2/translated_plan_2.txt \n",
+                    "VAL_grounding_log": "lift\n0 so far\ndrop\n0 so far\nmove\n0 so far\ngo-out\n2 so far\ngo-in\n4 so far\n4\n(go-out hoist0 container-0-0 loadarea)\n(go-out hoist0 depot48-1-1 loadarea)\n(go-in hoist0 loadarea container-0-0)\n(go-in hoist0 loadarea depot48-1-1)\n\nList of all literals:\n(in depot48-1-1 depot48)\n(in container-0-0 container0)\n(connected container-0-0 loadarea)\n(connected loadarea container-0-0)\n(connected depot48-1-1 loadarea)\n(connected loadarea depot48-1-1)\n(hoist_at hoist0 depot48-1-1)\n(available hoist0)\n(on crate0 container-0-0)\n(in_place crate0 container0)\n(clear depot48-1-1)\n(hoist_at hoist0 loadarea)\n(clear container-0-0)\n(hoist_at hoist0 container-0-0)\n",
+                    "scene_graph_grounding_log": null,
+                    "grounding_success_percentage": null,
+                    "domain_generation_time": null,
+                    "scene_pruning_time": null,
+                    "problem_generation_time": null,
+                    "problem_decomposition_time": null,
+                    "total_inference_time": null,
+                    "VAL_validation_log_path": null,
+                    "VAL_grounding_log_path": null,
+                    "planning_log_path": null,
+                    "grounding_log_path": null
+                },
+                {
+                    "plan_successful": false,
+                    "pddlenv_error_log": null,
+                    "planner_error_log": "UP Planner failed with status: PlanGenerationResultStatus.UNSOLVABLE_INCOMPLETELY",
+                    "planner_statistics": null,
+                    "VAL_validation_log": "Checking plan: results_icaps2026/benchmark_llmpp_storage_costl_domgen_claude_sonnet_4_6/20260402-181750/p12/iteration_0/refinement_3/translated_plan_3.txt\nBad plan description!\n\n\nFailed plans:\n results_icaps2026/benchmark_llmpp_storage_costl_domgen_claude_sonnet_4_6/20260402-181750/p12/iteration_0/refinement_3/translated_plan_3.txt \n",
+                    "VAL_grounding_log": "lift\n0 so far\ndrop\n0 so far\nmove\n0 so far\ngo-out\n2 so far\ngo-in\n4 so far\n4\n(go-out hoist0 container-0-0 loadarea)\n(go-out hoist0 depot48-1-1 loadarea)\n(go-in hoist0 loadarea container-0-0)\n(go-in hoist0 loadarea depot48-1-1)\n\nList of all literals:\n(in depot48-1-1 depot48)\n(in container-0-0 container0)\n(connected container-0-0 loadarea)\n(connected loadarea container-0-0)\n(connected depot48-1-1 loadarea)\n(connected loadarea depot48-1-1)\n(hoist_at hoist0 depot48-1-1)\n(available hoist0)\n(on crate0 container-0-0)\n(in_place crate0 container0)\n(clear depot48-1-1)\n(hoist_at hoist0 loadarea)\n(clear container-0-0)\n(hoist_at hoist0 container-0-0)\n",
+                    "scene_graph_grounding_log": null,
+                    "grounding_success_percentage": null,
+                    "domain_generation_time": null,
+                    "scene_pruning_time": null,
+                    "problem_generation_time": null,
+                    "problem_decomposition_time": null,
+                    "total_inference_time": null,
+                    "VAL_validation_log_path": null,
+                    "VAL_grounding_log_path": null,
+                    "planning_log_path": null,
+                    "grounding_log_path": null
+                }
+            ],
+            "TOTAL_INFERENCE": {
+                "plan_successful": null,
+                "pddlenv_error_log": null,
+                "planner_error_log": null,
+                "planner_statistics": null,
+                "VAL_validation_log": null,
+                "VAL_grounding_log": null,
+                "scene_graph_grounding_log": null,
+                "grounding_success_percentage": null,
+                "domain_generation_time": 10.387077331542969,
+                "scene_pruning_time": null,
+                "problem_generation_time": 5.867153882980347,
+                "problem_decomposition_time": 98.88095998764038,
+                "total_inference_time": 115.1351912021637,
+                "VAL_validation_log_path": null,
+                "VAL_grounding_log_path": null,
+                "planning_log_path": null,
+                "grounding_log_path": null
+            }
+        }
+    }
+}

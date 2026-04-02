@@ -1,0 +1,35 @@
+Exception in UP parsing/planning: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/DATA/lapis/src/costl/planner/low/planner_utils.py", line 78, in run_planner_UP
+    with OneshotPlanner(name=up_planner_name) as planner:
+         ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xps/miniconda3/lib/python3.13/site-packages/unified_planning/shortcuts.py", line 563, in OneshotPlanner
+    return get_environment().factory.OneshotPlanner(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        name=name,
+        ^^^^^^^^^^
+    ...<3 lines>...
+        optimality_guarantee=optimality_guarantee,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/xps/miniconda3/lib/python3.13/site-packages/unified_planning/engines/factory.py", line 777, in OneshotPlanner
+    return self._get_engine(
+           ~~~~~~~~~~~~~~~~^
+        OperationMode.ONESHOT_PLANNER,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        optimality_guarantee,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/xps/miniconda3/lib/python3.13/site-packages/unified_planning/engines/factory.py", line 692, in _get_engine
+    self._print_credits([credits])
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/home/xps/miniconda3/lib/python3.13/site-packages/unified_planning/engines/factory.py", line 606, in _print_credits
+    w.write("  *** Credits ***\n")
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xps/miniconda3/lib/python3.13/site-packages/unified_planning/engines/factory.py", line 595, in write
+    self._stream.write(txt)
+    ~~~~~~~~~~~~~~~~~~^^^^^
+BrokenPipeError: [Errno 32] Broken pipe

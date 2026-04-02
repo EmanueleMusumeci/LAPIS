@@ -101,7 +101,7 @@ def plan_with_output(domain_file_path, problem_dir, plan_file_path, env=None, pl
     print(domain_file_path)
     print(os.path.join(problem_dir, "problem.pddl"))
     
-    if planner_name.lower().startswith("up") or planner_name.lower() in ["fd", "symk"]:
+    if planner_name.lower().startswith("up") or planner_name.lower() in ["fd", "symk", "pyperplan"]:
         # Use Unified Planning for everything now as requested
         plan, pddlenv_error_log, planner_error_log, statistics = run_planner_UP(domain_file_path, problem_dir, planner_name, timeout)
 

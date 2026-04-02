@@ -1,0 +1,4 @@
+move(robot2, room2, room1)
+pick(robot2, ball1, room1, left_gripper2)
+move(robot2, room1, room3)
+drop(robot2, ball1, room3, left_gripper2)

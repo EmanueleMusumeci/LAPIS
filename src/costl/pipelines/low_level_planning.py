@@ -13,16 +13,12 @@ from src.costl.logger_cfg import logger
 from src.costl.planner.low.utils.log import (
     save_file, save_statistics,
 )
-from src.costl.planner.low.utils.graph import (
-    read_graph_from_path,
-    get_verbose_scene_graph,
-)
 from src.costl.planner.low.planner_utils import plan_with_output
 from src.costl.planner.low.pddl_generation import (
     generate_domain, generate_problem, refine_problem,
     check_domain_adequacy, check_problem_adequacy,
 )
-from src.costl.planner.low.pddl_verification import translate_plan, VAL_validate, VAL_ground, verify_groundability_in_scene_graph
+from src.costl.planner.low.pddl_verification import translate_plan, VAL_validate, VAL_ground
 
 class LowLevelPlanningPipeline(BasePipeline):
 
@@ -30,12 +26,14 @@ class LowLevelPlanningPipeline(BasePipeline):
                 determine_possibility: bool,
                 prevent_impossibility: bool,
                 pddl_gen_iterations: int,
+                planner_timeout: int = 180,
                 **base_init_kwargs,
                 ):
         super().__init__(**base_init_kwargs)
         self.determine_possibility: bool = determine_possibility
         self.prevent_impossibility: bool = prevent_impossibility
         self.pddl_gen_iterations: int = pddl_gen_iterations
+        self.planner_timeout: int = planner_timeout
         
     def _initialize_csv(self, csv_filepath):
         # Initialize CSV with headers
@@ -56,13 +54,12 @@ class LowLevelPlanningPipeline(BasePipeline):
                 writer.writerow(possibility_header)
 
     def _run_and_log_pipeline(self, task_name, scene_name, problem_id, results_problem_dir,
-                            domain_file_path, domain_description, scene_graph_file_path,
+                            domain_file_path, domain_description,
                             csv_filepath):
         # Run the pipeline
         results = self.grounded_planning(
             goal_file_path=os.path.join(results_problem_dir, "task.txt"),
             initial_location_file_path=os.path.join(results_problem_dir, "init_loc.txt"),
-            scene_graph_file_path=scene_graph_file_path,
             domain_file_path=domain_file_path,
             results_dir=results_problem_dir,
             domain_description=domain_description,
@@ -116,15 +113,14 @@ class LowLevelPlanningPipeline(BasePipeline):
         '''
         goal_file_path = kwargs.get("goal_file_path")
         initial_location_file_path = kwargs.get("initial_location_file_path")
-        scene_graph_file_path = kwargs.get("scene_graph_file_path")
         domain_file_path = kwargs.get("domain_file_path")
         results_dir = kwargs.get("results_dir")
         domain_description = kwargs.get("domain_description")
-        
+
         # Optional arguments for multi-level planning
         current_goal_text = kwargs.get("current_goal_text") # If passed directly
         initial_robot_location_arg = kwargs.get("initial_robot_location")
-        extracted_sg_str_arg = kwargs.get("extracted_sg_str")
+        extracted_sg_str_arg = kwargs.get("extracted_sg_str")  # Environment description string
 
         # Approach A ablation flags
         clean_domain_prompt = kwargs.get("clean_domain_prompt", True)
@@ -149,17 +145,8 @@ class LowLevelPlanningPipeline(BasePipeline):
         problem_generation_time = 0.0
         problem_refinement_time = 0.0
 
-        # Determine scene description
-        extracted_sg_str = ""
-        if extracted_sg_str_arg:
-            extracted_sg_str = extracted_sg_str_arg
-            # Mock scene_graph object if needed, or just set to None if not used elsewhere
-            scene_graph = None 
-            extracted_sg = None # Assuming this is only used for grounding which we might skip or handle
-        elif kwargs.get("scene_graph_file_path"):
-            scene_graph = read_graph_from_path(Path(scene_graph_file_path))
-            extracted_sg = get_verbose_scene_graph(scene_graph, as_string=False)
-            extracted_sg_str = get_verbose_scene_graph(scene_graph, as_string=True)
+        # Determine scene/environment description
+        extracted_sg_str = extracted_sg_str_arg if extracted_sg_str_arg else ""
         
         # Construct domain description for generation
         domain_description = kwargs.get("domain_description")
@@ -179,15 +166,10 @@ class LowLevelPlanningPipeline(BasePipeline):
             
 
         
-        # Write the verbose scene graph to file
-        with open(os.path.join(results_dir, "extracted_scene_graph.txt"), "w") as file:
-            file.write(extracted_sg_str)
-
         # Initialize workflow variables
         planning_successful = False
         grounding_successful = False
-        
-        scene_graph_grounding_log = None
+
         pddlenv_error_log = None
         planner_error_log = None
         VAL_validation_log = None
@@ -306,7 +288,7 @@ class LowLevelPlanningPipeline(BasePipeline):
         
         plan, pddlenv_error_log, planner_error_log, planner_statistics = plan_with_output(
             domain_file_path, problem_dir, plan_file_path,
-            planner_name="up_fd", search_flag=None, timeout=60
+            planner_name="up_fd", search_flag=None, timeout=self.planner_timeout
         )      
         planning_successful = plan is not None
         
@@ -328,15 +310,29 @@ class LowLevelPlanningPipeline(BasePipeline):
             planner_statistics=planner_statistics,
             phase=self.current_phase
         )
+
+        # Logging the exact status before deciding on refinement
+        logger.debug(f"[REFINEMENT CHECK] planning_successful: {planning_successful}, VAL_grounding_successful: {VAL_grounding_successful}")
+
             
         # Inner loop (PDDL Refinement)
         PDDL_loop_iteration = 0
-        if not planning_successful or not VAL_grounding_successful:
+        
+        # Explicit check: If both succeeded, skip refinement entirely
+        should_refine = not planning_successful or not VAL_grounding_successful
+        
+        if should_refine:
+            if not planning_successful:
+                logger.info("Entering PDDL refinement because initial planning failed (plan is None).")
+            elif not VAL_grounding_successful:
+                logger.info("Entering PDDL refinement because initial plan failed VAL validation or grounding.")
+            
             self.current_phase = "PDDL_REFINEMENT"
                 
             while PDDL_loop_iteration < self.pddl_gen_iterations and \
                 (not planning_successful or not VAL_grounding_successful):
                 logger.info(f"------------ Refinement iteration {PDDL_loop_iteration+1}/{self.pddl_gen_iterations} ------------")
+
                 logger.debug(f"Problem directory: {problem_dir}")
                     
                 logger.info("Refining problem")
@@ -354,11 +350,8 @@ class LowLevelPlanningPipeline(BasePipeline):
                     planner_error_log=planner_error_log,
                     VAL_validation_log=VAL_validation_log,
                     VAL_grounding_log=VAL_grounding_log,
-                    scene_graph_grounding_log=scene_graph_grounding_log
                 )
                 problem_refinement_time += time.time() - refinement_start_time
-                    
-                scene_graph_grounding_log = None
                     
                 new_problem_dir = str(Path(problem_dir).parent / f"refinement_{PDDL_loop_iteration+1}")
                 os.makedirs(new_problem_dir, exist_ok=True)
@@ -380,7 +373,7 @@ class LowLevelPlanningPipeline(BasePipeline):
                 # Attempt planning with refined problem
                 plan, pddlenv_error_log, planner_error_log, planner_statistics = plan_with_output(
                     domain_file_path, problem_dir, plan_file_path,
-                    planner_name="up_fd"
+                    planner_name="up_fd", timeout=self.planner_timeout
                 )
                 planning_successful = plan is not None
                     
@@ -413,43 +406,9 @@ class LowLevelPlanningPipeline(BasePipeline):
             
         if planning_successful and VAL_grounding_successful:
             logger.info("Planning and grounding successful")
+            grounding_successful = True
         else:
             logger.info("Out of PDDL refinements")
-                
-        # Grounding in the 3D Scene Graph
-        if planning_successful and plan is not None and VAL_grounding_successful:
-            if self.ground_in_sg:
-                logger.info("Grounding in the 3DSG")
-                
-                grounding_success_percentage, scene_graph_grounding_log = verify_groundability_in_scene_graph(
-                    plan=plan,
-                    graph=extracted_sg,
-                    domain_file_path=domain_file_path,
-                    problem_dir=problem_dir,
-                    move_action_str="move_to",
-                    location_relation_str="at",
-                    location_type_str="room",
-                    initial_robot_location=initial_robot_location,
-                )
-                    
-                logger.info(f"Grounding result: {grounding_success_percentage}")
-                logger.debug(scene_graph_grounding_log)
-                    
-                grounding_successful = True if grounding_success_percentage == 1 else False
-                    
-                self.current_phase = "SCENE_GRAPH_GROUNDING"
-                save_statistics(
-                    dir=results_dir,
-                    workflow_iteration=iteration,
-                    planner_statistics=planner_statistics,
-                    phase=self.current_phase,
-                    scene_graph_grounding_log=scene_graph_grounding_log,
-                    grounding_success_percentage=grounding_success_percentage
-                )
-            else:
-                logger.info("Skipping grounding in the 3DSG")
-                grounding_successful = True
-                scene_graph_grounding_log = None
 
         # Calculate total LLM time
         total_llm_time = domain_generation_time + problem_generation_time + problem_refinement_time

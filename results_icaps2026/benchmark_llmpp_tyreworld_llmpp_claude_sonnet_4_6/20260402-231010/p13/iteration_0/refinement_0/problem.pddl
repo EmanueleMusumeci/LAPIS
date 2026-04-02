@@ -1,0 +1,197 @@
+(define (problem tyreworld-problem)
+  (:domain tyreworld)
+
+  (:objects
+    jack pump wrench - tool
+    boot - container
+    hub1 hub2 hub3 hub4 hub5 hub6 hub7 hub8 hub9 hub10 hub11 hub12 hub13 - hub
+    nut1 nut2 nut3 nut4 nut5 nut6 nut7 nut8 nut9 nut10 nut11 nut12 nut13 - nut
+    flat1 flat2 flat3 flat4 flat5 flat6 flat7 flat8 flat9 flat10 flat11 flat12 flat13 - wheel
+    intact1 intact2 intact3 intact4 intact5 intact6 intact7 intact8 intact9 intact10 intact11 intact12 intact13 - wheel
+  )
+
+  (:init
+    ; Boot state
+    (unlocked boot)
+    (closed boot)
+
+    ; Tools in boot
+    (in jack boot)
+    (in pump boot)
+    (in wrench boot)
+
+    ; Intact tyres in boot, not inflated, intact
+    (in intact1 boot)
+    (in intact2 boot)
+    (in intact3 boot)
+    (in intact4 boot)
+    (in intact5 boot)
+    (in intact6 boot)
+    (in intact7 boot)
+    (in intact8 boot)
+    (in intact9 boot)
+    (in intact10 boot)
+    (in intact11 boot)
+    (in intact12 boot)
+    (in intact13 boot)
+
+    (not-inflated intact1)
+    (not-inflated intact2)
+    (not-inflated intact3)
+    (not-inflated intact4)
+    (not-inflated intact5)
+    (not-inflated intact6)
+    (not-inflated intact7)
+    (not-inflated intact8)
+    (not-inflated intact9)
+    (not-inflated intact10)
+    (not-inflated intact11)
+    (not-inflated intact12)
+    (not-inflated intact13)
+
+    (intact intact1)
+    (intact intact2)
+    (intact intact3)
+    (intact intact4)
+    (intact intact5)
+    (intact intact6)
+    (intact intact7)
+    (intact intact8)
+    (intact intact9)
+    (intact intact10)
+    (intact intact11)
+    (intact intact12)
+    (intact intact13)
+
+    ; Flat tyres on hubs
+    (on flat1 hub1)
+    (on flat2 hub2)
+    (on flat3 hub3)
+    (on flat4 hub4)
+    (on flat5 hub5)
+    (on flat6 hub6)
+    (on flat7 hub7)
+    (on flat8 hub8)
+    (on flat9 hub9)
+    (on flat10 hub10)
+    (on flat11 hub11)
+    (on flat12 hub12)
+    (on flat13 hub13)
+
+    ; Hubs on ground
+    (on-ground hub1)
+    (on-ground hub2)
+    (on-ground hub3)
+    (on-ground hub4)
+    (on-ground hub5)
+    (on-ground hub6)
+    (on-ground hub7)
+    (on-ground hub8)
+    (on-ground hub9)
+    (on-ground hub10)
+    (on-ground hub11)
+    (on-ground hub12)
+    (on-ground hub13)
+
+    ; Nuts tight on hubs
+    (tight nut1 hub1)
+    (tight nut2 hub2)
+    (tight nut3 hub3)
+    (tight nut4 hub4)
+    (tight nut5 hub5)
+    (tight nut6 hub6)
+    (tight nut7 hub7)
+    (tight nut8 hub8)
+    (tight nut9 hub9)
+    (tight nut10 hub10)
+    (tight nut11 hub11)
+    (tight nut12 hub12)
+    (tight nut13 hub13)
+
+    ; Hubs fastened
+    (fastened hub1)
+    (fastened hub2)
+    (fastened hub3)
+    (fastened hub4)
+    (fastened hub5)
+    (fastened hub6)
+    (fastened hub7)
+    (fastened hub8)
+    (fastened hub9)
+    (fastened hub10)
+    (fastened hub11)
+    (fastened hub12)
+    (fastened hub13)
+  )
+
+  (:goal
+    (and
+      ; Intact tyres on hubs, inflated
+      (on intact1 hub1)
+      (on intact2 hub2)
+      (on intact3 hub3)
+      (on intact4 hub4)
+      (on intact5 hub5)
+      (on intact6 hub6)
+      (on intact7 hub7)
+      (on intact8 hub8)
+      (on intact9 hub9)
+      (on intact10 hub10)
+      (on intact11 hub11)
+      (on intact12 hub12)
+      (on intact13 hub13)
+
+      (inflated intact1)
+      (inflated intact2)
+      (inflated intact3)
+      (inflated intact4)
+      (inflated intact5)
+      (inflated intact6)
+      (inflated intact7)
+      (inflated intact8)
+      (inflated intact9)
+      (inflated intact10)
+      (inflated intact11)
+      (inflated intact12)
+      (inflated intact13)
+
+      ; Nuts tight on hubs
+      (tight nut1 hub1)
+      (tight nut2 hub2)
+      (tight nut3 hub3)
+      (tight nut4 hub4)
+      (tight nut5 hub5)
+      (tight nut6 hub6)
+      (tight nut7 hub7)
+      (tight nut8 hub8)
+      (tight nut9 hub9)
+      (tight nut10 hub10)
+      (tight nut11 hub11)
+      (tight nut12 hub12)
+      (tight nut13 hub13)
+
+      ; Flat tyres in boot
+      (in flat1 boot)
+      (in flat2 boot)
+      (in flat3 boot)
+      (in flat4 boot)
+      (in flat5 boot)
+      (in flat6 boot)
+      (in flat7 boot)
+      (in flat8 boot)
+      (in flat9 boot)
+      (in flat10 boot)
+      (in flat11 boot)
+      (in flat12 boot)
+      (in flat13 boot)
+
+      ; Tools in boot
+      (in wrench boot)
+      (in jack boot)
+      (in pump boot)
+
+      ; Boot closed
+      (closed boot)
+    )
+  )
+)

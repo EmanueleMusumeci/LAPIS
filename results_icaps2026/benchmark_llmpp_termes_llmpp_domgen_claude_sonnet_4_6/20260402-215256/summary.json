@@ -1,0 +1,12 @@
+{
+  "domain": "termes",
+  "method": "llmpp",
+  "benchmark": "llmpp",
+  "total_problems": 20,
+  "planning_success": 19,
+  "val_success": 19,
+  "success_rate": 0.95,
+  "avg_llm_time_s": 22.22,
+  "avg_plan_length": 138.8,
+  "avg_refinements": 0.0
+}

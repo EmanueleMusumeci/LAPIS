@@ -1,0 +1,151 @@
+(define (problem tyreworld-problem)
+  (:domain tyreworld)
+
+  (:objects
+    jack pump wrench - tool
+    boot - container
+    hub1 hub2 hub3 hub4 hub5 hub6 hub7 hub8 hub9 - hub
+    nut1 nut2 nut3 nut4 nut5 nut6 nut7 nut8 nut9 - nut
+    flat1 flat2 flat3 flat4 flat5 flat6 flat7 flat8 flat9 - wheel
+    intact1 intact2 intact3 intact4 intact5 intact6 intact7 intact8 intact9 - wheel
+  )
+
+  (:init
+    ; Boot state
+    (unlocked boot)
+    (closed boot)
+
+    ; Tools and intact tyres are in the boot
+    (in jack boot)
+    (in pump boot)
+    (in wrench boot)
+    (in intact1 boot)
+    (in intact2 boot)
+    (in intact3 boot)
+    (in intact4 boot)
+    (in intact5 boot)
+    (in intact6 boot)
+    (in intact7 boot)
+    (in intact8 boot)
+    (in intact9 boot)
+
+    ; Intact tyres are not inflated
+    (not-inflated intact1)
+    (not-inflated intact2)
+    (not-inflated intact3)
+    (not-inflated intact4)
+    (not-inflated intact5)
+    (not-inflated intact6)
+    (not-inflated intact7)
+    (not-inflated intact8)
+    (not-inflated intact9)
+
+    ; Intact tyres are intact
+    (intact intact1)
+    (intact intact2)
+    (intact intact3)
+    (intact intact4)
+    (intact intact5)
+    (intact intact6)
+    (intact intact7)
+    (intact intact8)
+    (intact intact9)
+
+    ; Flat tyres are on the hubs
+    (on flat1 hub1)
+    (on flat2 hub2)
+    (on flat3 hub3)
+    (on flat4 hub4)
+    (on flat5 hub5)
+    (on flat6 hub6)
+    (on flat7 hub7)
+    (on flat8 hub8)
+    (on flat9 hub9)
+
+    ; Hubs are on the ground
+    (on-ground hub1)
+    (on-ground hub2)
+    (on-ground hub3)
+    (on-ground hub4)
+    (on-ground hub5)
+    (on-ground hub6)
+    (on-ground hub7)
+    (on-ground hub8)
+    (on-ground hub9)
+
+    ; Nuts are tight on the hubs
+    (tight nut1 hub1)
+    (tight nut2 hub2)
+    (tight nut3 hub3)
+    (tight nut4 hub4)
+    (tight nut5 hub5)
+    (tight nut6 hub6)
+    (tight nut7 hub7)
+    (tight nut8 hub8)
+    (tight nut9 hub9)
+
+    ; Hubs are fastened
+    (fastened hub1)
+    (fastened hub2)
+    (fastened hub3)
+    (fastened hub4)
+    (fastened hub5)
+    (fastened hub6)
+    (fastened hub7)
+    (fastened hub8)
+    (fastened hub9)
+  )
+
+  (:goal
+    (and
+      ; Intact tyres are on the hubs and inflated
+      (on intact1 hub1)
+      (on intact2 hub2)
+      (on intact3 hub3)
+      (on intact4 hub4)
+      (on intact5 hub5)
+      (on intact6 hub6)
+      (on intact7 hub7)
+      (on intact8 hub8)
+      (on intact9 hub9)
+
+      (inflated intact1)
+      (inflated intact2)
+      (inflated intact3)
+      (inflated intact4)
+      (inflated intact5)
+      (inflated intact6)
+      (inflated intact7)
+      (inflated intact8)
+      (inflated intact9)
+
+      ; Nuts are tight on the hubs
+      (tight nut1 hub1)
+      (tight nut2 hub2)
+      (tight nut3 hub3)
+      (tight nut4 hub4)
+      (tight nut5 hub5)
+      (tight nut6 hub6)
+      (tight nut7 hub7)
+      (tight nut8 hub8)
+      (tight nut9 hub9)
+
+      ; Flat tyres, wrench, jack, and pump are in the boot
+      (in flat1 boot)
+      (in flat2 boot)
+      (in flat3 boot)
+      (in flat4 boot)
+      (in flat5 boot)
+      (in flat6 boot)
+      (in flat7 boot)
+      (in flat8 boot)
+      (in flat9 boot)
+      (in wrench boot)
+      (in jack boot)
+      (in pump boot)
+
+      ; Boot is closed
+      (closed boot)
+    )
+  )
+)

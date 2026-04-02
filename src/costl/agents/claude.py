@@ -6,7 +6,13 @@ from src.costl.agents.agent import Agent
 class ClaudeAgent(Agent):
     def __init__(self, model, max_history: int = 5):
         super().__init__(model)
-        self.client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+        base_url = None
+        if not api_key and os.getenv("OPENROUTER_API_KEY"):
+            api_key = os.getenv("OPENROUTER_API_KEY")
+            base_url = "https://openrouter.ai/api/v1"
+        
+        self.client = Anthropic(api_key=api_key, base_url=base_url)
         self.prompt_chain = []
         self.max_history = None if max_history is None else int(max_history)
 

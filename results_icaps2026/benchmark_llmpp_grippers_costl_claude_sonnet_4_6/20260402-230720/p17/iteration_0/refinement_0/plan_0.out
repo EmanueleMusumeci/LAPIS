@@ -1,0 +1,8 @@
+pick(robot4, ball1, room1, left)
+move(robot4, room1, room2)
+drop(robot4, ball1, room2, left)
+pick(robot4, ball3, room2, left)
+pick(robot4, ball4, room2, right)
+move(robot4, room2, room1)
+drop(robot4, ball3, room1, left)
+drop(robot4, ball4, room1, right)

@@ -1,0 +1,202 @@
+/* LAPIS Premium — Glassmorphic Cyber-Dark Theme */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&family=Outfit:wght@500;700&display=swap');
+
+:root {
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --bg-dark: #0f172a;
+    --glass-bg: rgba(30, 41, 59, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --accent-purple: #a855f7;
+    --accent-blue: #3b82f6;
+    --accent-cyan: #22d3ee;
+    --accent-green: #22c55e;
+    --accent-orange: #f59e0b;
+    --accent-red: #ef4444;
+    --font-sans: 'Outfit', 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* ─── global ─────────────────────────────────────────────────── */
+.stApp {
+    background: radial-gradient(circle at top left, #1e1b4b 0%, #0f172a 40%, #020617 100%);
+    color: var(--text);
+    font-family: var(--font-sans);
+}
+
+/* ─── Sidebar ─────────────────────────────────────────────────── */
+section[data-testid="stSidebar"] {
+    background-color: rgba(15, 23, 42, 0.8) !important;
+    backdrop-filter: blur(20px);
+    border-right: 1px solid var(--glass-border);
+}
+
+section[data-testid="stSidebar"] .stMarkdown h2 {
+    color: var(--accent-cyan) !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em !important;
+}
+
+/* ─── header ─────────────────────────────────────────────────── */
+.lapis-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem 0;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-md);
+}
+
+.lapis-logo {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.05em;
+    font-family: 'Outfit', sans-serif;
+}
+
+.lapis-subtitle {
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-style: normal;
+    font-weight: 400;
+}
+
+/* ─── stage cards ─────────────────────────────────────────────── */
+.stage-card {
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stage-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.stage-card.pending  { color: var(--text-muted); opacity: 0.5; }
+.stage-card.running  { border-left: 4px solid var(--accent-orange); }
+.stage-card.done     { border-left: 4px solid var(--accent-green); }
+.stage-card.error    { border-left: 4px solid var(--accent-red); }
+.stage-card.skipped  { border-left: 4px solid var(--accent-purple); opacity: 0.8; }
+
+.stage-title {
+    font-weight: 600;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.stage-badge {
+    font-size: 0.75rem;
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-weight: 600;
+}
+
+.badge-pending  { background: #1e293b; color: #94a3b8; }
+.badge-running  { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+.badge-done     { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+.badge-error    { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+.badge-skipped  { background: rgba(168, 85, 247, 0.2); color: #c4b5fd; border: 1px solid rgba(168, 85, 247, 0.3); }
+
+.stage-duration {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-left: auto;
+}
+
+.stage-preview {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: #cbd5e1;
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.75rem;
+    max-height: 150px;
+}
+
+/* ─── Race Dashboard ─── */
+.race-container {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+}
+.race-track {
+    flex: 1;
+    background: var(--glass-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid var(--glass-border);
+}
+
+/* ─── terminal refinement log ────────────────────────────────── */
+.refine-terminal {
+    background: #020617;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--accent-green);
+    line-height: 1.6;
+}
+
+/* ─── PDDL Code Enhancement ─── */
+.stCode {
+    background: rgba(15, 23, 42, 0.4) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 12px !important;
+}
+
+/* ─── Plan Steps ─── */
+.plan-step {
+    background: rgba(30, 41, 59, 0.4);
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+    border-left: 4px solid var(--accent-cyan);
+    margin-bottom: 0.4rem;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.plan-step-num {
+    color: var(--accent-cyan);
+    font-weight: 700;
+}
+
+/* ─── result labels ────────────────────────────────────────────── */
+.result-success {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    color: white;
+    border-radius: 8px;
+    padding: 4px 16px;
+    font-weight: 700;
+}
+
+.result-fail {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    border-radius: 8px;
+    padding: 4px 16px;
+    font-weight: 700;
+}

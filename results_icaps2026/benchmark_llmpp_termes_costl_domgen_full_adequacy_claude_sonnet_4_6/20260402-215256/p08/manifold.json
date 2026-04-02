@@ -1,0 +1,18 @@
+{
+  "problem_id": "p08",
+  "domain": "termes",
+  "batch_id": "",
+  "planning_successful": true,
+  "val_valid": true,
+  "up_sim_valid": false,
+  "up_sim_failure": null,
+  "gif": null,
+  "plan_length": 109,
+  "pddl_refinements": 0,
+  "timing": {
+    "problem_gen_s": 13.64,
+    "refinement_s": 0.0,
+    "total_llm_s": 24.0
+  },
+  "failure_stage": ""
+}

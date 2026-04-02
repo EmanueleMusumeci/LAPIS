@@ -1,0 +1,63 @@
+{
+    "statistics": {
+        "0": {
+            "DOMAIN_GENERATION": {
+                "plan_successful": null,
+                "pddlenv_error_log": null,
+                "planner_error_log": null,
+                "planner_statistics": null,
+                "VAL_validation_log": "",
+                "VAL_grounding_log": null,
+                "scene_graph_grounding_log": null,
+                "grounding_success_percentage": null,
+                "domain_generation_time": 11.064963579177856,
+                "scene_pruning_time": null,
+                "problem_generation_time": null,
+                "problem_decomposition_time": null,
+                "total_inference_time": null,
+                "VAL_validation_log_path": null,
+                "VAL_grounding_log_path": null,
+                "planning_log_path": null,
+                "grounding_log_path": null
+            },
+            "INITIAL_PLANNING": {
+                "plan_successful": true,
+                "pddlenv_error_log": null,
+                "planner_error_log": null,
+                "planner_statistics": null,
+                "VAL_validation_log": "Checking plan: results_icaps2026/benchmark_llmpp_storage_llmpp_domgen_claude_sonnet_4_6/20260402-214106/p03/iteration_0/refinement_0/translated_plan_0.txt\nBad plan description!\n\n\nFailed plans:\n results_icaps2026/benchmark_llmpp_storage_llmpp_domgen_claude_sonnet_4_6/20260402-214106/p03/iteration_0/refinement_0/translated_plan_0.txt \n",
+                "VAL_grounding_log": "lift\n18 so far\ndrop\n36 so far\nmove\n48 so far\ngo-out\n54 so far\ngo-in\n60 so far\n60\n(lift hoist0 crate0 container-0-0 loadarea container0)\n(lift hoist1 crate0 container-0-0 loadarea container0)\n(lift hoist2 crate0 container-0-0 loadarea container0)\n(lift hoist0 crate0 depot48-1-2 depot48-1-1 depot48)\n(lift hoist1 crate0 depot48-1-2 depot48-1-1 depot48)\n(lift hoist2 crate0 depot48-1-2 depot48-1-1 depot48)\n(lift hoist0 crate0 depot48-1-1 depot48-1-2 depot48)\n(lift hoist1 crate0 depot48-1-1 depot48-1-2 depot48)\n(lift hoist2 crate0 depot48-1-1 depot48-1-2 depot48)\n(lift hoist0 crate0 depot48-1-3 depot48-1-2 depot48)\n(lift hoist1 crate0 depot48-1-3 depot48-1-2 depot48)\n(lift hoist2 crate0 depot48-1-3 depot48-1-2 depot48)\n(lift hoist0 crate0 depot48-1-2 depot48-1-3 depot48)\n(lift hoist1 crate0 depot48-1-2 depot48-1-3 depot48)\n(lift hoist2 crate0 depot48-1-2 depot48-1-3 depot48)\n(lift hoist0 crate0 depot48-1-2 loadarea depot48)\n(lift hoist1 crate0 depot48-1-2 loadarea depot48)\n(lift hoist2 crate0 depot48-1-2 loadarea depot48)\n(drop hoist0 crate0 container-0-0 loadarea container0)\n(drop hoist1 crate0 container-0-0 loadarea container0)\n(drop hoist2 crate0 container-0-0 loadarea container0)\n(drop hoist0 crate0 depot48-1-2 depot48-1-1 depot48)\n(drop hoist1 crate0 depot48-1-2 depot48-1-1 depot48)\n(drop hoist2 crate0 depot48-1-2 depot48-1-1 depot48)\n(drop hoist0 crate0 depot48-1-1 depot48-1-2 depot48)\n(drop hoist1 crate0 depot48-1-1 depot48-1-2 depot48)\n(drop hoist2 crate0 depot48-1-1 depot48-1-2 depot48)\n(drop hoist0 crate0 depot48-1-3 depot48-1-2 depot48)\n(drop hoist1 crate0 depot48-1-3 depot48-1-2 depot48)\n(drop hoist2 crate0 depot48-1-3 depot48-1-2 depot48)\n(drop hoist0 crate0 depot48-1-2 depot48-1-3 depot48)\n(drop hoist1 crate0 depot48-1-2 depot48-1-3 depot48)\n(drop hoist2 crate0 depot48-1-2 depot48-1-3 depot48)\n(drop hoist0 crate0 depot48-1-2 loadarea depot48)\n(drop hoist1 crate0 depot48-1-2 loadarea depot48)\n(drop hoist2 crate0 depot48-1-2 loadarea depot48)\n(move hoist0 depot48-1-2 depot48-1-1)\n(move hoist1 depot48-1-2 depot48-1-1)\n(move hoist2 depot48-1-2 depot48-1-1)\n(move hoist0 depot48-1-1 depot48-1-2)\n(move hoist1 depot48-1-1 depot48-1-2)\n(move hoist2 depot48-1-1 depot48-1-2)\n(move hoist0 depot48-1-3 depot48-1-2)\n(move hoist1 depot48-1-3 depot48-1-2)\n(move hoist2 depot48-1-3 depot48-1-2)\n(move hoist0 depot48-1-2 depot48-1-3)\n(move hoist1 depot48-1-2 depot48-1-3)\n(move hoist2 depot48-1-2 depot48-1-3)\n(go-out hoist0 container-0-0 loadarea)\n(go-out hoist1 container-0-0 loadarea)\n(go-out hoist2 container-0-0 loadarea)\n(go-out hoist0 depot48-1-2 loadarea)\n(go-out hoist1 depot48-1-2 loadarea)\n(go-out hoist2 depot48-1-2 loadarea)\n(go-in hoist0 loadarea container-0-0)\n(go-in hoist1 loadarea container-0-0)\n(go-in hoist2 loadarea container-0-0)\n(go-in hoist0 loadarea depot48-1-2)\n(go-in hoist1 loadarea depot48-1-2)\n(go-in hoist2 loadarea depot48-1-2)\n\nList of all literals:\n(in depot48-1-1 depot48)\n(in depot48-1-2 depot48)\n(in depot48-1-3 depot48)\n(in container-0-0 container0)\n(connected depot48-1-1 depot48-1-2)\n(connected depot48-1-2 depot48-1-1)\n(connected depot48-1-2 depot48-1-3)\n(connected depot48-1-3 depot48-1-2)\n(connected container-0-0 loadarea)\n(connected depot48-1-2 loadarea)\n(at hoist0 depot48-1-2)\n(at hoist1 depot48-1-3)\n(at hoist2 depot48-1-1)\n(available hoist0)\n(available hoist1)\n(available hoist2)\n(on crate0 container-0-0)\n(crate-at crate0 container0)\n(clear depot48-1-1)\n(clear depot48-1-2)\n(clear depot48-1-3)\n(clear container-0-0)\n(lifting hoist0 crate0)\n(lifting hoist1 crate0)\n(lifting hoist2 crate0)\n(on crate0 depot48-1-2)\n(crate-at crate0 depot48)\n(on crate0 depot48-1-1)\n(on crate0 depot48-1-3)\n(at hoist0 depot48-1-1)\n(at hoist1 depot48-1-1)\n(at hoist1 depot48-1-2)\n(at hoist2 depot48-1-2)\n(at hoist0 depot48-1-3)\n(at hoist2 depot48-1-3)\n(at hoist0 loadarea)\n(at hoist1 loadarea)\n(at hoist2 loadarea)\n(at hoist0 container-0-0)\n(at hoist1 container-0-0)\n(at hoist2 container-0-0)\n",
+                "scene_graph_grounding_log": null,
+                "grounding_success_percentage": null,
+                "domain_generation_time": null,
+                "scene_pruning_time": null,
+                "problem_generation_time": null,
+                "problem_decomposition_time": null,
+                "total_inference_time": null,
+                "VAL_validation_log_path": null,
+                "VAL_grounding_log_path": null,
+                "planning_log_path": null,
+                "grounding_log_path": null
+            },
+            "TOTAL_INFERENCE": {
+                "plan_successful": null,
+                "pddlenv_error_log": null,
+                "planner_error_log": null,
+                "planner_statistics": null,
+                "VAL_validation_log": null,
+                "VAL_grounding_log": null,
+                "scene_graph_grounding_log": null,
+                "grounding_success_percentage": null,
+                "domain_generation_time": 11.064963579177856,
+                "scene_pruning_time": null,
+                "problem_generation_time": 7.384159088134766,
+                "problem_decomposition_time": 0.0,
+                "total_inference_time": 18.449122667312622,
+                "VAL_validation_log_path": null,
+                "VAL_grounding_log_path": null,
+                "planning_log_path": null,
+                "grounding_log_path": null
+            }
+        }
+    }
+}

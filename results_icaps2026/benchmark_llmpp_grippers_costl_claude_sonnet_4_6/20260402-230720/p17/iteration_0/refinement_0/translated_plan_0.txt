@@ -1,0 +1,8 @@
+0: (pick(robot4, ball1, room1, left))
+1: (move(robot4, room1, room2))
+2: (drop(robot4, ball1, room2, left))
+3: (pick(robot4, ball3, room2, left))
+4: (pick(robot4, ball4, room2, right))
+5: (move(robot4, room2, room1))
+6: (drop(robot4, ball3, room1, left))
+7: (drop(robot4, ball4, room1, right))

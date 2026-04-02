@@ -1,0 +1,98 @@
+(define (domain depot)
+  (:requirements :strips :typing)
+
+  (:types
+    place area - object_root
+    store_area transit_area - area
+    hoist crate surface - object_root
+  )
+
+  (:predicates
+    (available ?h - hoist)
+    (at ?h - hoist ?a - area)
+    (lifting ?h - hoist ?c - crate)
+    (on ?c - crate ?s - surface)
+    (in ?s - store_area ?p - place)
+    (connected ?a1 - area ?a2 - area)
+    (clear ?s - store_area)
+    (occupied ?s - store_area ?c - crate)
+  )
+
+  (:action lift
+    :parameters (?h - hoist ?c - crate ?src - store_area ?dst - area ?p - place ?s - surface)
+    :precondition (and
+      (available ?h)
+      (at ?h ?dst)
+      (on ?c ?s)
+      (in ?src ?p)
+      (connected ?dst ?src)
+    )
+    :effect (and
+      (not (on ?c ?s))
+      (clear ?src)
+      (not (available ?h))
+      (lifting ?h ?c)
+      (not (occupied ?src ?c))
+    )
+  )
+
+  (:action drop
+    :parameters (?h - hoist ?c - crate ?dst - store_area ?a - area ?p - place)
+    :precondition (and
+      (at ?h ?a)
+      (lifting ?h ?c)
+      (clear ?dst)
+      (in ?dst ?p)
+      (connected ?a ?dst)
+    )
+    :effect (and
+      (not (lifting ?h ?c))
+      (available ?h)
+      (occupied ?dst ?c)
+      (not (clear ?dst))
+    )
+  )
+
+  (:action move
+    :parameters (?h - hoist ?src - store_area ?dst - store_area)
+    :precondition (and
+      (at ?h ?src)
+      (clear ?dst)
+      (connected ?src ?dst)
+    )
+    :effect (and
+      (not (at ?h ?src))
+      (at ?h ?dst)
+      (not (clear ?src))
+      (clear ?dst)
+    )
+  )
+
+  (:action go-out
+    :parameters (?h - hoist ?src - store_area ?dst - transit_area)
+    :precondition (and
+      (at ?h ?src)
+      (connected ?src ?dst)
+    )
+    :effect (and
+      (not (at ?h ?src))
+      (at ?h ?dst)
+      (clear ?src)
+    )
+  )
+
+  (:action go-in
+    :parameters (?h - hoist ?src - transit_area ?dst - store_area)
+    :precondition (and
+      (at ?h ?src)
+      (connected ?src ?dst)
+      (clear ?dst)
+    )
+    :effect (and
+      (not (at ?h ?src))
+      (at ?h ?dst)
+      (not (clear ?dst))
+    )
+  )
+
+)

@@ -153,8 +153,8 @@ def _init_state():
         "stages_llmpp": [],
         "running_lapis": False,
         "running_llmpp": False,
-        "domain_nl": "",
-        "problem_nl": "",
+        "domain_nl_widget": "",
+        "problem_nl_widget": "",
         "selected_preset": "blocksworld p01",
         "selected_domain": "blocksworld",
         "model_id": "claude-3-5-sonnet-20241022",
@@ -167,6 +167,14 @@ def _init_state():
     for k, v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
+
+    # Populate default preset on first load
+    if not st.session_state.domain_nl_widget and st.session_state.selected_preset != "Custom":
+        presets = _available_presets()
+        if st.session_state.selected_preset in presets:
+            preset = presets[st.session_state.selected_preset]
+            st.session_state.domain_nl_widget = preset["domain_nl"]
+            st.session_state.problem_nl_widget = preset["problem_nl"]
 
 _init_state()
 
@@ -343,8 +351,8 @@ def _sidebar():
             st.session_state.selected_preset = selected_label
             preset = presets[selected_label]
             if selected_label != "Custom":
-                st.session_state.domain_nl   = preset["domain_nl"]
-                st.session_state.problem_nl  = preset["problem_nl"]
+                st.session_state.domain_nl_widget = preset["domain_nl"]
+                st.session_state.problem_nl_widget = preset["problem_nl"]
                 st.session_state.selected_domain = preset["domain"]
             st.rerun()
 
@@ -407,7 +415,6 @@ def _nl_input_panel():
     with col1:
         domain_nl = st.text_area(
             "Domain description (actions, preconditions, effects)",
-            value=st.session_state.domain_nl,
             height=140,
             key="domain_nl_widget",
             placeholder="Describe the planning domain: actions the agent can perform, "
@@ -416,15 +423,11 @@ def _nl_input_panel():
     with col2:
         problem_nl = st.text_area(
             "Problem instance (objects, initial state, goal)",
-            value=st.session_state.problem_nl,
             height=140,
             key="problem_nl_widget",
             placeholder="Describe the specific problem: objects present, initial world state, "
                          "and the goal to achieve...",
         )
-    # Sync widget values to session state
-    st.session_state.domain_nl  = domain_nl
-    st.session_state.problem_nl = problem_nl
     return domain_nl, problem_nl
 
 
