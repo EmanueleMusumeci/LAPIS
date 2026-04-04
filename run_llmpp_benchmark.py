@@ -121,6 +121,7 @@ def run_method(domain, method, problems, agent, args, generate_domain):
     abl_suffix = f"_{ablation}" if ablation != "full" else ""
     experiment_name = f"benchmark_llmpp_{domain}_{method}{gen_suffix}{abl_suffix}_{args.model.replace('-', '_')}"
 
+    semantic_checks = getattr(args, "semantic_checks", False)
     pipeline = LAPISLowLevelPipeline(
         domain_name=domain,
         batch_id="",
@@ -139,6 +140,7 @@ def run_method(domain, method, problems, agent, args, generate_domain):
         inject_domain_schema=inject_domain_schema,
         check_adequacy=check_adequacy,
         planner_timeout=args.planner_timeout,
+        semantic_checks=semantic_checks,
     )
     pipeline.experiment_name = experiment_name
     pipeline.run()
@@ -202,6 +204,8 @@ def main():
                         help="Override PDDL refinement iterations (default: 3 for lapis, 0 for llmpp)")
     parser.add_argument("--planner_timeout", type=int, default=180,
                         help="Timeout for symbolic planner in seconds (default: 180)")
+    parser.add_argument("--semantic_checks", action="store_true",
+                        help="Enable semantic verification (predicate coverage, action reachability)")
     parser.add_argument("--data_dir", default="data/llm-pddl")
     parser.add_argument("--results_dir", default="results_llmpp")
     args = parser.parse_args()
