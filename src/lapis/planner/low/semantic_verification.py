@@ -31,14 +31,38 @@ def _remove_comments(pddl: str) -> str:
 
 
 def _extract_predicates_section(domain_pddl: str) -> str:
-    """Extract the :predicates section content."""
-    # Match from :predicates to the next top-level section or end
-    match = re.search(
-        r':predicates\s*\((.*?)\)\s*(?=\(:action|\(:derived|\(:functions|\(:constants|\Z)',
-        domain_pddl,
-        re.DOTALL | re.IGNORECASE
-    )
-    return match.group(1) if match else ""
+    """Extract the :predicates section content using balanced parenthesis matching."""
+    domain_clean = _remove_comments(domain_pddl)
+
+    # Find :predicates position
+    pred_start = domain_clean.lower().find(':predicates')
+    if pred_start == -1:
+        return ""
+
+    # In PDDL, (:predicates ...) has the opening ( BEFORE :predicates
+    # Find the opening ( that precedes :predicates
+    paren_start = domain_clean.rfind('(', 0, pred_start)
+    if paren_start == -1 or domain_clean[paren_start:pred_start].strip() != '(':
+        # Fallback: just look for ( before :predicates on the same logical line
+        paren_start = domain_clean.rfind('(', max(0, pred_start - 100), pred_start)
+    if paren_start == -1:
+        return ""
+
+    # Find matching closing ) using balanced parenthesis counting
+    paren_count = 1
+    pos = paren_start + 1
+    while pos < len(domain_clean) and paren_count > 0:
+        if domain_clean[pos] == '(':
+            paren_count += 1
+        elif domain_clean[pos] == ')':
+            paren_count -= 1
+        pos += 1
+
+    if paren_count == 0:
+        # Extract content between the outer parentheses
+        return domain_clean[paren_start + 1:pos - 1]
+
+    return ""
 
 
 def _extract_action_effects(domain_pddl: str) -> Dict[str, Set[str]]:
@@ -585,32 +609,137 @@ def check_goal_predicates_defined(domain_pddl: str, problem_pddl: str) -> dict:
 
 
 # ============================================================================
+# Domain-Level Semantic Checks (independent of problem)
+# ============================================================================
+
+def check_domain_goal_producibility(domain_pddl: str, goal_predicates: Set[str]) -> dict:
+    """
+    Check if goal predicates can possibly be produced by domain actions.
+    This is a domain-level check that's independent of the problem instance.
+
+    Returns:
+        {
+            "passed": bool,
+            "unproducible_goals": list[str],  # goals no action can produce
+            "diagnosis": str
+        }
+    """
+    action_effects = _extract_action_effects(domain_pddl)
+
+    # All predicates that can be produced by any action
+    producible = set()
+    for action_name, preds in action_effects.items():
+        producible.update(preds)
+
+    # Goals that no action can produce
+    unproducible = goal_predicates - producible
+
+    passed = len(unproducible) == 0
+
+    diagnosis = ""
+    if not passed:
+        diagnosis = f"DOMAIN-LEVEL ERROR: {len(unproducible)} goal predicate(s) cannot be produced.\n"
+        diagnosis += f"Unproducible goals: {sorted(unproducible)}\n"
+        diagnosis += "No action in the domain produces these predicates.\n"
+        diagnosis += "Fix: Add or modify actions to produce these predicates."
+
+    return {
+        "passed": passed,
+        "unproducible_goals": sorted(unproducible),
+        "diagnosis": diagnosis
+    }
+
+
+def check_domain_action_viability(domain_pddl: str) -> dict:
+    """
+    Check if actions can potentially fire (preconditions can be satisfied).
+    This identifies actions whose preconditions require predicates no other action produces.
+
+    Returns:
+        {
+            "passed": bool,
+            "problem_actions": list[(action, missing_preds)],  # actions with unfixable preconditions
+            "diagnosis": str
+        }
+    """
+    action_effects = _extract_action_effects(domain_pddl)
+    action_preconditions = _extract_action_preconditions(domain_pddl)
+
+    # All predicates producible by any action
+    producible = set()
+    for preds in action_effects.values():
+        producible.update(preds)
+
+    problem_actions = []
+
+    for action_name, preconds in action_preconditions.items():
+        # Check if all preconditions can be satisfied
+        satisfiable = preconds.intersection(producible)
+        missing = preconds - producible
+
+        # If action requires predicates that NO action produces, it's problematic
+        # (unless those predicates might be in init, which we check in problem-level checks)
+        if missing:
+            problem_actions.append((action_name, sorted(missing)))
+
+    passed = len(problem_actions) == 0
+
+    diagnosis = ""
+    if not passed:
+        diagnosis = f"DOMAIN-LEVEL WARNING: {len(problem_actions)} action(s) have unfixable preconditions.\n"
+        for action_name, missing in problem_actions:
+            diagnosis += f"  - '{action_name}' requires predicates no action produces: {missing}\n"
+        diagnosis += "These may be init predicates, but the domain has structural issues.\n"
+        diagnosis += "Verify: Are these predicates supposed to be in the initial state?"
+
+    return {
+        "passed": passed,
+        "problem_actions": problem_actions,
+        "diagnosis": diagnosis
+    }
+
+
+# ============================================================================
 # Main Entry Point
 # ============================================================================
 
-def run_semantic_checks(domain_pddl: str, problem_pddl: str, strict: bool = True) -> dict:
+def run_semantic_checks(domain_pddl: str, problem_pddl: str, strict: bool = False) -> dict:
     """
-    Run all semantic checks and return aggregated result.
+    Run all semantic checks (domain-level and problem-level) and return aggregated result.
 
     Args:
         domain_pddl: PDDL domain content
         problem_pddl: PDDL problem content
-        strict: If True, all checks must pass. If False, only critical checks must pass.
+        strict: If True, all checks must pass. If False (default), only critical checks must pass.
+                Allows tuning to reduce false positives.
 
     Returns:
         {
             "passed": bool,  # all (or critical) checks passed
             "checks": {
+                # Problem-level checks
                 "predicate_coverage": {...},
                 "action_reachability": {...},
                 "type_grounding": {...},
                 "init_defined": {...},
-                "goal_defined": {...}
+                "goal_defined": {...},
+                # Domain-level checks
+                "domain_goal_producibility": {...},
+                "domain_action_viability": {...}
             },
+            "domain_level_errors": list[str],  # errors at domain level (hard to fix)
+            "problem_level_errors": list[str],  # errors at problem level (might be fixable)
             "combined_diagnosis": str  # for LLM refinement prompt
         }
     """
+    # Extract goal predicates for domain-level checks
+    goal_predicates = _extract_goal_predicates(problem_pddl)
+
     checks = {
+        # Domain-level checks (independent of problem instance)
+        "domain_goal_producibility": check_domain_goal_producibility(domain_pddl, goal_predicates),
+        "domain_action_viability": check_domain_action_viability(domain_pddl),
+        # Problem-level checks (dependent on problem instance)
         "predicate_coverage": check_predicate_coverage(domain_pddl, problem_pddl),
         "action_reachability": check_action_reachability(domain_pddl, problem_pddl),
         "type_grounding": check_type_grounding(domain_pddl, problem_pddl),
@@ -618,19 +747,46 @@ def run_semantic_checks(domain_pddl: str, problem_pddl: str, strict: bool = True
         "goal_defined": check_goal_predicates_defined(domain_pddl, problem_pddl),
     }
 
-    # Critical checks that must always pass
-    critical_checks = ["predicate_coverage", "type_grounding", "init_defined", "goal_defined"]
+    # Categorize errors by level
+    domain_level_errors = []
+    problem_level_errors = []
+
+    if not checks["domain_goal_producibility"]["passed"]:
+        domain_level_errors.append("domain_goal_producibility")
+    if not checks["domain_action_viability"]["passed"]:
+        domain_level_errors.append("domain_action_viability")
+
+    problem_level = ["predicate_coverage", "action_reachability", "type_grounding", "init_defined", "goal_defined"]
+    for name in problem_level:
+        if not checks[name]["passed"]:
+            problem_level_errors.append(name)
+
+    # Determine pass/fail based on strictness
+    # In non-strict mode: domain errors are critical (unfixable), problem errors might be fixable
+    domain_errors_ok = len(domain_level_errors) == 0
+    problem_errors_ok = len(problem_level_errors) == 0
 
     if strict:
-        passed = all(c["passed"] for c in checks.values())
+        passed = domain_errors_ok and problem_errors_ok
     else:
-        passed = all(checks[name]["passed"] for name in critical_checks)
+        # Non-strict: only domain errors are blocking
+        # Problem-level errors can potentially be fixed by refinement
+        passed = domain_errors_ok
 
     # Build combined diagnosis
     diagnoses = []
-    for name, result in checks.items():
-        if not result["passed"] and result["diagnosis"]:
-            diagnoses.append(result["diagnosis"])
+
+    # Domain-level errors first (these are serious)
+    if not checks["domain_goal_producibility"]["passed"]:
+        diagnoses.append("CRITICAL (Domain): " + checks["domain_goal_producibility"]["diagnosis"])
+    if not checks["domain_action_viability"]["passed"]:
+        diagnoses.append("WARNING (Domain): " + checks["domain_action_viability"]["diagnosis"])
+
+    # Problem-level errors (these might be fixable)
+    for name in problem_level:
+        if not checks[name]["passed"] and checks[name]["diagnosis"]:
+            prefix = "PROBLEM-LEVEL" if name not in domain_level_errors else "ISSUE"
+            diagnoses.append(f"{prefix}: {checks[name]['diagnosis']}")
 
     combined_diagnosis = "\n\n".join(diagnoses) if diagnoses else "All semantic checks passed."
 
@@ -642,6 +798,8 @@ def run_semantic_checks(domain_pddl: str, problem_pddl: str, strict: bool = True
     return {
         "passed": passed,
         "checks": checks,
+        "domain_level_errors": domain_level_errors,
+        "problem_level_errors": problem_level_errors,
         "combined_diagnosis": combined_diagnosis
     }
 
