@@ -26,6 +26,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from demo.runner import LAPISRunner, RunResult, StageResult, MOCK_MODE
+from src.lapis.planner.low.semantic_verification import run_semantic_checks, format_semantic_report
 
 # ── page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -671,6 +672,22 @@ def _plan_tab(result: RunResult, lapis_result, llmpp_result):
         if plan_stage and "Errors: 0" in (plan_stage.val_log or ""):
             st.markdown('<span class="result-success" style="font-size:0.75rem;">VAL valid</span>', unsafe_allow_html=True)
 
+        # Semantic analysis badge
+        semantic_results = None
+        if result.domain_file_path and result.problem_file_path:
+            try:
+                from pathlib import Path
+                domain_content = Path(result.domain_file_path).read_text() if Path(result.domain_file_path).exists() else None
+                problem_content = Path(result.problem_file_path).read_text() if Path(result.problem_file_path).exists() else None
+                if domain_content and problem_content:
+                    semantic_results = run_semantic_checks(domain_content, problem_content, strict=False)
+                    if semantic_results["passed"]:
+                        st.markdown('<span class="result-success" style="font-size:0.75rem;">Semantic OK</span>', unsafe_allow_html=True)
+                    else:
+                        st.markdown('<span class="result-error" style="font-size:0.75rem;">Semantic issues</span>', unsafe_allow_html=True)
+            except Exception:
+                pass  # Semantic checks optional
+
         st.markdown(_render_plan_steps(result.plan_actions), unsafe_allow_html=True)
 
     with right_col:
@@ -711,6 +728,21 @@ def _plan_tab(result: RunResult, lapis_result, llmpp_result):
         st.markdown("---")
         st.markdown("**Refinement log**")
         st.markdown(_render_refinement_terminal(plan_stage.refinement_history), unsafe_allow_html=True)
+
+    # Semantic analysis details
+    if semantic_results:
+        st.markdown("---")
+        with st.expander("Semantic Analysis Details", expanded=not semantic_results["passed"]):
+            for check_name, check_result in semantic_results["checks"].items():
+                status_icon = "+" if check_result["passed"] else "-"
+                status_color = "#4caf50" if check_result["passed"] else "#f44336"
+                st.markdown(
+                    f'<span style="color:{status_color};font-weight:bold;">[{status_icon}]</span> '
+                    f'**{check_name.replace("_", " ").title()}**',
+                    unsafe_allow_html=True
+                )
+                if not check_result["passed"] and check_result.get("diagnosis"):
+                    st.code(check_result["diagnosis"], language=None)
 
     # Download buttons
     if result.plan_actions:

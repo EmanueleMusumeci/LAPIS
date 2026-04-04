@@ -19,14 +19,16 @@ from src.lapis.planner.low.pddl_generation import (
     check_domain_adequacy, check_problem_adequacy,
 )
 from src.lapis.planner.low.pddl_verification import translate_plan, VAL_validate, VAL_ground
+from src.lapis.planner.low.semantic_verification import run_semantic_checks
 
 class LowLevelPlanningPipeline(BasePipeline):
 
-    def __init__(self, 
+    def __init__(self,
                 determine_possibility: bool,
                 prevent_impossibility: bool,
                 pddl_gen_iterations: int,
                 planner_timeout: int = 180,
+                semantic_checks: bool = False,
                 **base_init_kwargs,
                 ):
         super().__init__(**base_init_kwargs)
@@ -34,6 +36,7 @@ class LowLevelPlanningPipeline(BasePipeline):
         self.prevent_impossibility: bool = prevent_impossibility
         self.pddl_gen_iterations: int = pddl_gen_iterations
         self.planner_timeout: int = planner_timeout
+        self.semantic_checks: bool = semantic_checks
         
     def _initialize_csv(self, csv_filepath):
         # Initialize CSV with headers
@@ -282,7 +285,22 @@ class LowLevelPlanningPipeline(BasePipeline):
 
         # Check problem and domain with VAL using helper method
         VAL_successful, VAL_validation_log = self._check_val(domain_file_path, problem_file_path)
-        
+
+        # Run semantic checks after VAL passes
+        semantic_diagnosis = ""
+        semantic_check_passed = True
+        if self.semantic_checks and VAL_successful:
+            domain_content = open(domain_file_path).read()
+            problem_content = open(problem_file_path).read()
+            semantic_result = run_semantic_checks(domain_content, problem_content, strict=False)
+            semantic_check_passed = semantic_result["passed"]
+            if not semantic_check_passed:
+                semantic_diagnosis = semantic_result["combined_diagnosis"]
+                logger.warning(f"Semantic checks failed:\n{semantic_diagnosis}")
+                # Save semantic check results
+                with open(os.path.join(logs_dir, "semantic_checks.txt"), "w") as f:
+                    f.write(semantic_diagnosis)
+
         plan_file_path = os.path.join(problem_dir, "plan_0.out")
         planner_output_file_path = os.path.join(problem_dir, "logs", "planner_output_0.log")
         
@@ -317,26 +335,37 @@ class LowLevelPlanningPipeline(BasePipeline):
             
         # Inner loop (PDDL Refinement)
         PDDL_loop_iteration = 0
-        
+
         # Explicit check: If both succeeded, skip refinement entirely
-        should_refine = not planning_successful or not VAL_grounding_successful
-        
+        # Also trigger refinement if semantic checks failed
+        should_refine = not planning_successful or not VAL_grounding_successful or (self.semantic_checks and not semantic_check_passed)
+
         if should_refine:
             if not planning_successful:
                 logger.info("Entering PDDL refinement because initial planning failed (plan is None).")
             elif not VAL_grounding_successful:
                 logger.info("Entering PDDL refinement because initial plan failed VAL validation or grounding.")
+            elif self.semantic_checks and not semantic_check_passed:
+                logger.info("Entering PDDL refinement because semantic checks failed.")
             
             self.current_phase = "PDDL_REFINEMENT"
                 
+            # Include semantic check status in refinement condition if enabled
+            semantic_ok = semantic_check_passed if self.semantic_checks else True
             while PDDL_loop_iteration < self.pddl_gen_iterations and \
-                (not planning_successful or not VAL_grounding_successful):
+                (not planning_successful or not VAL_grounding_successful or not semantic_ok):
+                semantic_ok = semantic_check_passed if self.semantic_checks else True
                 logger.info(f"------------ Refinement iteration {PDDL_loop_iteration+1}/{self.pddl_gen_iterations} ------------")
 
                 logger.debug(f"Problem directory: {problem_dir}")
                     
                 logger.info("Refining problem")
                 refinement_start_time = time.time()
+                # Include semantic diagnosis in refinement if available
+                combined_val_log = VAL_validation_log or ""
+                if semantic_diagnosis:
+                    combined_val_log = f"{combined_val_log}\n\n{semantic_diagnosis}" if combined_val_log else semantic_diagnosis
+
                 new_problem, _refinement_history = refine_problem(
                     domain_file_path=domain_file_path,
                     problem_file_path=problem_file_path,
@@ -348,7 +377,7 @@ class LowLevelPlanningPipeline(BasePipeline):
                     agent=self.agent,
                     pddlenv_error_log=pddlenv_error_log,
                     planner_error_log=planner_error_log,
-                    VAL_validation_log=VAL_validation_log,
+                    VAL_validation_log=combined_val_log,
                     VAL_grounding_log=VAL_grounding_log,
                 )
                 problem_refinement_time += time.time() - refinement_start_time
@@ -379,10 +408,18 @@ class LowLevelPlanningPipeline(BasePipeline):
                     
                 # Check planning with VAL (inner loop version)
                 VAL_successful, VAL_validation_log, VAL_ground_successful, VAL_grounding_log = \
-                    self._check_val_planning(domain_file_path, problem_file_path, plan_file_path, 
+                    self._check_val_planning(domain_file_path, problem_file_path, plan_file_path,
                                             translation_suffix=f"{PDDL_loop_iteration}", problem_dir=problem_dir)
                 VAL_grounding_successful = VAL_successful and VAL_ground_successful
-                    
+
+                # Re-run semantic checks after refinement
+                if self.semantic_checks and VAL_successful:
+                    domain_content = open(domain_file_path).read()
+                    problem_content = open(problem_file_path).read()
+                    semantic_result = run_semantic_checks(domain_content, problem_content, strict=False)
+                    semantic_check_passed = semantic_result["passed"]
+                    semantic_diagnosis = semantic_result["combined_diagnosis"] if not semantic_check_passed else ""
+
                 save_statistics(
                     dir=results_dir,
                     workflow_iteration=iteration,
