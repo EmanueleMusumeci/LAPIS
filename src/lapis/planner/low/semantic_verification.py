@@ -9,13 +9,340 @@ This module implements three core checks:
 1. Predicate coverage: Can all goal predicates be achieved via action effects?
 2. Action reachability: Can actions fire given the initial state?
 3. Type grounding: Do all action parameters have at least one valid object?
+
+ARCHITECTURE:
+- Pluggable extraction backends (regex or UP parser)
+- Easy to disable/enable different extraction strategies
+- Graceful fallback when parsers fail
 """
 
 import re
 import logging
+from abc import ABC, abstractmethod
 from typing import Dict, List, Set, Tuple, Optional
+from pathlib import Path
+import tempfile
 
 logger = logging.getLogger(__name__)
+
+
+# ============================================================================
+# PLUGGABLE EXTRACTION STRATEGIES
+# ============================================================================
+# This allows easy switching between different PDDL extraction backends
+# Implement PDDLExtractor to add new extraction methods
+
+class PDDLExtractor(ABC):
+    """Abstract base class for PDDL extraction strategies."""
+
+    @abstractmethod
+    def extract_predicates(self, domain_pddl: str) -> Set[str]:
+        """Extract predicate names from domain."""
+        pass
+
+    @abstractmethod
+    def extract_action_effects(self, domain_pddl: str) -> Dict[str, Set[str]]:
+        """Extract predicates from action effects."""
+        pass
+
+    @abstractmethod
+    def extract_action_preconditions(self, domain_pddl: str) -> Dict[str, Set[str]]:
+        """Extract predicates from action preconditions."""
+        pass
+
+    @abstractmethod
+    def extract_action_parameters(self, domain_pddl: str) -> Dict[str, List[Tuple[str, str]]]:
+        """Extract action parameters with types."""
+        pass
+
+    @abstractmethod
+    def extract_goal_predicates(self, problem_pddl: str) -> Set[str]:
+        """Extract goal predicates from problem."""
+        pass
+
+    @abstractmethod
+    def extract_init_predicates(self, problem_pddl: str) -> Set[str]:
+        """Extract init state predicates from problem."""
+        pass
+
+    @abstractmethod
+    def extract_types(self, domain_pddl: str) -> Dict[str, str]:
+        """Extract type hierarchy."""
+        pass
+
+    @abstractmethod
+    def extract_objects(self, problem_pddl: str) -> Dict[str, Set[str]]:
+        """Extract objects by type from problem."""
+        pass
+
+
+class RegexPDDLExtractor(PDDLExtractor):
+    """PDDL extraction using regex and balanced parenthesis matching.
+
+    Advantages: Works with any text, no external dependencies
+    Disadvantages: Less semantic awareness, potential edge cases
+    """
+
+    def __init__(self):
+        """Initialize the regex-based extractor."""
+        pass
+
+    def extract_predicates(self, domain_pddl: str) -> Set[str]:
+        """Extract all predicate names from domain."""
+        pred_section = self._extract_predicates_section(domain_pddl)
+        predicates = set()
+        for match in re.finditer(r'\(([a-zA-Z][a-zA-Z0-9_-]*)', pred_section):
+            predicates.add(match.group(1).lower())
+        return predicates
+
+    def extract_action_effects(self, domain_pddl: str) -> Dict[str, Set[str]]:
+        """Extract predicates from action effects."""
+        # Delegated to module-level function
+        return _extract_action_effects_regex(domain_pddl)
+
+    def extract_action_preconditions(self, domain_pddl: str) -> Dict[str, Set[str]]:
+        """Extract predicates from action preconditions."""
+        return _extract_action_preconditions_regex(domain_pddl)
+
+    def extract_action_parameters(self, domain_pddl: str) -> Dict[str, List[Tuple[str, str]]]:
+        """Extract action parameters with types."""
+        return _extract_action_parameters_regex(domain_pddl)
+
+    def extract_goal_predicates(self, problem_pddl: str) -> Set[str]:
+        """Extract goal predicates from problem."""
+        return _extract_goal_predicates_regex(problem_pddl)
+
+    def extract_init_predicates(self, problem_pddl: str) -> Set[str]:
+        """Extract init state predicates from problem."""
+        return _extract_init_predicates_regex(problem_pddl)
+
+    def extract_types(self, domain_pddl: str) -> Dict[str, str]:
+        """Extract type hierarchy."""
+        return _extract_types_regex(domain_pddl)
+
+    def extract_objects(self, problem_pddl: str) -> Dict[str, Set[str]]:
+        """Extract objects by type from problem."""
+        return _extract_objects_regex(problem_pddl)
+
+    def _extract_predicates_section(self, domain_pddl: str) -> str:
+        """Extract the :predicates section content using balanced parenthesis matching."""
+        domain_clean = _remove_comments(domain_pddl)
+
+        # Find :predicates position
+        pred_start = domain_clean.lower().find(':predicates')
+        if pred_start == -1:
+            return ""
+
+        # In PDDL, (:predicates ...) has the opening ( BEFORE :predicates
+        paren_start = domain_clean.rfind('(', 0, pred_start)
+        if paren_start == -1 or domain_clean[paren_start:pred_start].strip() != '(':
+            paren_start = domain_clean.rfind('(', max(0, pred_start - 100), pred_start)
+        if paren_start == -1:
+            return ""
+
+        # Find matching closing ) using balanced parenthesis counting
+        paren_count = 1
+        pos = paren_start + 1
+        while pos < len(domain_clean) and paren_count > 0:
+            if domain_clean[pos] == '(':
+                paren_count += 1
+            elif domain_clean[pos] == ')':
+                paren_count -= 1
+            pos += 1
+
+        if paren_count == 0:
+            return domain_clean[paren_start + 1:pos - 1]
+
+        return ""
+
+
+class UPParserExtractor(PDDLExtractor):
+    """PDDL extraction using Unified Planning parser.
+
+    Advantages: Semantic-aware, type-safe, no false positives
+    Disadvantages: Requires valid PDDL, external dependency
+    """
+
+    def __init__(self):
+        """Initialize the UP parser-based extractor."""
+        try:
+            from unified_planning import io
+            self.reader = io.PDDLReader()
+            self.available = True
+        except ImportError:
+            logger.warning("Unified Planning not available; UP extractor disabled")
+            self.available = False
+            self.reader = None
+
+    def _parse_problem(self, domain_pddl: str, problem_pddl: str):
+        """Parse domain and problem using UP parser."""
+        if not self.available:
+            raise RuntimeError("UP parser not available")
+
+        try:
+            # UP parser requires files or uses temp files
+            with tempfile.TemporaryDirectory() as tmpdir:
+                domain_file = Path(tmpdir) / "domain.pddl"
+                problem_file = Path(tmpdir) / "problem.pddl"
+
+                domain_file.write_text(domain_pddl)
+                problem_file.write_text(problem_pddl)
+
+                problem = self.reader.parse_problem_string(domain_pddl, problem_pddl)
+                return problem
+        except Exception as e:
+            logger.warning(f"UP parser failed: {e}. Falling back to regex.")
+            return None
+
+    def extract_predicates(self, domain_pddl: str) -> Set[str]:
+        """Extract all predicate names from domain."""
+        # We don't have a problem here, so parse with a dummy problem
+        dummy_problem = "(define (problem dummy) (:domain tmp) (:objects) (:init) (:goal (and)))"
+        # Extract domain name from PDDL
+        domain_match = re.search(r'\(define\s+\(domain\s+([a-zA-Z0-9_-]+)', domain_pddl)
+        domain_name = domain_match.group(1) if domain_match else "tmp"
+        dummy_problem = f"(define (problem dummy) (:domain {domain_name}) (:objects) (:init) (:goal (and)))"
+
+        problem = self._parse_problem(domain_pddl, dummy_problem)
+        if problem is None:
+            return RegexPDDLExtractor().extract_predicates(domain_pddl)
+
+        return {fluent.name for fluent in problem.fluents}
+
+    def extract_action_effects(self, domain_pddl: str) -> Dict[str, Set[str]]:
+        """Extract predicates from action effects."""
+        # Need a problem to parse domain with UP
+        try:
+            domain_match = re.search(r'\(define\s+\(domain\s+([a-zA-Z0-9_-]+)', domain_pddl)
+            domain_name = domain_match.group(1) if domain_match else "tmp"
+            dummy_problem = f"(define (problem dummy) (:domain {domain_name}) (:objects) (:init) (:goal (and)))"
+
+            problem = self._parse_problem(domain_pddl, dummy_problem)
+            if problem is None:
+                return RegexPDDLExtractor().extract_action_effects(domain_pddl)
+
+            effects_dict = {}
+            for action in problem.actions:
+                preds = set()
+                for effect in action.effects:
+                    if hasattr(effect, 'fluent'):
+                        preds.add(effect.fluent.name)
+                effects_dict[action.name] = preds
+            return effects_dict
+        except Exception as e:
+            logger.debug(f"UP extractor failed for effects: {e}")
+            return RegexPDDLExtractor().extract_action_effects(domain_pddl)
+
+    def extract_action_preconditions(self, domain_pddl: str) -> Dict[str, Set[str]]:
+        """Extract predicates from action preconditions."""
+        try:
+            domain_match = re.search(r'\(define\s+\(domain\s+([a-zA-Z0-9_-]+)', domain_pddl)
+            domain_name = domain_match.group(1) if domain_match else "tmp"
+            dummy_problem = f"(define (problem dummy) (:domain {domain_name}) (:objects) (:init) (:goal (and)))"
+
+            problem = self._parse_problem(domain_pddl, dummy_problem)
+            if problem is None:
+                return RegexPDDLExtractor().extract_action_preconditions(domain_pddl)
+
+            preconds_dict = {}
+            for action in problem.actions:
+                preds = set()
+                for prec in action.preconditions:
+                    if hasattr(prec, 'fluent'):
+                        preds.add(prec.fluent.name)
+                preconds_dict[action.name] = preds
+            return preconds_dict
+        except Exception as e:
+            logger.debug(f"UP extractor failed for preconditions: {e}")
+            return RegexPDDLExtractor().extract_action_preconditions(domain_pddl)
+
+    def extract_action_parameters(self, domain_pddl: str) -> Dict[str, List[Tuple[str, str]]]:
+        """Extract action parameters with types."""
+        try:
+            domain_match = re.search(r'\(define\s+\(domain\s+([a-zA-Z0-9_-]+)', domain_pddl)
+            domain_name = domain_match.group(1) if domain_match else "tmp"
+            dummy_problem = f"(define (problem dummy) (:domain {domain_name}) (:objects) (:init) (:goal (and)))"
+
+            problem = self._parse_problem(domain_pddl, dummy_problem)
+            if problem is None:
+                return RegexPDDLExtractor().extract_action_parameters(domain_pddl)
+
+            params_dict = {}
+            for action in problem.actions:
+                params = [(param.name, param.type.basename) for param in action.parameters]
+                params_dict[action.name] = params
+            return params_dict
+        except Exception as e:
+            logger.debug(f"UP extractor failed for parameters: {e}")
+            return RegexPDDLExtractor().extract_action_parameters(domain_pddl)
+
+    def extract_goal_predicates(self, problem_pddl: str) -> Set[str]:
+        """Extract goal predicates from problem."""
+        # Can't parse without domain
+        return RegexPDDLExtractor().extract_goal_predicates(problem_pddl)
+
+    def extract_init_predicates(self, problem_pddl: str) -> Set[str]:
+        """Extract init predicates from problem."""
+        # Can't parse without domain
+        return RegexPDDLExtractor().extract_init_predicates(problem_pddl)
+
+    def extract_types(self, domain_pddl: str) -> Dict[str, str]:
+        """Extract type hierarchy."""
+        # Can't easily extract from UP without problem
+        return RegexPDDLExtractor().extract_types(domain_pddl)
+
+    def extract_objects(self, problem_pddl: str) -> Dict[str, Set[str]]:
+        """Extract objects by type from problem."""
+        # Can't parse without domain
+        return RegexPDDLExtractor().extract_objects(problem_pddl)
+
+
+class ExtractorFactory:
+    """Factory for creating PDDL extractors."""
+
+    _extractors = {
+        "regex": RegexPDDLExtractor,
+        "up": UPParserExtractor,
+    }
+
+    @classmethod
+    def create(cls, extractor_type: str = "auto") -> PDDLExtractor:
+        """Create an extractor of the specified type.
+
+        Args:
+            extractor_type: "regex" (always works), "up" (better but requires UP),
+                           or "auto" (tries UP, falls back to regex)
+
+        Returns:
+            PDDLExtractor instance
+        """
+        if extractor_type == "auto":
+            # Try UP first, fall back to regex
+            try:
+                up_extractor = UPParserExtractor()
+                if up_extractor.available:
+                    logger.info("Using UP parser for PDDL extraction")
+                    return up_extractor
+            except Exception:
+                pass
+            logger.info("Falling back to regex-based PDDL extraction")
+            return RegexPDDLExtractor()
+
+        elif extractor_type in cls._extractors:
+            extractor_class = cls._extractors[extractor_type]
+            instance = extractor_class()
+            logger.info(f"Using {extractor_type} extractor for PDDL extraction")
+            return instance
+
+        else:
+            raise ValueError(f"Unknown extractor type: {extractor_type}")
+
+    @classmethod
+    def register(cls, name: str, extractor_class: type):
+        """Register a new extractor type."""
+        if not issubclass(extractor_class, PDDLExtractor):
+            raise TypeError(f"{extractor_class} must inherit from PDDLExtractor")
+        cls._extractors[name] = extractor_class
 
 
 # ============================================================================
@@ -65,7 +392,7 @@ def _extract_predicates_section(domain_pddl: str) -> str:
     return ""
 
 
-def _extract_action_effects(domain_pddl: str) -> Dict[str, Set[str]]:
+def _extract_action_effects_regex(domain_pddl: str) -> Dict[str, Set[str]]:
     """
     Extract predicates from action effects.
 
@@ -104,7 +431,7 @@ def _extract_action_effects(domain_pddl: str) -> Dict[str, Set[str]]:
     return action_effects
 
 
-def _extract_action_preconditions(domain_pddl: str) -> Dict[str, Set[str]]:
+def _extract_action_preconditions_regex(domain_pddl: str) -> Dict[str, Set[str]]:
     """
     Extract predicates from action preconditions.
 
@@ -143,7 +470,7 @@ def _extract_action_preconditions(domain_pddl: str) -> Dict[str, Set[str]]:
     return action_preconditions
 
 
-def _extract_action_parameters(domain_pddl: str) -> Dict[str, List[Tuple[str, str]]]:
+def _extract_action_parameters_regex(domain_pddl: str) -> Dict[str, List[Tuple[str, str]]]:
     """
     Extract typed parameters from actions.
 
@@ -192,7 +519,7 @@ def _extract_action_parameters(domain_pddl: str) -> Dict[str, List[Tuple[str, st
     return action_params
 
 
-def _extract_goal_predicates(problem_pddl: str) -> Set[str]:
+def _extract_goal_predicates_regex(problem_pddl: str) -> Set[str]:
     """Extract predicate names from the goal section."""
     problem_clean = _remove_comments(problem_pddl)
 
@@ -216,7 +543,7 @@ def _extract_goal_predicates(problem_pddl: str) -> Set[str]:
     return predicates
 
 
-def _extract_init_predicates(problem_pddl: str) -> Set[str]:
+def _extract_init_predicates_regex(problem_pddl: str) -> Set[str]:
     """Extract predicate names from the init section."""
     problem_clean = _remove_comments(problem_pddl)
 
@@ -248,7 +575,7 @@ def _extract_init_predicates(problem_pddl: str) -> Set[str]:
     return predicates
 
 
-def _extract_types(domain_pddl: str) -> Dict[str, str]:
+def _extract_types_regex(domain_pddl: str) -> Dict[str, str]:
     """
     Extract type hierarchy from domain.
 
@@ -292,7 +619,7 @@ def _extract_types(domain_pddl: str) -> Dict[str, str]:
     return types
 
 
-def _extract_objects(problem_pddl: str) -> Dict[str, Set[str]]:
+def _extract_objects_regex(problem_pddl: str) -> Dict[str, Set[str]]:
     """
     Extract typed objects from problem.
 
@@ -339,7 +666,7 @@ def _extract_objects(problem_pddl: str) -> Dict[str, Set[str]]:
     return objects_by_type
 
 
-def _get_subtypes(base_type: str, type_hierarchy: Dict[str, str]) -> Set[str]:
+def _get_subtypes_regex(base_type: str, type_hierarchy: Dict[str, str]) -> Set[str]:
     """Get all types that are subtypes of base_type (including base_type itself)."""
     subtypes = {base_type}
     changed = True
@@ -350,6 +677,36 @@ def _get_subtypes(base_type: str, type_hierarchy: Dict[str, str]) -> Set[str]:
                 subtypes.add(child)
                 changed = True
     return subtypes
+
+
+# ============================================================================
+# Global Extractor Configuration
+# ============================================================================
+# Control which extraction backend is used
+_extractor_type = "auto"  # "auto", "regex", or "up"
+_extractor = None
+
+
+def set_extractor_type(extractor_type: str):
+    """Set the global PDDL extractor type.
+
+    Args:
+        extractor_type: "auto" (try UP, fall back to regex),
+                       "regex" (always use regex),
+                       "up" (always use UP parser)
+    """
+    global _extractor, _extractor_type
+    _extractor_type = extractor_type
+    _extractor = ExtractorFactory.create(extractor_type)
+    logger.info(f"Switched to {extractor_type} extractor")
+
+
+def get_extractor() -> PDDLExtractor:
+    """Get the current PDDL extractor instance."""
+    global _extractor, _extractor_type
+    if _extractor is None:
+        _extractor = ExtractorFactory.create(_extractor_type)
+    return _extractor
 
 
 # ============================================================================
@@ -373,9 +730,9 @@ def check_predicate_coverage(domain_pddl: str, problem_pddl: str) -> dict:
             "diagnosis": str
         }
     """
-    goal_predicates = _extract_goal_predicates(problem_pddl)
-    init_predicates = _extract_init_predicates(problem_pddl)
-    action_effects = _extract_action_effects(domain_pddl)
+    goal_predicates = _extract_goal_predicates_regex(problem_pddl)
+    init_predicates = _extract_init_predicates_regex(problem_pddl)
+    action_effects = _extract_action_effects_regex(domain_pddl)
 
     # All predicates that can be made true
     achievable = set()
@@ -426,9 +783,9 @@ def check_action_reachability(domain_pddl: str, problem_pddl: str) -> dict:
             "diagnosis": str
         }
     """
-    action_preconditions = _extract_action_preconditions(domain_pddl)
-    action_effects = _extract_action_effects(domain_pddl)
-    init_predicates = _extract_init_predicates(problem_pddl)
+    action_preconditions = _extract_action_preconditions_regex(domain_pddl)
+    action_effects = _extract_action_effects_regex(domain_pddl)
+    init_predicates = _extract_init_predicates_regex(problem_pddl)
 
     # Compute reachable predicates via fixpoint iteration
     reachable_predicates = set(init_predicates)
@@ -491,16 +848,16 @@ def check_type_grounding(domain_pddl: str, problem_pddl: str) -> dict:
             "diagnosis": str
         }
     """
-    action_params = _extract_action_parameters(domain_pddl)
-    type_hierarchy = _extract_types(domain_pddl)
-    objects_by_type = _extract_objects(problem_pddl)
+    action_params = _extract_action_parameters_regex(domain_pddl)
+    type_hierarchy = _extract_types_regex(domain_pddl)
+    objects_by_type = _extract_objects_regex(problem_pddl)
 
     ungrounded_params = []
 
     for action_name, params in action_params.items():
         for param_name, param_type in params:
             # Get all subtypes of param_type
-            valid_types = _get_subtypes(param_type, type_hierarchy)
+            valid_types = _get_subtypes_regex(param_type, type_hierarchy)
 
             # Check if any objects exist for these types
             has_objects = False
@@ -546,11 +903,11 @@ def check_init_predicates_defined(domain_pddl: str, problem_pddl: str) -> dict:
         defined_predicates.add(match.group(1).lower())
 
     # Also include predicates from action effects (for robustness)
-    action_effects = _extract_action_effects(domain_pddl)
+    action_effects = _extract_action_effects_regex(domain_pddl)
     for preds in action_effects.values():
         defined_predicates.update(preds)
 
-    init_predicates = _extract_init_predicates(problem_pddl)
+    init_predicates = _extract_init_predicates_regex(problem_pddl)
     undefined = init_predicates - defined_predicates
 
     passed = len(undefined) == 0
@@ -586,11 +943,11 @@ def check_goal_predicates_defined(domain_pddl: str, problem_pddl: str) -> dict:
         defined_predicates.add(match.group(1).lower())
 
     # Also include predicates from action effects
-    action_effects = _extract_action_effects(domain_pddl)
+    action_effects = _extract_action_effects_regex(domain_pddl)
     for preds in action_effects.values():
         defined_predicates.update(preds)
 
-    goal_predicates = _extract_goal_predicates(problem_pddl)
+    goal_predicates = _extract_goal_predicates_regex(problem_pddl)
     undefined = goal_predicates - defined_predicates
 
     passed = len(undefined) == 0
@@ -624,7 +981,7 @@ def check_domain_goal_producibility(domain_pddl: str, goal_predicates: Set[str])
             "diagnosis": str
         }
     """
-    action_effects = _extract_action_effects(domain_pddl)
+    action_effects = _extract_action_effects_regex(domain_pddl)
 
     # All predicates that can be produced by any action
     producible = set()
@@ -662,8 +1019,8 @@ def check_domain_action_viability(domain_pddl: str) -> dict:
             "diagnosis": str
         }
     """
-    action_effects = _extract_action_effects(domain_pddl)
-    action_preconditions = _extract_action_preconditions(domain_pddl)
+    action_effects = _extract_action_effects_regex(domain_pddl)
+    action_preconditions = _extract_action_preconditions_regex(domain_pddl)
 
     # All predicates producible by any action
     producible = set()
@@ -703,7 +1060,12 @@ def check_domain_action_viability(domain_pddl: str) -> dict:
 # Main Entry Point
 # ============================================================================
 
-def run_semantic_checks(domain_pddl: str, problem_pddl: str, strict: bool = False) -> dict:
+def run_semantic_checks(
+    domain_pddl: str,
+    problem_pddl: str,
+    strict: bool = False,
+    extractor_type: str = "auto"
+) -> dict:
     """
     Run all semantic checks (domain-level and problem-level) and return aggregated result.
 
@@ -712,6 +1074,7 @@ def run_semantic_checks(domain_pddl: str, problem_pddl: str, strict: bool = Fals
         problem_pddl: PDDL problem content
         strict: If True, all checks must pass. If False (default), only critical checks must pass.
                 Allows tuning to reduce false positives.
+        extractor_type: Type of PDDL extractor to use: "auto" (default), "regex", or "up"
 
     Returns:
         {
@@ -732,8 +1095,12 @@ def run_semantic_checks(domain_pddl: str, problem_pddl: str, strict: bool = Fals
             "combined_diagnosis": str  # for LLM refinement prompt
         }
     """
+    # Set the extractor type if specified
+    if extractor_type != _extractor_type:
+        set_extractor_type(extractor_type)
+
     # Extract goal predicates for domain-level checks
-    goal_predicates = _extract_goal_predicates(problem_pddl)
+    goal_predicates = _extract_goal_predicates_regex(problem_pddl)
 
     checks = {
         # Domain-level checks (independent of problem instance)
