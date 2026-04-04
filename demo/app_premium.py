@@ -475,21 +475,27 @@ def _execute_run_parallel(domain_nl: str, problem_nl: str, containers):
                 st.markdown(f"#### {'LAPIS 🌀' if method == 'lapis' else 'LLM+P 🚀'}")
                 _render_all_stage_cards(stages)
 
-        result = runner.run(
-            domain_nl=domain_nl,
-            problem_nl=problem_nl,
-            method=method,
-            max_refinements=st.session_state.max_refinements,
-            planner_name=st.session_state.planner,
-            on_stage_update=on_update,
-        )
-        
-        if method == "lapis":
-            st.session_state.lapis_result = result
-            st.session_state.running_lapis = False
-        else:
-            st.session_state.llmpp_result = result
-            st.session_state.running_llmpp = False
+        try:
+            result = runner.run(
+                domain_nl=domain_nl,
+                problem_nl=problem_nl,
+                method=method,
+                max_refinements=st.session_state.max_refinements,
+                planner_name=st.session_state.planner,
+                on_stage_update=on_update,
+            )
+            
+            if method == "lapis":
+                st.session_state.lapis_result = result
+            else:
+                st.session_state.llmpp_result = result
+        except Exception as e:
+            st.error(f"Error in {method} race: {e}")
+        finally:
+            if method == "lapis":
+                st.session_state.running_lapis = False
+            else:
+                st.session_state.running_llmpp = False
 
     t1 = threading.Thread(target=run_wrapper, args=("lapis",))
     t2 = threading.Thread(target=run_wrapper, args=("llmpp",))
@@ -520,6 +526,24 @@ def _execute_run_parallel(domain_nl: str, problem_nl: str, containers):
     progress_bar.progress(1.0, text="🏁 Race Complete!")
     t1.join()
     t2.join()
+
+    # Determine winner
+    r1 = st.session_state.lapis_result
+    r2 = st.session_state.llmpp_result
+    
+    winner = None
+    if r1 and r1.success and r2 and r2.success:
+        winner = "LAPIS" if r1.total_time < r2.total_time else "LLM+P"
+    elif r1 and r1.success:
+        winner = "LAPIS"
+    elif r2 and r2.success:
+        winner = "LLM+P"
+    
+    if winner:
+        st.balloons()
+        with (lapis_ph.container() if winner == "LAPIS" else llmpp_ph.container()):
+            st.markdown(f"### 🏆 WINNER: {winner}!")
+            st.markdown(f'<div class="result-success" style="text-align:center;font-size:1.5rem;margin-top:1rem;">🏆 {winner} WON THE RACE!</div>', unsafe_allow_html=True)
 
 
 def _execute_run(method: str, domain_nl: str, problem_nl: str,

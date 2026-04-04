@@ -17,6 +17,10 @@ import traceback
 import unified_planning as up
 from unified_planning.shortcuts import OneshotPlanner
 from unified_planning.io import PDDLReader
+from unified_planning.environment import get_environment
+
+# Disable strictly naming conflict check (for Floortile "up" and "down" labels)
+get_environment().error_used_name = False
 
 import re
 
@@ -76,7 +80,7 @@ def run_planner_UP(domain_file_path, problem_dir, planner_name="up_fd", timeout=
         up_planner_name = "fast-downward" if "fd" in planner_name.lower() else "pyperplan"
         
         with OneshotPlanner(name=up_planner_name) as planner:
-            result = planner.solve(problem)
+            result = planner.solve(problem, timeout=timeout)
             
             from unified_planning.engines import PlanGenerationResultStatus
             if result.status in [PlanGenerationResultStatus.SOLVED_SATISFICING, PlanGenerationResultStatus.SOLVED_OPTIMALLY]:

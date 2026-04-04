@@ -265,6 +265,8 @@ class LAPISRunner:
         method: str = "lapis",
         max_refinements: int = 3,
         planner_name: str = "pyperplan",
+        planner_timeout: int = 180,
+        skip_adequacy: bool = False,
         on_stage_update: Optional[Callable[[StageResult], None]] = None,
     ) -> RunResult:
         """
@@ -277,6 +279,8 @@ class LAPISRunner:
         method          : "lapis" or "llmpp"
         max_refinements : number of problem-refinement attempts
         planner_name    : "pyperplan" | "up_fd" | "fd"
+        planner_timeout : maximum seconds to allow the planner per attempt
+        skip_adequacy   : if True, skip the Domain Adequacy Check stage even in lapis mode
         on_stage_update : callback called after each stage (or stage update)
         """
         if MOCK_MODE:
@@ -356,7 +360,7 @@ class LAPISRunner:
                              error_msg=str(e), method=method)
 
         # ── Stage 2: Domain Adequacy Check (LAPIS only) ─────────
-        if method == "lapis":
+        if method == "lapis" and not skip_adequacy:
             t0 = time.time()
             sr2 = _stage("Domain Adequacy Check")
             try:
@@ -473,6 +477,7 @@ class LAPISRunner:
                 problem_dir=problem_dir,
                 plan_path=plan_path,
                 planner_name=planner_name,
+                planner_timeout=planner_timeout,
                 max_refinements=max_ref,
                 agent=self.agent,
                 problem_nl=problem_nl,
@@ -559,6 +564,7 @@ def _plan_refine_loop(
     problem_dir: str,
     plan_path: str,
     planner_name: str,
+    planner_timeout: int,
     max_refinements: int,
     agent,
     problem_nl: str,
@@ -579,7 +585,7 @@ def _plan_refine_loop(
 
     on_update("Running planner…")
     plan, pddlenv_err, planner_err, _ = plan_with_output(
-        domain_path, problem_dir, plan_path, planner_name=planner_name, timeout=60
+        domain_path, problem_dir, plan_path, planner_name=planner_name, timeout=planner_timeout
     )
 
     if plan:
@@ -620,7 +626,7 @@ def _plan_refine_loop(
             f.write(new_problem_pddl)
 
         plan, pddlenv_err, planner_err, _ = plan_with_output(
-            domain_path, problem_dir, plan_path, planner_name=planner_name, timeout=60
+            domain_path, problem_dir, plan_path, planner_name=planner_name, timeout=planner_timeout
         )
 
         entry = {

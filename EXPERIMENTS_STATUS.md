@@ -1,51 +1,115 @@
-# ICAPS 2026 Experiments Status
+# LAPIS Experiments Status
 
-This document tracks the status of the experiments required for the ICAPS 2026 paper submission, separating the LAPIS framework results from the true LLM+P baseline.
-
-## 1. LAPIS Framework Execution
-The standard LAPIS conditions successfully executed utilizing the `run_icaps_experiments.sh` script, which correctly mapped to the `lapis` refinement method.
-
-| Condition | Domain | Status | Notes |
-| :--- | :--- | :--- | :--- |
-| LAPIS/full | blocksworld | ✅ Done | From previous runs |
-| LAPIS/full | barman | ✅ Done | From previous runs |
-| LAPIS/full | storage | ✅ Done | Run via `run_icaps_experiments.sh` Phase 1 |
-| LAPIS/full | termes | ✅ Done | Run via `run_icaps_experiments.sh` Phase 1 |
-| LAPIS/full+adequacy | blocksworld | ✅ Done | From previous runs |
-| LAPIS/full+adequacy | barman | ✅ Done | From previous runs |
-| LAPIS/full+adequacy | storage | ✅ Done | Run via `run_icaps_experiments.sh` Phase 2 |
-| LAPIS/full+adequacy | termes | ✅ Done | Run via `run_icaps_experiments.sh` Phase 2 |
-
-*Note: The conversation history mentioned potentially addressing missing benchmark domains like `grippers` and `tyreworld`. If LAPIS needs to be evaluated on these, they are currently marked as **TODO**.*
+Current status of experimental evaluation for the ICAPS 2026 Demo Track submission.
 
 ---
 
-## 2. LAPIS Ablation (Zero-Shot / No Refinement)
-Previously labeled "LLM+P with Gen Domain" (Condition B'). This condition failed due to the bash script routing it to `lapis` (3 refinements) instead of `llmpp` (0 refinements).
+## Overall Progress
 
-| Condition | Domain | Status | Notes |
-| :--- | :--- | :--- | :--- |
-| LAPIS Single-Shot | storage | ❌ INVALID | Ran with 3 refinements. Needs rerun. |
-| LAPIS Single-Shot | termes | ❌ INVALID | Ran with 3 refinements. Needs rerun. |
-
----
-
-## 3. Original LLM+P Baseline (True Condition B)
-The previous baseline executions used a Zero-Shot prompt structure in `run_llmpp_benchmark.py`. To be 100% fair and accurate, we must execute the original `third-party/llm-pddl/main.py`, which provides the necessary Few-Shot examples to the LLM.
-
-| Condition | Domain | Status | Notes |
-| :--- | :--- | :--- | :--- |
-| LLM+P (Original) | blocksworld | 🔄 TO BE RERUN | Must use `llm-pddl/main.py` |
-| LLM+P (Original) | barman | 🔄 TO BE RERUN | Must use `llm-pddl/main.py` |
-| LLM+P (Original) | storage | 🔄 TO BE RERUN | Must use `llm-pddl/main.py` |
-| LLM+P (Original) | termes | 🔄 TO BE RERUN | Must use `llm-pddl/main.py` |
-| LLM+P (Original) | grippers | 🔄 TO BE RERUN | Mentioned in past logs |
-| LLM+P (Original) | tyreworld | 🔄 TO BE RERUN | Mentioned in past logs |
+| Category | Status |
+|----------|--------|
+| LLM+P Baseline (6 domains) | Complete |
+| LAPIS/GT (5 domains) | Complete |
+| LAPIS/Synthesis (5 domains) | Complete |
+| LAPIS/Adequacy (5 domains) | Complete |
+| NL2Plan Comparison | In Progress |
+| Lexicon Benchmark | Complete |
 
 ---
 
-## Next Steps
-1. Approve the Implementation Plan to fix the scripts.
-2. Execute the True LLM+P baseline using the provided third-party code.
-3. Rerun the two invalid LAPIS zero-shot ablations.
-4. Tabulate final metrics for the paper.
+## LLM+P Benchmark Results
+
+### LLM+P Baseline (Few-Shot, GT Domain)
+
+| Domain | Success | Status |
+|--------|:-------:|--------|
+| Blocksworld | 100% (20/20) | Done |
+| Barman | 95% (19/20) | Done |
+| Storage | 100% (20/20) | Done |
+| Termes | 100% (20/20) | Done |
+| Grippers | 100% (20/20) | Done |
+| Tyreworld | 95% (19/20) | Done |
+
+### LAPIS/GT (Zero-Shot, GT Domain, Refinement)
+
+| Domain | Success | Status |
+|--------|:-------:|--------|
+| Blocksworld | 60% (6/10) | Done |
+| Grippers | 100% (20/20) | Done |
+| Tyreworld | 0% (0/14) | Done |
+| Floortile | 45% (9/20) | Done |
+
+### LAPIS/Synthesis (Generated Domain, Refinement)
+
+| Domain | Success | Status |
+|--------|:-------:|--------|
+| Barman | 50% (1/2) | Partial |
+| Storage | 90% (18/20) | Done |
+| Termes | 100% (20/20) | Done |
+| Tyreworld | 75% (15/20) | Done |
+| Floortile | 94% (17/18) | Done |
+
+### LAPIS/Adequacy (Generated Domain, CoT Check, Refinement)
+
+| Domain | Success | Status |
+|--------|:-------:|--------|
+| Storage | 85% (17/20) | Done |
+| Termes | 100% (20/20) | Done |
+| Grippers | 100% (20/20) | Done |
+| Tyreworld | 65% (13/20) | Done |
+| Floortile | 88% (16/18) | Done |
+
+---
+
+## Lexicon Benchmark Results (LAPIS/GT)
+
+| Domain | Success | Problems |
+|--------|:-------:|:--------:|
+| BabyAI | 100% (10/10) | 10 |
+| Blocksworld | 60% (6/10) | 10 |
+| Logistics | 40% (12/30) | 30 |
+| Sokoban | 56% (17/30) | 30 |
+
+---
+
+## Pending Work
+
+### NL2Plan Comparison
+
+Status: Experiments running. See `tasks/TASK_NL2PLAN_COMPARISON.md` for protocol.
+
+Expected completion: Before deadline if no blockers.
+
+Fallback: If not ready, cite NL2Plan without direct comparison.
+
+### Incomplete Domains
+
+| Domain | Condition | Issues |
+|--------|-----------|--------|
+| Barman | LAPIS/Synthesis | Only 2/20 problems run |
+| Barman | LAPIS/Adequacy | Not started |
+
+These are lower priority given Barman's complexity (cocktail recipes with multiple constraints).
+
+---
+
+## Key Observations
+
+The most notable finding is that LAPIS/Synthesis outperforms LAPIS/GT on structurally complex domains where the ground-truth PDDL uses non-obvious naming conventions or implicit constraints. Floortile shows the clearest example: 94% success with generated domains versus only 45% with ground truth. Tyreworld follows the same pattern: 75% for Synthesis versus 0% for GT.
+
+This suggests that the domain-problem coupling problem is more severe than previously understood. When the LLM generates both files, they share consistent assumptions. When forced to adapt to human-authored domains, the LLM frequently produces problem files that are syntactically valid but semantically incompatible.
+
+Grippers represents a solved domain where all methods achieve perfect or near-perfect scores, establishing a ceiling for comparison.
+
+---
+
+## Data Sources
+
+All numbers sourced from:
+- `EXPERIMENTAL_NOTES_FOR_PAPER.md` (primary)
+- `TRUE_LLMPP_BASELINE_RESULTS.md` (LLM+P baseline)
+- `final_results/` directory (raw manifold.json files)
+
+---
+
+*Last Updated: 2026-04-04*

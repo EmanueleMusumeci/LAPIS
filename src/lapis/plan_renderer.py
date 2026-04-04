@@ -149,7 +149,7 @@ def render_blocksworld_gif(
         import importlib.util, sys
         _spec = importlib.util.spec_from_file_location(
             "blocksworld_simulator",
-            str(Path(__file__).parent / "blocksworld_simulator.py"),
+            str(Path(__file__).parent / "simulators" / "blocksworld_simulator.py"),
         )
         _mod = importlib.util.module_from_spec(_spec)
         _spec.loader.exec_module(_mod)
@@ -235,7 +235,20 @@ def render_blocksworld_gif(
 # Domain dispatcher
 # ---------------------------------------------------------------------------
 
-RENDERABLE_DOMAINS = {"blocksworld"}
+RENDERABLE_DOMAINS = {
+    "blocksworld", "barman", "floortile", "grippers",
+    "storage", "termes", "tyreworld"
+}
+
+# Map domain names to their simulator module and class
+_DOMAIN_SIMULATOR_MAP = {
+    "grippers":  ("src.lapis.simulators.grippers_simulator",  "GrippersSimulator"),
+    "barman":    ("src.lapis.simulators.barman_simulator",    "BarmanSimulator"),
+    "floortile": ("src.lapis.simulators.floortile_simulator", "FloortileSimulator"),
+    "storage":   ("src.lapis.simulators.storage_simulator",   "StorageSimulator"),
+    "termes":    ("src.lapis.simulators.termes_simulator",    "TermesSimulator"),
+    "tyreworld": ("src.lapis.simulators.tyreworld_simulator", "TyreworldSimulator"),
+}
 
 
 def render_plan_gif(
@@ -254,4 +267,103 @@ def render_plan_gif(
     if "blocksworld" in norm:
         return render_blocksworld_gif(domain_file, problem_file, action_strs, output_path)
 
+    # All other domains use the generic renderer
+    for key, (mod_path, cls_name) in _DOMAIN_SIMULATOR_MAP.items():
+        if key in norm:
+            return _render_generic_gif(
+                cls_name, mod_path,
+                domain_file, problem_file, action_strs, output_path
+            )
+
+    return False
+
+
+def _render_generic_gif(
+    cls_name: str,
+    mod_path: str,
+    domain_file: str,
+    problem_file: str,
+    action_strs: list[str],
+    output_path: str,
+    fps: int = 2,
+) -> bool:
+    """
+    Generic GIF renderer using a PDDLSimulator subclass.
+
+    Instantiates the named simulator class, steps through the plan,
+    collects PIL frames from get_image(), and saves as animated GIF.
+    """
+    try:
+        from PIL import Image
+        import importlib
+        from unified_planning.io import PDDLReader
+        from unified_planning.shortcuts import SequentialSimulator, get_environment
+        from unified_planning.plans import ActionInstance
+
+        mod = importlib.import_module(mod_path)
+        SimClass = getattr(mod, cls_name)
+
+        sim = SimClass()
+        if not sim.setup(domain_file, problem_file):
+            return False
+
+        # Re-parse problem for action stepping
+        reader = PDDLReader()
+        problem = reader.parse_problem(domain_file, problem_file)
+        action_map = {a.name: a for a in problem.actions}
+        env = get_environment()
+        up_sim = SequentialSimulator(problem)
+        state = up_sim.get_initial_state()
+        sim.current_state = state
+
+        frames: list[Image.Image] = []
+        img0 = sim.get_image(action_text="[Initial state]")
+        if img0:
+            frames.append(img0)
+
+        for a_str in action_strs:
+            clean = a_str.strip().lstrip("(").rstrip(")")
+            parts = clean.split()
+            if not parts:
+                continue
+            a_name = parts[0]
+            if a_name not in action_map:
+                a_name = a_name.replace("_", "-")
+            if a_name not in action_map:
+                continue
+
+            action = action_map[a_name]
+            params = []
+            ok = True
+            for p in parts[1:]:
+                obj = next((o for o in problem.all_objects if o.name == p), None)
+                if obj is None:
+                    ok = False
+                    break
+                params.append(env.expression_manager.ObjectExp(obj))
+            if not ok:
+                continue
+
+            ai = ActionInstance(action, tuple(params))
+            if up_sim.is_applicable(state, ai):
+                state = up_sim.apply(state, ai)
+                sim.current_state = state
+                img = sim.get_image(action_text=clean)
+                if img:
+                    frames.append(img)
+
+        if frames:
+            frames.extend([frames[-1]] * fps)
+            duration = int(1000 / fps)
+            frames[0].save(
+                output_path,
+                save_all=True,
+                append_images=frames[1:],
+                loop=0,
+                duration=duration,
+            )
+            return True
+
+    except Exception:
+        pass
     return False

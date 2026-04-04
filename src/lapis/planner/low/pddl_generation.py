@@ -26,6 +26,9 @@ def _preprocess_pddl(pddl_str):
         pddl_str = re.sub(r'\bobject\b(?=\s*-)', 'physical-object', pddl_str)
         pddl_str = re.sub(r'(?<=- )\bobject\b', 'physical-object', pddl_str)
 
+        # Rename `up` to `up_dir` to avoid collision with `unified_planning` (up)
+        pddl_str = re.sub(r'\bup\b', 'up_dir', pddl_str)
+
     return pddl_str
 
 from src.lapis.utils.vector_db import VectorDB
