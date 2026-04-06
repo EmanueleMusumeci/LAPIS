@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LAPIS — Language-to-Action Planning via Iterative Schema Injection</title>
+    <title>LAPIS — Language-to-Action Planning via Iterative Schema Synthesis</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,17 @@
                 <li><a href="#features">Features</a></li>
                 <li><a href="#results">Results</a></li>
                 <li><a href="app/" class="nav-btn">Try Demo</a></li>
-                <li><a href="https://github.com/EmanueleMusumeci/LAPIS" class="nav-btn nav-btn-outline">GitHub</a></li>
+                <li>
+                    <button class="nav-btn nav-btn-disabled" title="Coming soon!" disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 22H9a6 6 0 0 1-6-6V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v11a6 6 0 0 1-6 6z"></path>
+                            <polyline points="9 7 9 13"></polyline>
+                            <polyline points="15 7 15 13"></polyline>
+                        </svg>
+                        GitHub
+                        <span class="soon-badge">Soon!</span>
+                    </button>
+                </li>
             </ul>
             <button class="mobile-menu-btn" aria-label="Toggle menu">
                 <span></span>
@@ -38,7 +48,7 @@
         <div class="container">
             <div class="hero-content">
                 <div class="hero-badge">ICAPS 2026 Demo Track</div>
-                <h1>Language-to-Action Planning via <span class="text-accent">Iterative Schema Injection</span></h1>
+                <h1>Language-to-Action Planning via <span class="text-accent">Iterative Schema Synthesis</span></h1>
                 <p class="hero-subtitle">
                     Transform natural language task descriptions into provably correct symbolic plans through
                     LLM-guided PDDL synthesis with automatic refinement.
@@ -50,7 +60,7 @@
                         </svg>
                         Launch Demo
                     </a>
-                    <a href="https://arxiv.org/abs/2506.15828" class="btn btn-secondary">
+                    <button class="btn btn-secondary btn-disabled" title="Coming soon!" disabled>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                             <polyline points="14 2 14 8 20 8"></polyline>
@@ -59,7 +69,8 @@
                             <polyline points="10 9 9 9 8 9"></polyline>
                         </svg>
                         Read Paper
-                    </a>
+                        <span class="soon-badge">Soon!</span>
+                    </button>
                 </div>
             </div>
             <div class="hero-visual">
@@ -220,14 +231,15 @@
                     <p>Supports pyperplan, FastDownward, and SymK planners. Works with GPT-4o, Claude, and Gemini models.</p>
                 </div>
 
-                <div class="feature-card">
+                <div class="feature-card feature-card-soon">
+                    <div class="feature-soon-overlay">Coming Soon!</div>
                     <div class="feature-icon">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="16 18 22 12 16 6"></polyline>
                             <polyline points="8 6 2 12 8 18"></polyline>
                         </svg>
                     </div>
-                    <h3>Open Source</h3>
+                    <h3>Open Source <span class="soon-text">(Soon!)</span></h3>
                     <p>Fully open-source implementation with benchmark suite, evaluation scripts, and reproducible experiments.</p>
                 </div>
             </div>
