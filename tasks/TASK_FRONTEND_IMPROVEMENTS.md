@@ -1,24 +1,26 @@
-# Task: Frontend Improvements for Demo Track
+# Task: Frontend Improvements for Demo Track (DEPRECATED)
+
+> **⚠️ DEPRECATED**: This document refers to the legacy Streamlit demo which has been archived to `IGNORE_THIS_FOLDER/`. The current frontend is `lapis-web/` (React + FastAPI). See `lapis-web/README.md` for current documentation.
+
+---
+
+## Historical Reference (Legacy Streamlit Version)
 
 **Priority**: HIGH (video = 50% of demo track evaluation)
 **Estimated Time**: 4-8 hours
 **Dependencies**: None (can run in parallel with experiments)
 
----
-
 ## Objective
 
-Polish the Streamlit dashboard to create a compelling 10-minute demo video. The frontend should clearly visualize the LAPIS pipeline, making the refinement loop and ablation conditions tangible to viewers.
+Polish the web dashboard to create a compelling 10-minute demo video. The frontend should clearly visualize the LAPIS pipeline, making the refinement loop and ablation conditions tangible to viewers.
 
----
+## Current State (Archived)
 
-## Current State
-
-Existing files:
-- `demo/app.py` - Basic Streamlit app
-- `demo/app_premium.py` - Enhanced version
-- `demo/style_premium.css` - Custom styling
-- `demo/runner.py` - Pipeline execution
+Legacy files (in `IGNORE_THIS_FOLDER/`):
+- `app.py.old` - Basic Streamlit app
+- `app_premium.py.old` - Enhanced version
+- `style_premium.css.old` - Custom styling
+- `runner.py.old` - Pipeline execution
 
 ---
 

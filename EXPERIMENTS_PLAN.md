@@ -1,5 +1,11 @@
 # LAPIS Experimental Evaluation Plan
 
+> **Note**: This document describes the original experimental plan from early April 2026. For **current results and completion status**, see:
+> - **EXPERIMENTAL_NOTES_FOR_PAPER.md** - Final results (Table 1 with all tracks including LAPIS/Semantic)
+> - **EXPERIMENTS_STATUS.md** - Current experiment completion status
+> - **MISSING_EXPERIMENTS.md** - Missing experiments breakdown and execution guide
+> - **TASK_SEMANTIC_VERIFICATION_BENCHMARK.md** - Semantic verification track (140/140 complete)
+
 This document describes the evaluation strategy for the LAPIS demo system, designed to demonstrate practical capabilities for the ICAPS 2026 Demo Track.
 
 ---

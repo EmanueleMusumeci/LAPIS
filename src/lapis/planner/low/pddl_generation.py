@@ -5,6 +5,70 @@ from pathlib import Path
 from src.lapis.agents.agent import Agent
 from src.lapis.logger_cfg import logger
 
+# ─── Issue Classification ───────────────────────────────────────────────────
+
+PRIORITY_ORDER = ['P0_SYNTAX', 'P1_TYPE', 'P1_PREDICATE', 'P2_ACTION', 'P3_OTHER']
+
+def classify_issue(issue_text: str) -> str:
+    """
+    Classify a PDDL issue into a priority category using keyword matching.
+    Issues are fixed in priority order: syntax first, then types, etc.
+    """
+    text = issue_text.lower()
+
+    # Phase 1: Unambiguous syntax errors
+    if any(k in text for k in ['parenthes', 'bracket', 'parse error', 'syntax error']):
+        return 'P0_SYNTAX'
+
+    # Phase 2: Domain-specific categories
+    if any(k in text for k in ['predicate', 'arity', 'fluent', 'wrong number of arguments']):
+        return 'P1_PREDICATE'
+    if any(k in text for k in ['type', 'undefined type', 'undeclared', 'not declared', 'object']):
+        return 'P1_TYPE'
+    if any(k in text for k in ['precondition', 'effect', 'action', 'operator']):
+        return 'P2_ACTION'
+
+    # Phase 3: Ambiguous syntax-ish terms
+    if any(k in text for k in ['unexpected', 'expected', 'invalid', 'malformed']):
+        return 'P0_SYNTAX'
+
+    return 'P3_OTHER'
+
+
+class IssueStats:
+    """
+    Tracks issue classification counts and resolution rates across a planning call.
+    Surfaced in pipeline logs and summary.
+    """
+    def __init__(self):
+        self.counts: dict[str, int] = {}
+        self.resolved: dict[str, int] = {}
+
+    def record(self, category: str, was_resolved: bool):
+        self.counts[category] = self.counts.get(category, 0) + 1
+        if was_resolved:
+            self.resolved[category] = self.resolved.get(category, 0) + 1
+
+    def summary(self) -> str:
+        """Human-readable summary for logs."""
+        if not self.counts:
+            return "Issue Resolution Statistics: No issues recorded."
+        lines = ["Issue Resolution Statistics:"]
+        for cat in PRIORITY_ORDER:
+            if cat in self.counts:
+                total = self.counts[cat]
+                res = self.resolved.get(cat, 0)
+                rate = (res / total * 100) if total else 0
+                lines.append(f"  {cat}: {res}/{total} resolved ({rate:.0f}%)")
+        # Any categories not in PRIORITY_ORDER
+        for cat in sorted(self.counts):
+            if cat not in PRIORITY_ORDER:
+                total = self.counts[cat]
+                res = self.resolved.get(cat, 0)
+                rate = (res / total * 100) if total else 0
+                lines.append(f"  {cat}: {res}/{total} resolved ({rate:.0f}%)")
+        return '\n'.join(lines)
+
 def _preprocess_pddl(pddl_str):
     """
     Last-resort cleanup of non-standard PDDL constructs that break UP/FD parsers.
@@ -151,6 +215,7 @@ def generate_domain(
     environment=None,       # kept for signature compatibility
     goal_file_path=None,    # kept for signature compatibility
     clean_domain_prompt=True,
+    temperature=0.1,
 ):
     """
     Generate a PDDL domain file from a natural-language description.
@@ -252,6 +317,8 @@ def generate_problem(
     problem_nl=None,
     ADD_PREDICATE_UNDERSCORE_EXAMPLE=False,
     inject_domain_schema=True,
+    pddl_init_state=None,  # NEW: Oracle grounding - pre-grounded :init predicates
+    temperature=0.1,
 ):
     """
     Generate a PDDL problem file.
@@ -260,11 +327,21 @@ def generate_problem(
       True  (Approach A): extract types/predicates/constants from domain and inject
                           them as explicit constraints in the prompt.
       False (baseline):   provide domain PDDL as context only, no extracted schema.
+
+    Oracle grounding (pddl_init_state):
+      If provided, the grounded :init predicates are appended to the context_nl
+      so the LLM generates a problem using these exact predicates.
     """
     with open(domain_file_path, "r") as file:
         domain = file.read()
 
     context_nl = problem_nl if problem_nl else environment
+
+    # Oracle grounding: Append grounded :init predicates to context (like CoSTL)
+    # The LLM must properly format these into the PDDL problem - this is "fair" grounding
+    if pddl_init_state:
+        logger.info(f"Oracle grounding: Adding {len(pddl_init_state.splitlines())} grounded predicates to context")
+        context_nl = f"{context_nl}\n\nINITIAL STATE PREDICATES (grounded from simulator):\n{pddl_init_state}"
 
     if inject_domain_schema:
         schema = extract_schema(domain)
@@ -346,6 +423,7 @@ SUBGOAL (Target to reach):
         problem_pddl = answer.replace("`", "").replace("pddl", "").replace("lisp", "").strip()
 
     problem_pddl = _preprocess_pddl(problem_pddl)
+
     with open(problem_file_path, "w") as file:
         file.write(problem_pddl)
 
@@ -372,6 +450,7 @@ def refine_problem(
     use_vector_db = False,
     vector_db_path = None,
     scene_graph = None,
+    temperature=0.1,
 ):
     # Accept scene_graph as alias for environment
     if environment is None and scene_graph is not None:
@@ -635,7 +714,8 @@ def refine_domain(
     scene_graph_grounding_log = None,
     use_two_step_refinement = True,
     use_vector_db = False,
-    vector_db_path = None
+    vector_db_path = None,
+    temperature=0.1
 ):
     """
     Refine a PDDL domain file based on feedback.
@@ -1132,7 +1212,10 @@ def refine_domain_and_problem_unified(
     scene_graph_grounding_log = None,
     use_two_step_refinement = True,
     use_vector_db = False,
-    vector_db_path = None
+    vector_db_path = None,
+    temperature=0.2,
+    pddl_init_state=None,
+    issue_stats=None
 ):
     """
     Unified refinement that handles both domain and problem together. 
@@ -1189,7 +1272,7 @@ Analyze the DOMAIN and identify issues:
 Provide detailed suggestions. Do NOT rewrite the PDDL yet.
 """
 
-    domain_diagnosis = agent.llm_call(domain_diagnosis_system, domain_diagnosis_user)
+    domain_diagnosis = agent.llm_call(domain_diagnosis_system, domain_diagnosis_user, temperature=temperature)
     
     _save_prompt_response(
         prompt=domain_diagnosis_system + "\n\n" + domain_diagnosis_user,
@@ -1246,7 +1329,7 @@ Analyze the PROBLEM and identify issues:
 Provide detailed suggestions. Do NOT rewrite the PDDL yet.
 """
 
-    problem_diagnosis = agent.llm_call(problem_diagnosis_system, problem_diagnosis_user)
+    problem_diagnosis = agent.llm_call(problem_diagnosis_system, problem_diagnosis_user, temperature=temperature)
     
     _save_prompt_response(
         prompt=problem_diagnosis_system + "\n\n" + problem_diagnosis_user,
@@ -1340,7 +1423,7 @@ Output your plan in a structured format with clear sections.
         
         # Call LLM for refinement plan
         print(f"\n[REFINEMENT PLAN PROMPT]\n{plan_system_prompt}\n\n{plan_user_prompt}\n")
-        refinement_plan = agent.llm_call(plan_system_prompt, plan_user_prompt)
+        refinement_plan = agent.llm_call(plan_system_prompt, plan_user_prompt, temperature=temperature)
         print(f"\n[REFINEMENT PLAN RESPONSE]\n{refinement_plan}\n")
         
         # Save the plan

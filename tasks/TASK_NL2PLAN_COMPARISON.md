@@ -1,7 +1,8 @@
 # Task: NL2Plan Baseline Comparison
 
+**Status**: ✅ COMPLETE (2026-04-05)
 **Priority**: Medium (nice-to-have for demo track, strengthens narrative)
-**Estimated Time**: 4-8 hours (mostly waiting for experiments)
+**Actual Time**: ~5 hours (blocksworld 1.5h + storage 3.5h)
 **Dependencies**: NL2Plan Docker image, API keys
 
 ---

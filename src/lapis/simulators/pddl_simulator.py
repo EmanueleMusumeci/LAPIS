@@ -68,8 +68,19 @@ class PDDLSimulator(BaseSimulator):
                 logger.error("Problem file not found: %s", problem_path)
                 return False
 
+            # Preprocess for UP-specific incompatibilities (action/predicate name collisions,
+            # type unions). Only needed for UP's SequentialSimulator; VAL/FastDownward work natively.
+            from ..utils.pddl_preprocessor import preprocess_pddl_for_up
+            try:
+                preprocessed_domain, preprocessed_problem = preprocess_pddl_for_up(
+                    str(domain_path), str(problem_path), self.domain_name
+                )
+            except Exception as preproc_err:
+                logger.warning("UP preprocessing failed: %s - using original files", preproc_err)
+                preprocessed_domain, preprocessed_problem = str(domain_path), str(problem_path)
+
             reader = PDDLReader()
-            raw = reader.parse_problem(str(domain_path), str(problem_path))
+            raw = reader.parse_problem(preprocessed_domain, preprocessed_problem)
 
             # Strip constraints/metrics that break SequentialSimulator
             clean = Problem(raw.name)
@@ -170,8 +181,9 @@ def _all_ground_combinations(problem, fluent):
     all_objs = list(problem.all_objects)
     param_domains: list[list] = []
     for param in fluent.signature:
+        # Check if object type matches or is a subtype of parameter type
         compatible = [o for o in all_objs if o.type == param.type or
-                      problem.is_a(o.type, param.type)]
+                      o.type.is_subtype(param.type)]
         if not compatible:
             compatible = all_objs
         param_domains.append(compatible)

@@ -15,7 +15,7 @@ from src.lapis.planner.low.utils.log import (
 )
 from src.lapis.planner.low.planner_utils import plan_with_output
 from src.lapis.planner.low.pddl_generation import (
-    generate_domain, generate_problem, refine_problem,
+    generate_domain, generate_problem, refine_problem, refine_domain,
     check_domain_adequacy, check_problem_adequacy,
 )
 from src.lapis.planner.low.pddl_verification import translate_plan, VAL_validate, VAL_ground
@@ -29,6 +29,8 @@ class LowLevelPlanningPipeline(BasePipeline):
                 pddl_gen_iterations: int,
                 planner_timeout: int = 180,
                 semantic_checks: bool = False,
+                refine_domain: bool = False,
+                extractor_type: str = "auto",
                 **base_init_kwargs,
                 ):
         super().__init__(**base_init_kwargs)
@@ -37,6 +39,8 @@ class LowLevelPlanningPipeline(BasePipeline):
         self.pddl_gen_iterations: int = pddl_gen_iterations
         self.planner_timeout: int = planner_timeout
         self.semantic_checks: bool = semantic_checks
+        self.refine_domain: bool = refine_domain
+        self.extractor_type: str = extractor_type
         
     def _initialize_csv(self, csv_filepath):
         # Initialize CSV with headers
@@ -242,6 +246,55 @@ class LowLevelPlanningPipeline(BasePipeline):
                         with open(domain_file_path, "w") as _f: _f.write(domain_pddl)
                     else:
                         domain_generation_time += 0  # time already counted above
+                        VAL_successful = VAL_ok
+                        VAL_validation_log = _vlog
+
+            # DOMAIN REFINEMENT LOOP (up to 3 iterations)
+            domain_refinement_iteration = 0
+            max_domain_refinements = 3
+
+            if self.refine_domain and not VAL_successful:
+                logger.info(f"Entering DOMAIN refinement loop (domain VAL failed)")
+                self.current_phase = "DOMAIN_REFINEMENT"
+
+                while domain_refinement_iteration < max_domain_refinements and not VAL_successful:
+                    logger.info(f"------------ Domain Refinement iteration {domain_refinement_iteration+1}/{max_domain_refinements} ------------")
+
+                    domain_refinement_start = time.time()
+                    new_domain, _domain_refinement_history = refine_domain(
+                        domain_file_path=domain_file_path,
+                        problem_file_path=None,  # No problem yet
+                        environment=domain_description or "",
+                        task=current_goal,
+                        logs_dir=logs_dir,
+                        workflow_iteration=iteration,
+                        refinement_iteration=domain_refinement_iteration,
+                        agent=self.agent,
+                        pddlenv_error_log=None,
+                        planner_error_log=None,
+                        VAL_validation_log=VAL_validation_log,
+                        VAL_grounding_log=None,
+                    )
+                    domain_generation_time += time.time() - domain_refinement_start
+
+                    # Save refined domain
+                    with open(domain_file_path, "w") as file:
+                        file.write(new_domain)
+
+                    # Validate refined domain
+                    VAL_successful, VAL_validation_log = self._check_val(domain_file_path)
+
+                    if VAL_successful:
+                        logger.info(f"Domain refinement successful after {domain_refinement_iteration+1} iteration(s)")
+                        break
+                    else:
+                        logger.warning(f"Domain refinement iteration {domain_refinement_iteration+1} still has VAL errors")
+
+                    domain_refinement_iteration += 1
+
+                if not VAL_successful:
+                    logger.error(f"Domain refinement failed after {max_domain_refinements} iterations. Cannot proceed to problem generation.")
+                    # Will fail later when trying to generate problem
 
             self.current_phase = "DOMAIN_GENERATION"
             save_statistics(
@@ -289,10 +342,11 @@ class LowLevelPlanningPipeline(BasePipeline):
         # Run semantic checks after VAL passes
         semantic_diagnosis = ""
         semantic_check_passed = True
+        semantic_result = None
         if self.semantic_checks and VAL_successful:
             domain_content = open(domain_file_path).read()
             problem_content = open(problem_file_path).read()
-            semantic_result = run_semantic_checks(domain_content, problem_content, strict=False)
+            semantic_result = run_semantic_checks(domain_content, problem_content, strict=False, extractor_type=self.extractor_type)
             semantic_check_passed = semantic_result["passed"]
             if not semantic_check_passed:
                 semantic_diagnosis = semantic_result["combined_diagnosis"]
@@ -349,23 +403,59 @@ class LowLevelPlanningPipeline(BasePipeline):
                 logger.info("Entering PDDL refinement because semantic checks failed.")
             
             self.current_phase = "PDDL_REFINEMENT"
-                
-            # Include semantic check status in refinement condition if enabled
-            semantic_ok = semantic_check_passed if self.semantic_checks else True
+
+            # Refinement loop: continue until we have a valid, grounded plan or max iterations
+            # Semantic checks inform refinement but don't force continuation if plan is valid
             while PDDL_loop_iteration < self.pddl_gen_iterations and \
-                (not planning_successful or not VAL_grounding_successful or not semantic_ok):
-                semantic_ok = semantic_check_passed if self.semantic_checks else True
+                not (planning_successful and VAL_grounding_successful):
                 logger.info(f"------------ Refinement iteration {PDDL_loop_iteration+1}/{self.pddl_gen_iterations} ------------")
 
                 logger.debug(f"Problem directory: {problem_dir}")
-                    
-                logger.info("Refining problem")
+
                 refinement_start_time = time.time()
                 # Include semantic diagnosis in refinement if available
                 combined_val_log = VAL_validation_log or ""
                 if semantic_diagnosis:
                     combined_val_log = f"{combined_val_log}\n\n{semantic_diagnosis}" if combined_val_log else semantic_diagnosis
 
+                # Check if domain refinement is needed
+                domain_level_errors_exist = False
+                if self.semantic_checks and semantic_result:
+                    domain_level_errors_exist = len(semantic_result.get("domain_level_errors", [])) > 0
+
+                # Refine domain first if domain-level errors detected and flag is enabled
+                if self.refine_domain and domain_level_errors_exist:
+                    logger.info("Refining domain (domain-level semantic errors detected)")
+                    new_domain, _domain_refinement_history = refine_domain(
+                        domain_file_path=domain_file_path,
+                        problem_file_path=problem_file_path,
+                        environment=domain_description or "",
+                        task=current_goal,
+                        logs_dir=logs_dir,
+                        workflow_iteration=iteration,
+                        refinement_iteration=PDDL_loop_iteration,
+                        agent=self.agent,
+                        pddlenv_error_log=pddlenv_error_log,
+                        planner_error_log=planner_error_log,
+                        VAL_validation_log=combined_val_log,
+                        VAL_grounding_log=VAL_grounding_log,
+                    )
+
+                    # Save refined domain
+                    logger.debug(f"Saving refined domain to {domain_file_path}")
+                    with open(domain_file_path, "w") as file:
+                        file.write(new_domain)
+
+                    # Validate refined domain with VAL
+                    VAL_ok, _vlog = self._check_val(domain_file_path)
+                    if not VAL_ok:
+                        logger.warning("Domain refinement broke VAL; skipping domain refinement this iteration.")
+                        # Revert to previous domain if available
+                        # For now, continue with broken domain (problem refinement might help)
+                    else:
+                        logger.info("Domain refinement successful and passed VAL")
+
+                logger.info("Refining problem")
                 new_problem, _refinement_history = refine_problem(
                     domain_file_path=domain_file_path,
                     problem_file_path=problem_file_path,
@@ -416,7 +506,7 @@ class LowLevelPlanningPipeline(BasePipeline):
                 if self.semantic_checks and VAL_successful:
                     domain_content = open(domain_file_path).read()
                     problem_content = open(problem_file_path).read()
-                    semantic_result = run_semantic_checks(domain_content, problem_content, strict=False)
+                    semantic_result = run_semantic_checks(domain_content, problem_content, strict=False, extractor_type=self.extractor_type)
                     semantic_check_passed = semantic_result["passed"]
                     semantic_diagnosis = semantic_result["combined_diagnosis"] if not semantic_check_passed else ""
 

@@ -1,16 +1,162 @@
-@article{lexicon2025,
-  title={LexiCon: a Benchmark for Planning under Temporal Constraints in Natural Language},
-  author={Mantenoglou, Periklis and Hazra, Rishi and Martires, Pedro Zuidberg Dos and De Raedt, Luc},
-  journal={arXiv preprint arXiv:2510.05972},
-  year={2025}
+%% =============================================================================
+%% LAPIS Paper References
+%% =============================================================================
+
+%% -----------------------------------------------------------------------------
+%% Core References (Our Foundation + Primary Baseline)
+%% -----------------------------------------------------------------------------
+
+@inproceedings{contextmatters2025,
+  title={Context Matters: {PDDL} Iterative Synthesis from Natural Language},
+  author={Musumeci, Emanuele and Drid, Abdel Hakim and Suriani, Vincenzo and Nardi, Daniele},
+  booktitle={Proceedings of the IEEE International Conference on Robotics and Automation (ICRA)},
+  year={2026}
 }
 
 @inproceedings{llmpp2023,
-  title={LLM+P: Empowering Large Language Models with Optimal Planning Proficiency},
+  title={{LLM+P}: Empowering Large Language Models with Optimal Planning Proficiency},
   author={Liu, Bo and Jiang, Yuqian and Zhang, Xiaohan and Liu, Qiang and Zhang, Shiqi and Biswas, Joydeep and Stone, Peter},
   booktitle={IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
   pages={5258--5265},
   year={2023}
+}
+
+%% -----------------------------------------------------------------------------
+%% Tier 1: Direct Competitors (Full NL-to-PDDL Synthesis)
+%% -----------------------------------------------------------------------------
+
+@inproceedings{nl2plan2025,
+  title={{NL2Plan}: Robust {LLM}-Driven Planning from Minimal Text},
+  author={Gestrin, Elliot and Singhal, Vaibhav and Hoffman, George and Chamberland, Simon},
+  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
+  year={2025},
+  note={6-step extraction pipeline for full domain+problem synthesis}
+}
+
+@inproceedings{isrllm2024,
+  title={{ISR-LLM}: Iterative Self-Refined Large Language Model for Long-Horizon Sequential Task Planning},
+  author={Zhu, Zhehua and Jiao, Rongwu and Peng, Nianwen},
+  booktitle={IEEE International Conference on Robotics and Automation (ICRA)},
+  year={2024},
+  note={VAL-guided iterative refinement for problem generation}
+}
+
+@inproceedings{planningindark2025,
+  title={Planning in the Dark: {LLM}-Symbolic Planning Pipeline Without Experts},
+  author={Huang, Shoukang and Lipovetzky, Nir and Cohn, Trevor},
+  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
+  year={2025},
+  note={arXiv:2409.15915; Schema library + semantic validation and ranking without expert intervention}
+}
+
+@article{lamalfa2025,
+  title={An End-to-end Planning Framework with Agentic {LLMs} and {PDDL}},
+  author={La Malfa, Emanuele and others},
+  journal={arXiv preprint arXiv:2512.09629},
+  year={2025},
+  note={Multi-agent architecture with VAL + uVAL iterative feedback}
+}
+
+%% -----------------------------------------------------------------------------
+%% Tier 2: Alternative Paradigms
+%% -----------------------------------------------------------------------------
+
+@article{tic2024,
+  title={{TIC}: Translation via Intermediate Compilation for {NL}-to-{PDDL}},
+  author={Agarwal, Yash and Sreepathy, Vishnu},
+  journal={arXiv preprint arXiv:2410.XXXXX},
+  year={2024},
+  note={NL → ASP → PDDL intermediate representation}
+}
+
+@inproceedings{thoughtofsearch2024,
+  title={Thought of Search: Planning with Language Models Through The Lens of Efficiency},
+  author={Katz, Michael and Kokel, Harsha and Srinivas, Kavitha and Sohrabi, Shirin},
+  booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
+  year={2024},
+  note={arXiv:2404.11833; LLM generates Python search code for sound and complete planning}
+}
+
+@inproceedings{correa2025,
+  title={Learning Domain-Specific Heuristics for Classical Planning},
+  author={Corr\^{e}a, Augusto B. and others},
+  booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
+  year={2025},
+  note={LLM generates heuristic code for planners}
+}
+
+@article{delta2024,
+  title={{DELTA}: A Deep Learning based Text-to-Action Architecture},
+  author={Ding, Yan and Zhang, Xiaohan and others},
+  journal={arXiv preprint arXiv:2401.00000},
+  year={2024}
+}
+
+%% -----------------------------------------------------------------------------
+%% Tier 3: Theoretical Grounding & Benchmarks
+%% -----------------------------------------------------------------------------
+
+@inproceedings{llmmodulo2024,
+  title={{LLMs} Can't Plan, But Can Help Planning in {LLM-Modulo} Frameworks},
+  author={Kambhampati, Subbarao and Valmeekam, Karthik and Guan, Lin and Verma, Mudit and Stechly, Kaya and Bhambri, Siddhant and Sreedharan, Sarath},
+  booktitle={Proceedings of the International Conference on Machine Learning (ICML)},
+  year={2024},
+  note={Theoretical justification for external sound verifiers}
+}
+
+@inproceedings{planetarium2025,
+  title={Planetarium: A Rigorous Benchmark for Translating Text to Structured Planning Languages},
+  author={Zuo, Max and Lipkin, Ari and Stone, Peter and Tellex, Stefanie},
+  booktitle={Proceedings of the Conference of the North American Chapter of the Association for Computational Linguistics (NAACL)},
+  year={2025},
+  note={96\% syntactically valid but only 25\% semantically correct}
+}
+
+@inproceedings{text2world2025,
+  title={{Text2World}: A Benchmark for Domain Generation from Natural Language},
+  author={Hu, Yue and others},
+  booktitle={Findings of the Association for Computational Linguistics (ACL)},
+  year={2025}
+}
+
+@inproceedings{l2ptoolkit2025,
+  title={{LLMs} as Planning Formalizers: A Survey for Leveraging Large Language Models to Construct Automated Planning Models},
+  author={Tantakoun, Marcus and Muise, Christian and Zhu, Xiaodan},
+  booktitle={Findings of the Association for Computational Linguistics: ACL},
+  pages={25167--25188},
+  year={2025},
+  note={Survey on NL-to-PDDL methods; discusses data contamination in IPC domains}
+}
+
+@inproceedings{vallati2025,
+  title={Knowledge Engineering for Planning and Scheduling in the {LLM} Era},
+  author={Vallati, Mauro and Barták, Roman and Chrpa, Lukáš and McCluskey, Thomas Lee and Petrick, Ronald P. A.},
+  booktitle={Proceedings of the International Conference on Automated Planning and Scheduling (ICAPS)},
+  volume={35},
+  number={1},
+  pages={391--395},
+  year={2025},
+  note={LLMs can assist in knowledge acquisition but human expertise and symbolic validators remain critical}
+}
+
+@inproceedings{autoplanbench2025,
+  title={Automating the Generation of Prompts for {LLM}-based Action Choice in {PDDL} Planning},
+  author={Stein, Katharina and Fišer, Daniel and Hoffmann, Jörg and Koller, Alexander},
+  booktitle={Proceedings of the International Conference on Automated Planning and Scheduling (ICAPS)},
+  year={2025},
+  note={Automated NL conversion of PDDL domains; NL prompts yield better LLM performance}
+}
+
+%% -----------------------------------------------------------------------------
+%% Tier 4: Prior Demo Track & Related Systems
+%% -----------------------------------------------------------------------------
+
+@inproceedings{pddlgenai2025,
+  title={{PDDL-GenAI}: A Plugin for {LLM}-Based Support in Planning Domain Modeling},
+  author={Wang, Jinbiao and Peng, Rui and Chen, Tong and Zeng, Chaowen and Wang, Weilin and Huang, Sukai and Lipovetzky, Nir},
+  booktitle={ICAPS Demo Track},
+  year={2025},
+  note={NL-to-PDDL plugin for editor.planning.domains; supports ChatGPT, Deepseek, ZhipuAI}
 }
 
 @inproceedings{ahn2022saycan,
@@ -20,16 +166,34 @@
   year={2022}
 }
 
-@inproceedings{contextmatters2025,
-  title={Context Matters: PDDL Iterative Synthesis from Natural Language},
-  author={Musumeci, Emanuele and Drid, Abdel Hakim and Suriani, Vincenzo and Nardi, Daniele},
-  booktitle={Proceedings of the IEEE International Conference on Robotics and Automation (ICRA)},
-  year={2026}
+%% -----------------------------------------------------------------------------
+%% Benchmarks
+%% -----------------------------------------------------------------------------
+
+@article{lexicon2025,
+  title={{LexiCon}: A Benchmark for Planning under Temporal Constraints in Natural Language},
+  author={Mantenoglou, Periklis and Hazra, Rishi and Martires, Pedro Zuidberg Dos and De Raedt, Luc},
+  journal={arXiv preprint arXiv:2510.05972},
+  year={2025}
 }
 
-@article{delta2024,
-  title={DELTA: A Deep Learning based Text-to-Action Architecture},
-  author={Ding, Yan and Zhang, Xiaohan and others},
-  journal={arXiv preprint arXiv:2401.00000},
-  year={2024}
+%% -----------------------------------------------------------------------------
+%% Tools & Validators
+%% -----------------------------------------------------------------------------
+
+@inproceedings{val2004,
+  title={{VAL}: Automatic Plan Validation, Continuous Effects and Mixed Initiative Planning Using {PDDL}},
+  author={Howey, Richard and Long, Derek and Fox, Maria},
+  booktitle={Proceedings of the IEEE International Conference on Tools with Artificial Intelligence (ICTAI)},
+  pages={294--301},
+  year={2004}
+}
+
+@inproceedings{fastdownward2006,
+  title={The {Fast Downward} Planning System},
+  author={Helmert, Malte},
+  booktitle={Journal of Artificial Intelligence Research},
+  volume={26},
+  pages={191--246},
+  year={2006}
 }

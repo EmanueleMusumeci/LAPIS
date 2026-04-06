@@ -4,6 +4,19 @@
 **Track**: Demo Track (2 pages + 10-min video)
 **Video Weight**: 50% of evaluation
 
+> **Updated 2026-04-05**: Semantic verification track complete (140/140). See `PAPER_SKETCH_v2.md` for updated narrative incorporating new findings.
+
+---
+
+## Key Updates Since Original Plan
+
+1. **LAPIS/Semantic track COMPLETE** - 140/140 problems benchmarked
+2. **New finding**: Semantic cleanliness predicts 100% success
+3. **Updated Table 1**: Now includes 5 conditions (added Semantic column)
+4. **New pipeline stage**: Semantic Verification (Stage 4)
+
+See `PAPER_SKETCH_v2.md` for complete updated paper narrative.
+
 ---
 
 ## Paper Structure: Section-by-Section Requirements
@@ -14,7 +27,7 @@
 - One-sentence problem statement (NL-to-PDDL synthesis bottleneck)
 - LAPIS system description (synthesizes domain + problem, VAL-guided refinement)
 - Key empirical finding (self-consistent synthesis can outperform oracle domains)
-- Demo highlight (Streamlit dashboard, video link)
+- Demo highlight (web dashboard, video link)
 
 **NICE TO HAVE:**
 - Comparison claim against NL2Plan (if results ready)
@@ -124,7 +137,7 @@
 ### Demo Description (~0.25 page)
 
 **MUST HAVE:**
-- Streamlit dashboard overview
+- Web dashboard overview
 - What users can do: input NL, see generated PDDL, watch refinement, view plan
 - Video link (placeholder OK)
 - Code repository link
@@ -176,8 +189,8 @@
 
 | Task | Time | Owner | Status |
 |------|------|-------|--------|
-| Semantic verification (see TASK_SEMANTIC_VERIFICATION.md) | 6h | - | TODO |
-| Re-run experiments with semantic checks | 4h | - | TODO |
+| Semantic verification (see TASK_SEMANTIC_VERIFICATION.md) | 6h | - | **DONE** |
+| Re-run experiments with semantic checks | 4h | - | **DONE (140/140)** |
 | Side-by-side PDDL comparison in UI | 3h | - | TODO |
 
 ### LOW (Can do after deadline / camera-ready)
@@ -244,19 +257,21 @@
 ### For a Strong Demo Track Submission
 | Item | Status | Blocker? |
 |------|--------|----------|
-| Working Streamlit demo | Exists | No |
+| Working web demo | Exists | No |
 | 7-domain ablation results | Complete | No |
 | LLM+P baseline comparison | Complete | No |
+| **Semantic verification benchmark** | **COMPLETE (140/140)** | No |
 | Video | Not recorded | **Yes** |
-| Paper draft | Not written | **Yes** |
+| Paper draft | Exists (`paper/main.tex`) | Update needed |
 
 ### For a Competitive Research Paper (NOT required for demo track)
 | Item | Status | Impact |
 |------|--------|--------|
 | NL2Plan comparison | In progress | Medium |
-| Semantic verification | Not implemented | Low for demo |
+| Semantic verification | **DONE** | **High (new key finding!)** |
 | ISR-LLM comparison | Not done | Low |
 | Iteration sensitivity | Not done | Low |
+| Missing LAPIS experiments | 140 remaining | Medium (see `MISSING_EXPERIMENTS.md`) |
 
 ---
 
@@ -275,7 +290,6 @@
 - Worst case: screen recording with voiceover (acceptable for demo track)
 
 ### If frontend crashes during recording
-- Use the simpler `app.py` instead of `app_premium.py`
 - Pre-load a successful example, show cached results
 
 ---
@@ -285,11 +299,15 @@
 | File | Purpose |
 |------|---------|
 | `paper/main.tex` | Paper source (to be updated) |
-| `EXPERIMENTAL_NOTES_FOR_PAPER.md` | Ground truth for results |
-| `tasks/TASK_SEMANTIC_VERIFICATION.md` | Semantic verification spec |
+| `PAPER_SKETCH_v2.md` | **Updated paper narrative with semantic findings** |
+| `EXPERIMENTAL_NOTES_FOR_PAPER.md` | Ground truth for results (Table 1) |
+| `EXPERIMENTS_STATUS.md` | Current experiment completion status |
+| `MISSING_EXPERIMENTS.md` | Missing experiments guide (140 remaining) |
+| `TASK_SEMANTIC_VERIFICATION_BENCHMARK.md` | Semantic track completion (140/140) |
+| `PIPELINE.md` | Pipeline architecture documentation |
 | `tasks/TASK_FRONTEND_IMPROVEMENTS.md` | Frontend work spec |
 | `tasks/TASK_NL2PLAN_COMPARISON.md` | NL2Plan comparison spec |
-| `demo/app_premium.py` | Main demo application |
+| `lapis-web/` | Main demo application (React + FastAPI) |
 
 ---
 
@@ -304,4 +322,4 @@
 
 ---
 
-*Last Updated: 2026-04-04*
+*Last Updated: 2026-04-05*

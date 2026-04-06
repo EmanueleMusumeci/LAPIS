@@ -8,9 +8,20 @@ class ClaudeAgent(Agent):
         super().__init__(model)
         api_key = os.getenv("ANTHROPIC_API_KEY")
         base_url = None
-        if not api_key and os.getenv("OPENROUTER_API_KEY"):
+        use_openrouter_fallback = os.getenv("LAPIS_USE_OPENROUTER_FALLBACK", "false").lower() in {
+            "1", "true", "yes", "on"
+        }
+
+        if not api_key and use_openrouter_fallback and os.getenv("OPENROUTER_API_KEY"):
             api_key = os.getenv("OPENROUTER_API_KEY")
             base_url = "https://openrouter.ai/api/v1"
+
+        if not api_key:
+            raise RuntimeError(
+                "Missing ANTHROPIC_API_KEY. Direct Anthropic mode is active. "
+                "Set ANTHROPIC_API_KEY, or explicitly enable OPENROUTER fallback with "
+                "LAPIS_USE_OPENROUTER_FALLBACK=true and OPENROUTER_API_KEY."
+            )
         
         self.client = Anthropic(api_key=api_key, base_url=base_url)
         self.prompt_chain = []

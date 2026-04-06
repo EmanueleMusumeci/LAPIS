@@ -4,6 +4,7 @@ import subprocess
 import re
 import logging
 from src.lapis.logger_cfg import logger
+from src.lapis.validators import VerificationService
 
 def translate_plan(input_arg, output_path=None):
     """
@@ -30,7 +31,13 @@ def translate_plan(input_arg, output_path=None):
                     line = f"({line})"
                 f.write(f"{i}: {line}\n")
 
-def VAL_validate(domain_file_path, problem_file_path=None, plan_file_path=None):
+def VAL_validate(
+    domain_file_path,
+    problem_file_path=None,
+    plan_file_path=None,
+    run_semantic=False,
+    verification_service=None,
+):
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
     validate_path = os.path.join(BASE_DIR, "third-party", "VAL", "build", "linux64", "Release", "bin", "Validate")
     command = [validate_path, domain_file_path]
@@ -41,6 +48,19 @@ def VAL_validate(domain_file_path, problem_file_path=None, plan_file_path=None):
     
     result = subprocess.run(command, capture_output=True, text=True)
     output_text = result.stdout
+    semantic_is_valid = True
+
+    if run_semantic and problem_file_path:
+        try:
+            service = verification_service or VerificationService()
+            domain_text = Path(domain_file_path).read_text()
+            problem_text = Path(problem_file_path).read_text()
+            semantic_result = service.verify(domain_text, problem_text, run_asp=True)
+            semantic_is_valid = semantic_result.valid
+            output_text += "\n\n[Semantic Verification]\n" + semantic_result.to_text()
+        except Exception as exc:
+            semantic_is_valid = False
+            output_text += f"\n\n[Semantic Verification]\nfailed: {exc}"
 
     # VAL output usually contains "Errors: 0, warnings: 5"
     # We must check if the number of errors is actually > 0.
@@ -49,13 +69,13 @@ def VAL_validate(domain_file_path, problem_file_path=None, plan_file_path=None):
         num_errors = int(error_match.group(1))
         if num_errors > 0:
             return False, output_text
-        return True, output_text
+        return semantic_is_valid, output_text
     
     # Fallback status checks
     if "Bad pddl" in output_text or "Check failed" in output_text:
         return False, output_text
     
-    return True, output_text
+    return semantic_is_valid, output_text
 
 def VAL_ground(domain_file_path, problem_file_path=None):
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))

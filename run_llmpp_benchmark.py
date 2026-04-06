@@ -45,6 +45,10 @@ import json
 import os
 import sys
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -112,6 +116,7 @@ ABLATION_FLAGS = {
 
 def run_method(domain, method, problems, agent, args, generate_domain):
     from src.lapis.pipelines.lapis_low_level import LAPISLowLevelPipeline
+    from src.lapis.pipelines.lapis_low_level_oracle import LAPISLowLevelOraclePipeline
 
     ablation = getattr(args, "ablation", "full")
     clean_domain_prompt, inject_domain_schema, check_adequacy = ABLATION_FLAGS.get(ablation, (True, True, False))
@@ -119,29 +124,48 @@ def run_method(domain, method, problems, agent, args, generate_domain):
     pddl_gen_iterations = LAPIS_REFINEMENTS if method == "lapis" else LLMPP_REFINEMENTS
     gen_suffix = "_domgen" if generate_domain else ""
     abl_suffix = f"_{ablation}" if ablation != "full" else ""
-    experiment_name = f"benchmark_llmpp_{domain}_{method}{gen_suffix}{abl_suffix}_{args.model.replace('-', '_')}"
 
     semantic_checks = getattr(args, "semantic_checks", False)
-    pipeline = LAPISLowLevelPipeline(
-        domain_name=domain,
-        batch_id="",
-        llmpp_source_dir=str(Path(__file__).parent / "third-party" / "llm-pddl" / "domains"),
-        determine_possibility=False,
-        prevent_impossibility=False,
-        pddl_gen_iterations=pddl_gen_iterations,
-        agent=agent,
-        base_dir=str(Path(__file__).parent),
-        data_dir=args.data_dir,
-        results_dir=args.results_dir,
-        splits=problems,
-        generate_domain=generate_domain,
-        ground_in_sg=False,
-        clean_domain_prompt=clean_domain_prompt,
-        inject_domain_schema=inject_domain_schema,
-        check_adequacy=check_adequacy,
-        planner_timeout=args.planner_timeout,
-        semantic_checks=semantic_checks,
-    )
+    refine_domain = getattr(args, "refine_domain", False)
+    extractor_type = getattr(args, "extractor_type", "auto")
+    oracle_grounding = getattr(args, "oracle_grounding", False)
+
+    # Add refine_domain and oracle_grounding suffixes to experiment name
+    refine_suffix = "_refdom" if refine_domain else ""
+    oracle_suffix = "_oracle" if oracle_grounding else ""
+    experiment_name = f"benchmark_llmpp_{domain}_{method}{gen_suffix}{abl_suffix}{refine_suffix}{oracle_suffix}_{args.model.replace('-', '_')}"
+
+    # Common pipeline parameters
+    pipeline_params = {
+        "domain_name": domain,
+        "batch_id": "",
+        "llmpp_source_dir": str(Path(__file__).parent / "third-party" / "llm-pddl" / "domains"),
+        "determine_possibility": False,
+        "prevent_impossibility": False,
+        "pddl_gen_iterations": pddl_gen_iterations,
+        "agent": agent,
+        "base_dir": str(Path(__file__).parent),
+        "data_dir": args.data_dir,
+        "results_dir": args.results_dir,
+        "splits": problems,
+        "generate_domain": generate_domain,
+        "ground_in_sg": False,
+        "clean_domain_prompt": clean_domain_prompt,
+        "inject_domain_schema": inject_domain_schema,
+        "check_adequacy": check_adequacy,
+        "planner_timeout": args.planner_timeout,
+        "semantic_checks": semantic_checks,
+        "refine_domain": refine_domain,
+        "extractor_type": extractor_type,
+    }
+
+    # Use oracle pipeline if oracle_grounding is enabled
+    if oracle_grounding:
+        pipeline_params["use_oracle_grounding"] = True
+        pipeline_params["gt_source_dir"] = args.gt_source_dir
+        pipeline = LAPISLowLevelOraclePipeline(**pipeline_params)
+    else:
+        pipeline = LAPISLowLevelPipeline(**pipeline_params)
     pipeline.experiment_name = experiment_name
     pipeline.run()
 
@@ -206,6 +230,15 @@ def main():
                         help="Timeout for symbolic planner in seconds (default: 180)")
     parser.add_argument("--semantic_checks", action="store_true",
                         help="Enable semantic verification (predicate coverage, action reachability)")
+    parser.add_argument("--refine_domain", action="store_true",
+                        help="Enable iterative domain refinement when semantic/adequacy checks identify domain-level issues")
+    parser.add_argument("--extractor_type", default="auto",
+                        choices=["regex", "up", "auto"],
+                        help="PDDL extraction backend for semantic checks (default: auto)")
+    parser.add_argument("--oracle_grounding", action="store_true",
+                        help="Use GT simulator for state grounding (oracle ablation)")
+    parser.add_argument("--gt_source_dir", default="third-party/llm-pddl/domains",
+                        help="Directory containing GT PDDL domains and problems")
     parser.add_argument("--data_dir", default="data/llm-pddl")
     parser.add_argument("--results_dir", default="results_llmpp")
     args = parser.parse_args()

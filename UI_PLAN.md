@@ -1,21 +1,18 @@
-# UI_PLAN.md — LAPIS Demo UI Improvements
+# UI_PLAN.md — DEPRECATED
 
-This document outlines fixes and improvements for the LAPIS Streamlit demo dashboard.
+> **⚠️ DEPRECATED**: This document refers to the legacy Streamlit demo which has been archived to `IGNORE_THIS_FOLDER/`. The current frontend is the React+FastAPI web app in `lapis-web/`. See `lapis-web/README.md` for current documentation.
 
-## Current State
+---
 
-**Files:**
-- `demo/app.py` — Main Streamlit application (784 lines)
-- `demo/runner.py` — Pipeline runner with mock mode (653 lines)
-- `demo/style.css` — Dark theme CSS (165 lines)
-- `demo/requirements_demo.txt` — Demo-specific dependencies
+## Historical Reference (Legacy Streamlit Demo)
 
-**Launch:**
-```bash
-streamlit run demo/app.py
-# Mock mode (no API keys needed):
-LAPIS_DEMO_MOCK=1 streamlit run demo/app.py
-```
+This document outlined fixes and improvements for the original Streamlit demo dashboard.
+
+**Legacy Files (archived in `IGNORE_THIS_FOLDER/`):**
+- `app.py.old` — Main Streamlit application
+- `runner.py.old` — Pipeline runner with mock mode
+- `style.css.old` — Dark theme CSS
+- `requirements_demo.txt` — Demo-specific dependencies
 
 ---
 

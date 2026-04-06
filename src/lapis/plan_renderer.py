@@ -45,14 +45,16 @@ def parse_plan_file(plan_path: str) -> list[str]:
 
 def _to_pddl_action(line: str) -> str:
     """Convert  grasp(left, shaker1)  →  (grasp left shaker1)."""
-    line = line.strip().lstrip("(").rstrip(")")
+    line = line.strip()
     # UP format: action_name(arg1, arg2, ...)
     m = re.match(r"^([\w][\w-]*)\(([^)]*)\)$", line)
     if m:
         name = m.group(1)
         args = [a.strip() for a in m.group(2).split(",") if a.strip()]
         return "({})".format(" ".join([name] + args))
-    # Already space-separated or no args
+    # Already space-separated format: (unstack b1 b3) or unstack b1 b3
+    # Strip outer parens if present
+    line = line.lstrip("(").rstrip(")")
     return "({})".format(line) if not line.startswith("(") else line
 
 
@@ -80,6 +82,14 @@ def simulate_plan(
         from unified_planning.io import PDDLReader
         from unified_planning.shortcuts import SequentialSimulator, get_environment
         from unified_planning.plans import ActionInstance
+
+        # Preprocess for UP-specific incompatibilities (action/predicate name collisions,
+        # type unions in tyreworld/storage/floortile). Only needed for UP's SequentialSimulator.
+        from .utils.pddl_preprocessor import preprocess_pddl_for_up
+        try:
+            domain_file, problem_file = preprocess_pddl_for_up(domain_file, problem_file)
+        except Exception:
+            pass  # Fall back to original files
 
         reader = PDDLReader()
         problem = reader.parse_problem(domain_file, problem_file)
@@ -303,11 +313,18 @@ def _render_generic_gif(
         mod = importlib.import_module(mod_path)
         SimClass = getattr(mod, cls_name)
 
+        # Preprocess for UP-specific incompatibilities. Only needed for UP's SequentialSimulator.
+        from .utils.pddl_preprocessor import preprocess_pddl_for_up
+        try:
+            domain_file, problem_file = preprocess_pddl_for_up(domain_file, problem_file)
+        except Exception:
+            pass
+
         sim = SimClass()
         if not sim.setup(domain_file, problem_file):
             return False
 
-        # Re-parse problem for action stepping
+        # Re-parse problem for action stepping (use preprocessed files)
         reader = PDDLReader()
         problem = reader.parse_problem(domain_file, problem_file)
         action_map = {a.name: a for a in problem.actions}
