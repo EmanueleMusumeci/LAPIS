@@ -4,79 +4,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LAPIS — Language-Adaptive PDDL Iterative Synthesis</title>
+    <title>LAPIS — Language-to-Action Planning via Iterative Schema Injection</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 </head>
 
 <body>
     <nav class="navbar">
         <div class="container">
-            <div class="logo">
-                <img src="assets/logo.png" alt="LAPIS Logo">
-            </div>
+            <a href="/" class="logo">
+                <img src="assets/logo.svg" alt="LAPIS" class="logo-img">
+                <span class="logo-text">LAPIS</span>
+            </a>
             <ul class="nav-links">
-                <li><a href="#how-it-works">How it Works</a></li>
+                <li><a href="#pipeline">Pipeline</a></li>
                 <li><a href="#features">Features</a></li>
-                <li><a href="#evaluation">Evaluation</a></li>
-                <li><a href="https://github.com/EmanueleMusumeci/ContextMattersDemo" class="btn-sm">GitHub</a></li>
+                <li><a href="#results">Results</a></li>
+                <li><a href="app/" class="nav-btn">Try Demo</a></li>
+                <li><a href="https://github.com/EmanueleMusumeci/LAPIS" class="nav-btn nav-btn-outline">GitHub</a></li>
             </ul>
+            <button class="mobile-menu-btn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
     </nav>
 
     <header class="hero">
         <div class="container">
-            <h1>Language-Adaptive PDDL <br><span class="gradient-text">Iterative Synthesis</span></h1>
-            <p class="subtitle">An end-to-end framework for grounding natural language tasks into provably executable
-                symbolic plans through iterative refinement.</p>
-            <div class="hero-btns">
-                <a href="#how-it-works" class="btn-primary">Explore Pipeline</a>
-                <a href="https://example.com/lapis-demo-video" class="btn-secondary">Watch Demo Video</a>
+            <div class="hero-content">
+                <div class="hero-badge">ICAPS 2026 Demo Track</div>
+                <h1>Language-to-Action Planning via <span class="text-accent">Iterative Schema Injection</span></h1>
+                <p class="hero-subtitle">
+                    Transform natural language task descriptions into provably correct symbolic plans through
+                    LLM-guided PDDL synthesis with automatic refinement.
+                </p>
+                <div class="hero-actions">
+                    <a href="app/" class="btn btn-primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        Launch Demo
+                    </a>
+                    <a href="https://arxiv.org/abs/2506.15828" class="btn btn-secondary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        Read Paper
+                    </a>
+                </div>
             </div>
-            <div class="hero-image">
-                <div class="glass-card main-screenshot">
-                    <img src="assets/gui.png" alt="LAPIS Dashboard Preview">
+            <div class="hero-visual">
+                <div class="screenshot-frame">
+                    <div class="screenshot-header">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                        <span class="screenshot-title">LAPIS Dashboard</span>
+                    </div>
+                    <img src="assets/gui.png" alt="LAPIS Dashboard showing live execution interface">
                 </div>
             </div>
         </div>
     </header>
 
-    <section id="how-it-works" class="pipeline">
-        <div class="container text-center">
-            <h2 class="section-title">The LAPIS Pipeline</h2>
-            <p class="section-subtitle">Bridging the gap between LLM flexibility and symbolic planning rigor.</p>
+    <section id="pipeline" class="pipeline">
+        <div class="container">
+            <div class="section-header">
+                <h2>The LAPIS Pipeline</h2>
+                <p>From natural language to executable plans in four stages</p>
+            </div>
 
-            <div class="pipeline-steps">
-                <div class="glass-card step">
-                    <div class="step-icon">🔧</div>
-                    <h3>Domain Synthesis</h3>
-                    <p>Translates NL task descriptions into structured PDDL domain files with VAL-guided syntax
-                        correction.</p>
+            <div class="pipeline-flow">
+                <div class="pipeline-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <line x1="10" y1="9" x2="8" y2="9"></line>
+                            </svg>
+                        </div>
+                        <h3>Domain Synthesis</h3>
+                        <p>LLM generates PDDL domain from natural language task description with automatic syntax correction via VAL.</p>
+                    </div>
                 </div>
-                <div class="arrow">→</div>
-                <div class="glass-card step">
-                    <div class="step-icon">🔍</div>
-                    <h3>Adequacy Check</h3>
-                    <p>Verifies domain expressivity via Chain-of-Thought reasoning to identify missing predicates or
-                        actions.</p>
+
+                <div class="pipeline-connector"></div>
+
+                <div class="pipeline-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                <line x1="11" y1="8" x2="11" y2="14"></line>
+                                <line x1="8" y1="11" x2="14" y2="11"></line>
+                            </svg>
+                        </div>
+                        <h3>Schema Injection</h3>
+                        <p>Domain schema is injected into LLM context for consistent problem generation with proper predicate grounding.</p>
+                    </div>
                 </div>
-                <div class="arrow">→</div>
-                <div class="glass-card step">
-                    <div class="step-icon">📋</div>
-                    <h3>Problem Gen</h3>
-                    <p>Generates specific problem instances using dynamic schema injection from the synthesised domain.
-                    </p>
+
+                <div class="pipeline-connector"></div>
+
+                <div class="pipeline-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 20h9"></path>
+                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                            </svg>
+                        </div>
+                        <h3>Problem Generation</h3>
+                        <p>Creates PDDL problem instance encoding initial state and goal from natural language specification.</p>
+                    </div>
                 </div>
-                <div class="arrow">→</div>
-                <div class="glass-card step highlight">
-                    <div class="step-icon">⚙️</div>
-                    <h3>Refinement Loop</h3>
-                    <p>Iteratively refines PDDL via symbolic feedback until a valid plan is found by a classical solver.
-                    </p>
+
+                <div class="pipeline-connector"></div>
+
+                <div class="pipeline-step highlight">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <div class="step-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path>
+                                <path d="M21 3v5h-5"></path>
+                            </svg>
+                        </div>
+                        <h3>Iterative Refinement</h3>
+                        <p>Closed-loop refinement using planner feedback until valid plan is found by classical solver.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -84,61 +156,170 @@
 
     <section id="features" class="features">
         <div class="container">
-            <div class="grid">
-                <div class="feature-item">
+            <div class="section-header">
+                <h2>Key Features</h2>
+                <p>Bridging LLM flexibility with symbolic planning rigor</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </div>
                     <h3>Provable Correctness</h3>
-                    <p>Uses VAL (PDDL Validator) to ensure that every generated plan is logically sound and executable.
-                    </p>
+                    <p>Every generated plan is validated by VAL, ensuring logical soundness and executability before deployment.</p>
                 </div>
-                <div class="feature-item">
-                    <h3>Zero-Shot Deployment</h3>
-                    <p>Handles entirely new domains without requiring manual PDDL modeling or expert-in-the-loop
-                        intervention.</p>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
+                    </div>
+                    <h3>Zero-Shot Domains</h3>
+                    <p>Handle new domains without manual PDDL modeling. LLMs provide the semantic understanding, planners provide the search.</p>
                 </div>
-                <div class="feature-item">
-                    <h3>Complex Reasoning</h3>
-                    <p>Combines the broad semantic knowledge of LLMs (GPT-4o/Claude) with the precision of classical
-                        search.</p>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 20V10"></path>
+                            <path d="M12 20V4"></path>
+                            <path d="M6 20v-6"></path>
+                        </svg>
+                    </div>
+                    <h3>Long-Horizon Planning</h3>
+                    <p>Successfully plans tasks with 80+ steps where pure autoregressive generation fails due to compounding errors.</p>
                 </div>
-                <div class="feature-item">
-                    <h3>Scalability</h3>
-                    <p>Successfully plans tasks with long horizons (>80 steps) where pure autoregressive models fail.
-                    </p>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                    </div>
+                    <h3>Interactive Demo</h3>
+                    <p>Live web interface for real-time pipeline visualization, PDDL editing, and plan execution trace stepping.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                    </div>
+                    <h3>Multiple Backends</h3>
+                    <p>Supports pyperplan, FastDownward, and SymK planners. Works with GPT-4o, Claude, and Gemini models.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="16 18 22 12 16 6"></polyline>
+                            <polyline points="8 6 2 12 8 18"></polyline>
+                        </svg>
+                    </div>
+                    <h3>Open Source</h3>
+                    <p>Fully open-source implementation with benchmark suite, evaluation scripts, and reproducible experiments.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="evaluation" class="evaluation gradient-bg">
-        <div class="container text-center">
-            <h2>Benchmarked Performance</h2>
-            <p>LAPIS consistently outperforms single-shot translation baselines on IPC domains.</p>
+    <section id="results" class="results">
+        <div class="container">
+            <div class="section-header light">
+                <h2>Benchmark Results</h2>
+                <p>Evaluated on IPC domains from the Lexicon benchmark</p>
+            </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <span class="stat-number">100%</span>
-                    <span class="stat-label">Success on BlocksWorld</span>
+            <div class="results-grid">
+                <div class="result-card">
+                    <div class="result-value">100%</div>
+                    <div class="result-label">Success Rate</div>
+                    <div class="result-detail">BlocksWorld domain</div>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number">3x</span>
-                    <span class="stat-label">Faster Recovery than Baselines</span>
+                <div class="result-card">
+                    <div class="result-value">94%</div>
+                    <div class="result-label">Success Rate</div>
+                    <div class="result-detail">BabyAI navigation</div>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number">0</span>
-                    <span class="stat-label">Manual Modeling Effort</span>
+                <div class="result-card">
+                    <div class="result-value">3.2x</div>
+                    <div class="result-label">Recovery Speed</div>
+                    <div class="result-detail">vs single-shot baselines</div>
                 </div>
+                <div class="result-card">
+                    <div class="result-value">0</div>
+                    <div class="result-label">Manual Modeling</div>
+                    <div class="result-detail">Expert effort required</div>
+                </div>
+            </div>
+
+            <div class="cta-section">
+                <a href="app/" class="btn btn-primary btn-lg">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Try the Interactive Demo
+                </a>
             </div>
         </div>
     </section>
 
     <footer class="footer">
-        <div class="container text-center">
-            <div class="affiliations">
-                <span>Sapienza University of Rome</span> | <span>Mohamed Khider University of Biskra</span>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="assets/logo.svg" alt="LAPIS" class="footer-logo">
+                    <span>LAPIS</span>
+                </div>
+                <div class="footer-links">
+                    <a href="https://github.com/EmanueleMusumeci/LAPIS">GitHub</a>
+                    <a href="https://arxiv.org/abs/2506.15828">Paper</a>
+                    <a href="app/">Demo</a>
+                </div>
             </div>
-            <p>&copy; 2026 LAPIS Project. ICAPS 2026 Demo Track.</p>
+            <div class="footer-bottom">
+                <div class="affiliations">
+                    Sapienza University of Rome &middot; Mohamed Khider University of Biskra
+                </div>
+                <div class="copyright">ICAPS 2026 Demo Track</div>
+            </div>
         </div>
     </footer>
+
+    <script>
+        // Mobile menu toggle
+        const menuBtn = document.querySelector('.mobile-menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+
+        menuBtn?.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            menuBtn.classList.toggle('active');
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    navLinks.classList.remove('active');
+                    menuBtn.classList.remove('active');
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
