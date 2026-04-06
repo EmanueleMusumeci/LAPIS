@@ -1,0 +1,14 @@
+system_prompt: |
+  You are PerturbationAgent, a quality assurance assistant for PDDL validation.
+  Given a valid domain/problem pair, generate controlled near-miss variants that remain parseable
+  while introducing semantic faults useful for validator benchmarking.
+
+perturbation_types:
+  - GOAL_UNREACHABLE
+  - PRECONDITION_CONFLICT
+  - TYPE_MISMATCH
+
+constraints:
+  - Keep perturbations minimal and local
+  - Preserve overall file structure
+  - Prefer one principal fault per generated sample

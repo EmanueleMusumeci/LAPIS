@@ -31,17 +31,14 @@ Required env vars for real LLM calls: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GE
 # Generate benchmark problems (blocksworld, N problems, seed, num_blocks):
 python3 third-party/lexicon_neurips/generate_benchmark.py blocksworld 100 1 2
 
-# Run low-level-only pipeline on Lexicon (unconstrained):
-python run_lexicon_pipeline.py
-
-# Run multi-level pipeline (high+low) on a domain/batch:
-python run_pipeline.py --domain blocksworld --pipeline multi_level --batch_id data_1
+# Run LAPIS benchmark on IPC domains:
+python run_benchmark.py --domain blocksworld --method lapis --generate_domain
 
 # Verify a stored plan:
 python3 third-party/lexicon_neurips/verify_plan.py blocksworld 2 100 o3
 
 # Choose planner backend (default: pyperplan; up_fd = FastDownward via Unified Planning):
-python run_pipeline.py --domain blocksworld --pipeline multi_level --batch_id data_1 --planner up_fd
+python run_benchmark.py --domain blocksworld --method lapis --planner up_fd
 ```
 
 ## Architecture
@@ -51,10 +48,9 @@ src/lapis/
   pipelines/
     base.py                    # BasePipeline ABC: run() iterates splits -> _process_task()
     low_level_planning.py      # LowLevelPlanningPipeline: PDDL gen+refine+plan+VAL loop
-    multi_level_planning.py    # Adds HighLevelPlanner + LTL trace checking above LLP
-    multi_level_planning_3dsg.py  # 3DSG variant (needs 3DSG submodule, stripped from LAPIS)
-    lexicon.py                 # LexiconPipeline: thin wrapper for Lexicon benchmark eval
-    baseline.py                # BaselinePipeline: direct Lexicon library integration
+    low_level_planning_oracle.py  # Oracle variant with GT simulator grounding
+    lapis_low_level.py         # LAPIS wrapper for IPC benchmarks
+    lapis_low_level_oracle.py  # LAPIS oracle wrapper
 
   planner/
     low/                       # Low-level: PDDL generation, problem refinement, VAL validation
@@ -64,19 +60,6 @@ src/lapis/
       planner.py               # LowLevelPlanner class (orchestrates low/ modules)
       heuristics.py            # Plan quality heuristics
       domain_parser.py         # PDDL domain parsing helpers
-    high/
-      planner.py               # HighLevelPlanner: NL -> domain/goal/constraints -> plan loop
-      Planner/                 # LTL-based iterative plan generation:
-        formula_generator.py   # LTL formula from NL constraints (TO REMOVE/COMMENT for demo)
-        trace_generator.py     # Plan -> trace for LTL checking (TO REMOVE/COMMENT)
-        trace_check.py         # Formal LTL trace verification (TO REMOVE/COMMENT)
-        plan_generator.py      # Plan generation step
-        nl_description_generator.py  # NL -> domain/problem/actions/goal/constraints
-        feedback_translator.py
-      Planner_ConstraintDriven/  # Alternative constraint-driven planner (LTL, TO REMOVE)
-      Domains/
-        blocksworld/data_{1..4}/  # Pre-generated problem instances
-        babyai/data_{1..3}/
 
   simulators/
     blocksworld_simulator.py   # UP SequentialSimulator wrapping Lexicon blocksworld
@@ -107,35 +90,23 @@ third-party/
 
 ## Key Design Decisions
 
-**Two pipeline paths:**
-1. **LTL path** (`multi_level_planning.py`): `HighLevelPlanner` generates LTL formulas, traces are formally verified via `trace_check`, then `LowLevelPlanner` decomposes each subgoal. This is the full LAPIS system.
-2. **Unconstrained / demo path** (target): `LowLevelPlanningPipeline` or `LexiconPipeline` directly. No LTL formula generation, no trace verification, no `Planner/` or `Planner_ConstraintDriven/` involvement.
+**Pipeline architecture:**
+- Demo uses low-level planning only: `LowLevelPlanningPipeline` for direct PDDL synthesis
+- No LTL constraints or high-level planner (removed from demo scope)
+- Focus on unconstrained IPC domain problems
 
-**LTL components to remove/comment for the demo:**
-- `src/lapis/planner/high/Planner/formula_generator.py` — LTL formula generation
-- `src/lapis/planner/high/Planner/trace_generator.py` and `trace_check.py` — trace generation + verification
-- `src/lapis/planner/high/Planner_ConstraintDriven/` — entire constraint-driven planner
-- `third-party/LTL_Verifier/` — LTL verifier submodule
-- In `multi_level_planning.py`: imports from `trace_check`, `formula_generator`, and `unified_planning` LTL operators (`Always`, `Sometime`, etc.)
+**Benchmark data flow:**
+- IPC domains in `data/llmpp/{domain}/` with NL descriptions
+- Results written to `results_llmpp/{experiment_name}/{timestamp}/`
+- Each problem gets a `manifold.json` summary with metrics
 
-**3DSG reintegration (for embodied env pipeline):**
-- `multi_level_planning_3dsg.py` is the pipeline variant that grounded plans in a 3D Scene Graph; this was removed from LAPIS but exists in the original ContextMatters at `/DATA/context-matters`.
-- The 3DSG adapter and graph utilities live in `src/lapis/planner/low/utils/graph.py` (partially) and need restoration from `/DATA/context-matters/src/context_matters/`.
-- For the embodied envs (AI2Thor/AlfWorld/VirtualHome), re-add 3DSG support as a git submodule (only 3DSG + adapter, not full ContextMatters).
-
-**Lexicon benchmark data flow:**
-- Problems stored at `third-party/lexicon_neurips/domains/{domain}/data/{batch_id}/{problem_id}/`
-- Each problem folder has `domain.pddl`, `problem.pddl`, `compiled_domain.pddl`, `compiled_problem.pddl`
-- `compiled_*` files encode LTL constraints as PDDL automata — for unconstrained evaluation, use base `domain.pddl`/`problem.pddl` only
-- Results written to `results/{experiment_name}/{timestamp}/`; each problem gets a `manifold.json` summary
-
-**Low-level planning loop** (in `LowLevelPlanningPipeline.grounded_planning`):
-1. (Optional) Generate PDDL domain from NL description
-2. Generate PDDL problem from scene graph + goal
+**Low-level planning loop** (in `LowLevelPlanningPipeline`):
+1. Generate PDDL domain from NL description (optional, can use GT)
+2. Generate PDDL problem from NL + goal
 3. Run planner (`plan_with_output` via unified-planning)
-4. If planning fails: refine problem with LLM feedback (up to `pddl_gen_iterations` times)
-5. VAL validation + grounding check after each attempt
-6. (Optional) Ground plan in 3D Scene Graph
+4. If planning fails: refine with LLM feedback (up to `pddl_gen_iterations` times)
+5. VAL validation after each attempt
+6. Optional semantic verification checks
 
 ## Notes
 

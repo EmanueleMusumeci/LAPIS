@@ -238,3 +238,16 @@ third-party/symk_wrapper
 third-party/virtualhome
 third-party/VAL
 test*.py
+
+data/
+final_results/
+lapis-web/frontend/node_modules/*
+lapis-web/backend/tmp/*
+*/tmp/*
+IGNORE_THIS_FOLDER/
+archive/
+/DATA/lapis.worktrees/*
+results*/
+recordings/
+logs/
+paper/

@@ -72,21 +72,30 @@ This demonstrates that end-to-end neural generation produces syntactically plaus
 
 ## 2. Results Summary
 
-### Table 1: VAL Success Rate (%) on 20 Problems per Domain
+### Table 1: Success Rate on 20 Problems per Domain (VAL / GT Simulator)
 
-| Domain | LLM+P (Few-Shot GT) | LLM+P (Zero-Shot) | LAPIS (Zero-Shot GT) | LAPIS (Synthesis, 0 Iterations) | LAPIS (Synthesis, 3 Iterations) | LAPIS (Adequacy Check) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Blocksworld** | ✅ **20/20 (100%)** | ✅ 16/20 (80%) | ✅ **20/20 (100%)** | ✅ **20/20 (100%)** | ✅ **20/20 (100%)** | ✅ **20/20 (100%)** |
-| **Barman** | ✅ 19/20 (95%) | ❌ **0/20 (0%)** | ✅ 16/20 (80%) | ❌ **0/20 (0%)** | ✅ 1/2 (50%) | ✅ **20/20 (100%)** |
-| **Storage** | ✅ **20/20 (100%)** | ✅ 18/20 (90%) | ✅ **20/20 (100%)** | ✅ 15/20 (75%) | ✅ **20/20 (100%)** | ✅ **20/20 (100%)** |
-| **Termes** | ✅ **20/20 (100%)** | ✅ 19/20 (95%) | ✅ **20/20 (100%)** | ✅ 19/20 (95%) | ✅ **20/20 (100%)** | ✅ **20/20 (100%)** |
-| **Grippers** | ✅ **20/20 (100%)** | ✅ **20/20 (100%)** | ✅ **20/20 (100%)** | ✅ **20/20 (100%)** | ✅ **20/20 (100%)** | ✅ **20/20 (100%)** |
-| **Tyreworld** | ✅ 19/20 (95%) | ✅ 18/20 (90%) | ✅ 19/20 (95%) | ✅ 15/20 (75%) | ✅ 15/20 (75%) | ✅ 18/20 (90%) |
-| **Floortile** | ✅ **20/20 (100%)** | ✅ 9/20 (45%) | ✅ 18/20 (90%) | ✅ 18/20 (90%) | ✅ 17/18 (94%) | ✅ 17/20 (85%) |
+Values shown as **SR / SR_GT** where SR = self-consistent VAL validation, SR_GT = ground-truth simulator validation.
+
+| Domain | LLM+P (Few-Shot GT) | LLM+P (Zero-Shot) | LAPIS (Zero-Shot GT) | LAPIS (Synthesis, 0 Iter) | LAPIS (Synthesis, 3 Iter) | LAPIS (Adequacy) | LAPIS (Semantic) | LAPIS/Oracle |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Blocksworld** | 100 / 0 | 80 / 0 | 100 / 0 | 100 / 0 | 100 / 0 | 100 / 0 | 100 / 0 | **100 / 90** |
+| **Barman** | 95 / 0 | 0 / 0 | 80 / 0 | 0 / 0 | 50* / 0 | 100 / 0 | 50† / 0 | **100 / 90** |
+| **Grippers** | 100 / 0 | 100 / 0 | 100 / 0 | 100 / 0 | 100 / 0 | 100 / 0 | 100 / 0 | **100 / 90** |
+| **Termes** | 100 / 0 | 95 / 0 | 100 / 0 | 95 / 0 | 100 / 0 | 100 / 0 | 100 / 0 | **100 / 85** |
+| **Floortile** | 100 / 0 | 45 / 0 | 90 / 0 | 90 / 0 | 94 / 0 | 85 / 0 | 77† / 0 | **100 / 75** |
+| **Tyreworld** | 95 / 0 | 90 / 0 | 95 / 0 | 75 / 0 | 75 / 0 | 90 / 0 | 53† / 0 | **100 / 45** |
+| **Storage** | 100 / 0 | 90 / 0 | 100 / 0 | 75 / 0 | 100 / 0 | 100 / 0 | 55 / 0 | **100 / 35** |
 
 *Partial run (2/20 problems)
-**LAPIS/Semantic**: Full 20/20 problems on all 7 domains (140 total), with semantic verification enabled
-**NL2Plan**: Benchmarked on Blocksworld (20/20) and Storage (20/20); uses Claude Sonnet 4.6 with 6-step pipeline and max 3 refinement iterations
+†Incomplete run due to API credit limits: barman 14/20, floortile 13/20, tyreworld 19/20
+
+**Why SR_GT = 0 for most conditions?** Plans generated against LLM-synthesized domains use different action/object naming than GT domains. Direct execution against GT simulator fails due to schema mismatch. Only LAPIS/Oracle uses LLM-based assignment mapping to bridge this gap.
+
+**LAPIS (Semantic)**: Adds semantic verification to adequacy check, detecting "unfixable preconditions" (predicates required by actions but never produced). Domains with clean semantic checks (blocksworld, grippers, termes) achieve 100% VAL success.
+
+**LAPIS/Oracle**: Separate benchmark using `LowLevelPlanningOraclePipeline` with LLM-based assignment mapping for GT simulator validation. **Total: 102/140 (73%) GT success.**
+
+**NL2Plan**: Benchmarked on Blocksworld (20/20) and Storage (20/20); uses Claude Sonnet 4.6 with 6-step pipeline
 
 ### Table 2: Lexicon Benchmark (Direct LLM Baselines)
 

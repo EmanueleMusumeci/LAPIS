@@ -1,0 +1,178 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+:root {
+  --color-success: #10b981;
+  --color-failure: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+  --color-symbolic: #8b5cf6;
+  --font-mono: 'Fira Code', 'JetBrains Mono', monospace;
+  --font-ui: 'Inter', system-ui, sans-serif;
+}
+
+body {
+  @apply bg-lapis-bg text-lapis-text font-sans antialiased;
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-lapis-bg;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-lapis-border rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-lapis-muted;
+}
+
+/* Code blocks */
+pre, code {
+  @apply font-mono;
+}
+
+/* Animation for running status */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+
+/* Pipeline progress pills */
+@layer components {
+  .pip-done {
+    @apply bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-full px-3 py-1 text-xs font-semibold;
+  }
+
+  .pip-active {
+    @apply bg-blue-500/20 text-blue-300 border border-blue-500/40 rounded-full px-3 py-1 text-xs font-bold;
+    animation: pulse-dot 1.4s ease-in-out infinite;
+  }
+
+  .pip-pending {
+    @apply text-slate-500 px-2 py-1 text-xs;
+  }
+
+  .pip-error {
+    @apply bg-red-500/20 text-red-300 border border-red-500/40 rounded-full px-3 py-1 text-xs font-semibold;
+  }
+}
+
+/* Stage cards */
+@layer components {
+  .stage-card {
+    @apply border-l-4 bg-lapis-card rounded-md p-3 mb-2 text-sm transition-colors duration-200;
+  }
+
+  .stage-card.pending {
+    @apply border-l-slate-600 opacity-60;
+  }
+
+  .stage-card.running {
+    @apply border-l-amber-500;
+  }
+
+  .stage-card.done {
+    @apply border-l-emerald-500;
+  }
+
+  .stage-card.error {
+    @apply border-l-red-500;
+  }
+
+  .stage-card.skipped {
+    @apply border-l-violet-500 opacity-75;
+  }
+}
+
+/* Badges */
+@layer components {
+  .badge {
+    @apply text-xs rounded px-2 py-0.5 font-semibold;
+  }
+
+  .badge-pending {
+    @apply bg-slate-700 text-slate-400;
+  }
+
+  .badge-running {
+    @apply bg-amber-900/50 text-amber-300;
+  }
+
+  .badge-done {
+    @apply bg-emerald-900/50 text-emerald-300;
+  }
+
+  .badge-error {
+    @apply bg-red-900/50 text-red-300;
+  }
+
+  .badge-skipped {
+    @apply bg-violet-900/50 text-violet-300;
+  }
+}
+
+/* Result badges */
+@layer components {
+  .result-success {
+    @apply inline-block bg-emerald-900/50 text-emerald-300 rounded-full px-3 py-0.5 text-xs font-bold;
+  }
+
+  .result-fail {
+    @apply inline-block bg-red-900/50 text-red-300 rounded-full px-3 py-0.5 text-xs font-bold;
+  }
+}
+
+/* Plan steps */
+@layer components {
+  .plan-step {
+    @apply flex items-center gap-2 px-2 py-1 rounded font-mono text-sm mb-1 bg-lapis-card border-l-2 border-l-lapis-accent;
+  }
+
+  .plan-step-active {
+    @apply bg-blue-500/10 border-l-blue-500;
+  }
+
+  .plan-current-action {
+    @apply bg-gradient-to-r from-blue-500/20 to-blue-500/5 border border-blue-500/30 rounded-lg px-4 py-3 my-2 flex gap-3 items-center font-mono text-sm;
+  }
+}
+
+/* Refinement terminal */
+@layer components {
+  .refine-terminal {
+    @apply bg-[#0a0f0a] border border-emerald-900/50 rounded-md p-3 font-mono text-xs text-emerald-400 whitespace-pre overflow-x-auto max-h-72 overflow-y-auto leading-relaxed;
+  }
+
+  .refine-err {
+    @apply text-red-400;
+  }
+
+  .refine-ok {
+    @apply text-emerald-400;
+  }
+
+  .refine-info {
+    @apply text-slate-400;
+  }
+}
+
+/* PDDL code styling */
+@layer components {
+  .pddl-code {
+    @apply font-mono text-xs bg-[#1e1e2e] text-[#cdd6f4] p-4 rounded-lg overflow-x-auto whitespace-pre;
+  }
+}
