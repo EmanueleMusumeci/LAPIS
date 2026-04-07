@@ -270,62 +270,62 @@
             </div>
 
             <div class="bench-section">
-                <h3 class="bench-title">Table 1 &mdash; Success Rate on 20 Problems per Domain</h3>
+                <h3 class="bench-title">Success Rate on 20 Problems per Domain</h3>
                 <p class="bench-caption">
-                    VAL = self-consistent plan validation &middot; GT = ground-truth simulator executability &middot; Claude Sonnet 4.6 + FastDownward
-                    <span class="caption-note">Methods marked * use human-authored ground-truth domain PDDL and cannot be directly compared to synthesis approaches. Hover column headers for method details, domain names for domain descriptions.</span>
+                    <strong>VAL</strong> = the plan passes PDDL validation (self-consistent) &nbsp;&middot;&nbsp; <strong>GT</strong> = the plan actually runs in the ground-truth simulator &nbsp;&middot;&nbsp; Claude Sonnet 4.6 + FastDownward
+                    <span class="caption-note">Columns marked * use the human-authored ground-truth PDDL domain and are provided as upper-bound references only. Hover a column header to learn what each method does, or hover a domain name for a description of that benchmark.</span>
                 </p>
                 <div class="table-wrapper">
                     <table class="bench-table">
                         <thead>
                             <tr class="group-row">
                                 <th rowspan="2" class="domain-corner">Domain</th>
-                                <th colspan="2" class="group-label-baseline"><em>LLM+P*</em></th>
-                                <th class="group-label-compare"><em>NL2Plan</em></th>
+                                <th colspan="2" class="group-label-baseline"><em><a href="https://arxiv.org/abs/2304.11477" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">LLM+P</a>*</em></th>
+                                <th class="group-label-compare"><em><a href="https://arxiv.org/abs/2405.04215" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">NL2Plan</a></em></th>
                                 <th colspan="2" class="group-label-gt"><strong>GT-LAPIS²*</strong></th>
                                 <th colspan="2" class="group-label-lapis"><strong>LAPIS²</strong></th>
                                 <th class="group-label-oracle"><strong>Sim-LAPIS²</strong></th>
                             </tr>
                             <tr class="col-row">
                                 <th class="col-baseline"
-                                    data-tooltip="LLM+P (few-shot). Given the human-authored GT domain PDDL plus 3 few-shot examples, generates problem PDDL then calls the planner. Strongest oracle baseline — benefits from both privileged domain access and in-context examples.">
+                                    data-tooltip="LLM+P with few-shot examples. The LLM receives the human-written PDDL domain plus 3 worked examples, then writes the problem file. A classical planner finds the plan. This is the strongest oracle baseline: it has both the correct domain and example guidance.">
                                     Few*
                                     <span class="col-sub">few-shot</span>
                                 </th>
                                 <th class="col-baseline"
-                                    data-tooltip="LLM+P (zero-shot). Same human-authored GT domain, but problem PDDL generated with no examples. Isolates the contribution of few-shot scaffolding from domain access.">
+                                    data-tooltip="LLM+P without examples. Same human-written PDDL domain, but the LLM writes the problem file from scratch with no worked examples. Shows how much the few-shot examples contribute on top of having the correct domain.">
                                     Zero*
                                     <span class="col-sub">zero-shot</span>
                                 </th>
                                 <th class="col-compare"
-                                    data-tooltip="NL2Plan (AAAI 2025). A competing NL-to-PDDL system using a 6-step pipeline with error-driven iterative refinement. Avg. 325 s/task. Tested only on Blocksworld and Storage.">
-                                    325s
+                                    data-tooltip="NL2Plan (2024). A competing end-to-end NL-to-PDDL system that builds both domain and problem files through a 6-step LLM pipeline with error-driven refinement. Takes ~325 s per task. Only tested on Blocksworld and Storage in our evaluation.">
+                                    325s/task
                                     <span class="col-sub">2 domains</span>
                                 </th>
                                 <th class="col-gt"
-                                    data-tooltip="GT-LAPIS² (GT). LAPIS problem generation with the oracle ground-truth domain injected. Measures the ceiling of LAPIS's problem-generation module in isolation — no domain synthesis needed.">
+                                    data-tooltip="LAPIS problem generation with the correct domain handed in. Bypasses domain synthesis entirely to measure how well LAPIS writes problem files when the domain is already known. Think of it as LAPIS without its hardest job.">
                                     GT*
                                     <span class="col-sub">oracle domain</span>
                                 </th>
                                 <th class="col-gt col-gt-last"
-                                    data-tooltip="GT-LAPIS² (Zero). Full LAPIS domain synthesis with 0 refinement iterations. One-shot domain + problem generation — measures raw quality before any VAL feedback loop.">
+                                    data-tooltip="LAPIS full synthesis with zero refinement passes. The LLM writes both domain and problem files in a single shot, with no feedback from the validator. Baseline for our iterative refinement loop.">
                                     Zero
                                     <span class="col-sub">0 iterations</span>
                                 </th>
                                 <th class="col-lapis"
-                                    data-tooltip="LAPIS² (Dom.). Core LAPIS pipeline: synthesizes its own domain PDDL from NL, then refines up to 3 iterations using VAL error feedback. Entirely no human-authored PDDL required.">
+                                    data-tooltip="Core LAPIS pipeline. The LLM synthesizes a domain from natural language, then iteratively fixes it using VAL validator feedback for up to 3 rounds. No human-authored PDDL involved at any point.">
                                     Dom.
                                     <span class="col-sub">3-iter synth.</span>
                                 </th>
                                 <th class="col-lapis"
-                                    data-tooltip="LAPIS² (Adq.). Adds a Chain-of-Thought adequacy check before synthesis commits. Verifies the LLM can produce all required predicates — catches structural gaps before expensive planner calls.">
+                                    data-tooltip="LAPIS with an adequacy check. Before committing to a domain, the LLM is asked to verify that every predicate the actions need can actually be produced. This catches structural gaps before wasting time on an unsolvable domain.">
                                     Adq.
-                                    <span class="col-sub">+ adequacy</span>
+                                    <span class="col-sub">+ adequacy check</span>
                                 </th>
                                 <th class="col-oracle"
-                                    data-tooltip="Sim-LAPIS². Full pipeline with LLM-based assignment mapping to bridge synthesized ↔ GT schemas. The only condition with GT executability > 0%. A = VAL success rate, B = GT simulator executability.">
+                                    data-tooltip="Sim-LAPIS: full pipeline plus an LLM-based mapping step that translates the synthesized plan back into ground-truth action/object names. This is the only condition where plans are tested in the real GT simulator. The two numbers show VAL success rate / GT executability.">
                                     VAL / GT
-                                    <span class="col-sub">executability</span>
+                                    <span class="col-sub">real executability</span>
                                 </th>
                             </tr>
                         </thead>
@@ -423,12 +423,12 @@
                 </div>
 
                 <div class="bench-footnotes">
-                    <p>* Baselines using human-authored ground-truth domain PDDL — results are not directly comparable to synthesis methods</p>
-                    <p>All non-Sim-LAPIS² conditions show VAL self-consistency only. GT executability = 0% because plans validated against a synthesized domain schema cannot run on the GT simulator (different predicate/action naming). Only Sim-LAPIS² bridges this gap via LLM-based assignment mapping.</p>
+                    <p>* These methods receive the human-authored PDDL domain as input and serve as upper-bound references. They are not directly comparable to synthesis methods that must build the domain from scratch.</p>
+                    <p>Every non-Sim-LAPIS² method shows VAL score only. Their GT executability is 0% across all domains: plans are validated against the synthesized PDDL schema, which uses different action and object names than the ground-truth simulator. Sim-LAPIS² is the only method that bridges this gap, using an LLM-based assignment mapping to translate synthesized plans into ground-truth terms.</p>
                 </div>
 
                 <div class="insight-box">
-                    <strong>Key insight:</strong> LAPIS² (Adq.) achieves <strong>96% average VAL</strong> with no human-authored domain — outperforming zero-shot LLM+P (71%) and approaching the few-shot oracle (99%). On complex domains (Barman, Storage), NL2Plan scores 0–25% while LAPIS² reaches 50–100%. Sim-LAPIS² then closes the synthesis-to-execution gap: <strong>73% real GT executability</strong> where all other methods achieve 0%.
+                    <strong>Key result:</strong> LAPIS² with adequacy checking reaches <strong>96% average VAL score</strong> using only natural language input, no human-authored PDDL. This is within 3 points of the few-shot oracle (99%) that gets handed the correct domain. On harder domains like Barman and Storage, NL2Plan scores between 0% and 25% while LAPIS² reaches 50-100%. Sim-LAPIS² then goes further, achieving <strong>73% real executability in the ground-truth simulator</strong> — something no other method can do at all.
                 </div>
             </div>
 
