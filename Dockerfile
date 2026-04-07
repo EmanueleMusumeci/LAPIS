@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc g++ cmake make \
     libgmp-dev libboost-all-dev \
     libffi-dev \
-    clingo \
+    gringo \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -16,7 +16,7 @@ RUN pip install --no-cache-dir -r /app/backend/requirements.txt
 
 # Copy application code
 COPY backend/ /app/backend/
-COPY frontend/ /app/frontend/
+COPY frontend/dist/ /app/frontend/
 COPY src/ /app/src/
 COPY data/ /app/data/
 COPY third-party/VAL/ /app/third-party/VAL/
