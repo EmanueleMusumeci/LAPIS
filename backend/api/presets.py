@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api", tags=["presets"])
 
 # Path configuration
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-_NL_DATA_ROOT = _REPO_ROOT / "data" / "llmpp"
+_NL_DATA_ROOT = _REPO_ROOT / "data"
 _LLMPP_ROOT = _REPO_ROOT / "third-party" / "llm-pddl" / "domains"
 
 # Domain list

@@ -36,7 +36,7 @@ if str(_REPO_ROOT) not in sys.path:
 
 def _find_gt_domain(domain_name: str) -> Optional[str]:
     """Find the ground-truth domain.pddl for a named domain."""
-    base = _REPO_ROOT / "data" / "llmpp" / domain_name / "p01" / "domain.pddl"
+    base = _REPO_ROOT / "data" / domain_name / "p01" / "domain.pddl"
     if base.exists():
         return str(base)
     return None
