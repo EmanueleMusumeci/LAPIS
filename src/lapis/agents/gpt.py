@@ -5,9 +5,9 @@ from src.lapis.agents.agent import Agent
 from typing import Optional
 
 class GPTAgent(Agent):
-    def __init__(self, model, max_history: int = 5):
+    def __init__(self, model, max_history: int = 5, api_key: str | None = None):
         super().__init__(model)
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
         # prompt_chain holds messages starting with the system prompt at index 0
         self.prompt_chain = []
         # max_history: number of user/assistant messages to keep (excluding the system prompt)

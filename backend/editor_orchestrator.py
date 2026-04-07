@@ -2,8 +2,15 @@ from __future__ import annotations
 
 import asyncio
 import re
+import sys
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
+
+# Ensure the repo root (parent of lapis-web/) is importable as src.*
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 from src.lapis.agents.editor_agent import EditorAgent
 from src.lapis.agents.dialogue_manager import DialogueManager
@@ -74,13 +81,13 @@ class EditorOrchestrator:
                 "blueprint": blueprint,
             }
 
-    async def process_user_message(self, text: str) -> dict[str, Any]:
+    async def process_user_message(self, text: str, api_key: str | None = None) -> dict[str, Any]:
         async with self._lock:
             user_text = text.strip()
             if user_text:
                 self._state.chat.append({"role": "user", "text": user_text})
 
-            response = self._agent.process(user_text, self._state.domain, self._state.problem)
+            response = self._agent.process(user_text, self._state.domain, self._state.problem, api_key=api_key)
             self._state.domain = response.domain
             self._state.problem = response.problem
             self._state.chat.append({"role": "agent", "text": response.reply})

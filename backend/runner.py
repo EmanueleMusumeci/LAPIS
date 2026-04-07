@@ -10,7 +10,9 @@ Two modes:
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import html
+import json
 import os
 import re
 import sys
@@ -110,11 +112,34 @@ class LAPISRunner:
         self.tmp_dir = tmp_dir or str(_REPO_ROOT / "backend" / "tmp")
         os.makedirs(self.tmp_dir, exist_ok=True)
 
-    def _new_run_dir(self) -> str:
-        """Create a unique subdirectory for this run's files."""
-        run_id = f"run_{int(time.time()*1000)}"
+    def _run_id_for(self, config: "PipelineConfig") -> str:
+        """Return a deterministic run ID based on config content."""
+        key = json.dumps({
+            "domain_nl": config.domain_nl,
+            "problem_nl": config.problem_nl,
+            "method": config.method.value,
+            "model_id": config.model_id,
+            "max_refinements": config.max_refinements,
+            "planner_name": config.planner_name,
+            "skip_adequacy": config.skip_adequacy,
+            "semantic_checks": config.semantic_checks,
+            "refine_domain": config.refine_domain,
+            "extractor_type": config.extractor_type,
+            "domain_name": self.domain_name,
+        }, sort_keys=True)
+        return "run_" + hashlib.sha256(key.encode()).hexdigest()[:16]
+
+    def _new_run_dir(self, config: "PipelineConfig") -> str:
+        """Return a deterministic run dir, backing up any previous run for the same config."""
+        run_id = self._run_id_for(config)
         d = os.path.join(self.tmp_dir, run_id)
-        os.makedirs(d, exist_ok=True)
+        bak = d + ".bak"
+        if os.path.isdir(d):
+            if os.path.isdir(bak):
+                shutil.rmtree(bak)
+            shutil.copytree(d, bak)
+            shutil.rmtree(d)
+        os.makedirs(d)
         return d
 
     @staticmethod
@@ -152,7 +177,7 @@ class LAPISRunner:
         from src.lapis.planner.low.planner_utils import plan_with_output
         from src.lapis.planner.low.semantic_verification import run_semantic_checks
 
-        run_dir = self._new_run_dir()
+        run_dir = self._new_run_dir(config)
         logs_dir = os.path.join(run_dir, "logs")
         os.makedirs(logs_dir, exist_ok=True)
 
@@ -629,11 +654,14 @@ async def _generate_plan_animation(
     return animation_url, step_images
 
 
-def make_agent(model_id: str):
-    """Create an agent instance for the given model ID."""
+def make_agent(model_id: str, api_key: str | None = None):
+    """Create an agent instance for the given model ID.
+
+    *api_key* overrides the corresponding environment variable when provided.
+    """
     if model_id.startswith("claude"):
         from src.lapis.agents.claude import ClaudeAgent
-        return ClaudeAgent(model=model_id)
+        return ClaudeAgent(model=model_id, api_key=api_key or None)
     else:
         from src.lapis.agents.gpt import GPTAgent
-        return GPTAgent(model=model_id)
+        return GPTAgent(model=model_id, api_key=api_key or None)

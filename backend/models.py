@@ -94,6 +94,7 @@ class PipelineConfig(BaseModel):
     semantic_checks: bool = True
     refine_domain: bool = True
     extractor_type: str = "auto"
+    api_key: Optional[str] = Field(None, description="User-supplied API key (Anthropic or OpenAI)")
 
 
 class Preset(BaseModel):
