@@ -34,7 +34,44 @@ const PAPER_ROWS: PaperRow[] = [
   { domain: 'Average',     llmpp_few: 99,  llmpp_zero: 71,  nl2plan: null, gt_lapis: 95,  lapis_zero: 76,  lapis_dom: 85,  lapis_adq: 96,  sim_val: 100, sim_gt: 73 },
 ]
 
+type PaperMethod = { key: keyof Omit<PaperRow, 'domain'>; label: string; color: string }
+
+const PAPER_METHODS: PaperMethod[] = [
+  { key: 'llmpp_few',  label: 'LLM+P Few',    color: '#94a3b8' },
+  { key: 'llmpp_zero', label: 'LLM+P Zero',   color: '#64748b' },
+  { key: 'nl2plan',    label: 'NL2Plan',       color: '#10b981' },
+  { key: 'gt_lapis',   label: 'GT-LAPIS²',    color: '#f59e0b' },
+  { key: 'lapis_zero', label: 'LAPIS² Zero',  color: '#4fc3f7' },
+  { key: 'lapis_dom',  label: 'LAPIS² Dom.',  color: '#38bdf8' },
+  { key: 'lapis_adq',  label: 'LAPIS² Adq.',  color: '#0ea5e9' },
+  { key: 'sim_val',    label: 'Sim-LAPIS² VAL', color: '#f97316' },
+  { key: 'sim_gt',     label: 'Sim-LAPIS² GT',  color: '#ef4444' },
+]
+
 function PaperResultsTable() {
+  const [selectedMethods, setSelectedMethods] = useState<Set<string>>(
+    new Set(['lapis_zero', 'lapis_dom', 'lapis_adq', 'sim_val', 'sim_gt', 'llmpp_few'])
+  )
+
+  const toggleMethod = (key: string) => {
+    setSelectedMethods(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) { if (next.size > 1) next.delete(key) }
+      else next.add(key)
+      return next
+    })
+  }
+
+  const chartData = PAPER_ROWS.filter(r => r.domain !== 'Average').map(row => {
+    const entry: Record<string, string | number> = { name: row.domain }
+    PAPER_METHODS.forEach(m => {
+      if (selectedMethods.has(m.key)) {
+        entry[m.label] = row[m.key] ?? 0
+      }
+    })
+    return entry
+  })
+
   const fmt = (v: number | null) => v == null ? <span className="text-lapis-muted">—</span> : `${v}`
   const pct = (v: number) => {
     if (v >= 90) return 'text-emerald-400 font-semibold'
@@ -44,6 +81,47 @@ function PaperResultsTable() {
   }
 
   return (
+    <div className="space-y-6">
+    {/* Chart */}
+    <div className="bg-lapis-card border border-lapis-border rounded-xl p-6">
+      <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
+        <h3 className="text-lg font-semibold text-lapis-text">Success Rate by Domain (%)</h3>
+        <div className="flex flex-wrap gap-2">
+          {PAPER_METHODS.map(m => (
+            <button
+              key={m.key}
+              onClick={() => toggleMethod(m.key)}
+              className={cn(
+                'px-2 py-1 rounded text-xs font-medium transition-colors border',
+                selectedMethods.has(m.key)
+                  ? 'border-transparent text-lapis-bg'
+                  : 'border-lapis-border text-lapis-muted bg-transparent'
+              )}
+              style={selectedMethods.has(m.key) ? { backgroundColor: m.color } : {}}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <ResponsiveContainer width="100%" height={360}>
+        <BarChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+          <XAxis dataKey="name" stroke="#64748b" tick={{ fontSize: 11 }} />
+          <YAxis stroke="#64748b" domain={[0, 100]} tickFormatter={v => `${v}%`} width={40} />
+          <Tooltip
+            contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px' }}
+            formatter={(v: number) => [`${v}%`]}
+          />
+          <Legend />
+          {PAPER_METHODS.filter(m => selectedMethods.has(m.key)).map(m => (
+            <Bar key={m.key} dataKey={m.label} fill={m.color} radius={[3, 3, 0, 0]} />
+          ))}
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+
+    {/* Table */}
     <div className="bg-lapis-card border border-lapis-border rounded-xl overflow-hidden">
       <div className="px-6 py-4 border-b border-lapis-border">
         <h3 className="text-lg font-semibold text-lapis-text">Paper Benchmark Results</h3>
@@ -121,6 +199,7 @@ function PaperResultsTable() {
         </p>
       </div>
     </div>
+    </div>
   )
 }
 
@@ -134,18 +213,23 @@ function LiveResults() {
   const [selectedMetric, setSelectedMetric] = useState<'val_rate' | 'success_rate' | 'avg_plan_length' | 'avg_time'>('val_rate')
 
   useEffect(() => {
-    async function loadData() {
+    let cancelled = false
+
+    async function loadData(initial = false) {
       try {
-        setIsLoading(true)
+        if (initial) setIsLoading(true)
         const result = await fetchModelRaceData()
-        setData(result)
+        if (!cancelled) setData(result)
       } catch (e) {
-        setError((e as Error).message)
+        if (!cancelled && initial) setError((e as Error).message)
       } finally {
-        setIsLoading(false)
+        if (initial && !cancelled) setIsLoading(false)
       }
     }
-    loadData()
+
+    loadData(true)
+    const interval = setInterval(() => loadData(false), 10000)
+    return () => { cancelled = true; clearInterval(interval) }
   }, [])
 
   if (isLoading) {

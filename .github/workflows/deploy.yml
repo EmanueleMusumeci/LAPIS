@@ -35,6 +35,7 @@ jobs:
           # Sync backend + src + data to /opt/lapis-webapp (no frontend source/node_modules)
           rsync -avz --delete \
             --exclude='.github' \
+            --exclude='.env' \
             --exclude='*.pyc' \
             --exclude='__pycache__' \
             --exclude='frontend' \
