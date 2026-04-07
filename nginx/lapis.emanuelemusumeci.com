@@ -4,13 +4,10 @@ server {
     root /var/www/lapis.emanuelemusumeci.com;
     index index.html;
 
-    # Security headers (matching existing sites)
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-Content-Type-Options "nosniff" always;
-    add_header Strict-Transport-Security "max-age=31536000" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
-    # WebSocket proxy (real-time pipeline updates)
     location /ws/ {
         proxy_pass         http://127.0.0.1:8001;
         proxy_http_version 1.1;
@@ -23,7 +20,6 @@ server {
         proxy_read_timeout 3600s;
     }
 
-    # API proxy
     location /api/ {
         proxy_pass         http://127.0.0.1:8001;
         proxy_http_version 1.1;
@@ -35,14 +31,12 @@ server {
         client_max_body_size 2m;
     }
 
-    # Static plan results
     location /static/ {
         proxy_pass http://127.0.0.1:8001;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
     }
 
-    # SPA frontend — serve static files, fall back to index.html
     location / {
         try_files $uri $uri/ /index.html;
     }
@@ -54,22 +48,21 @@ server {
         access_log off;
     }
 
-    listen 443 ssl;
-    listen [::]:443 ssl;
-    ssl_certificate /etc/letsencrypt/live/lapis.emanuelemusumeci.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/lapis.emanuelemusumeci.com/privkey.pem;
-    include /etc/letsencrypt/options-ssl-nginx.conf;
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/lapis.emanuelemusumeci.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/lapis.emanuelemusumeci.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 }
 
 server {
+    if ($host = lapis.emanuelemusumeci.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
     listen 80;
     listen [::]:80;
     server_name lapis.emanuelemusumeci.com;
-
-    if ($host = lapis.emanuelemusumeci.com) {
-        return 301 https://$host$request_uri;
-    }
-
-    return 404;
+    return 404; # managed by Certbot
 }
