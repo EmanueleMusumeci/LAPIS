@@ -27,8 +27,8 @@ RUN chmod +x /app/third-party/VAL/build/linux64/Release/bin/*
 RUN mkdir -p /app/backend/tmp /app/results_web
 
 # Expose API port (nginx proxies from outside)
-EXPOSE 8001
+EXPOSE 8002
 
 ENV PYTHONPATH=/app
 
-CMD ["uvicorn", "backend.main:app", "--host", "127.0.0.1", "--port", "8001"]
+CMD ["uvicorn", "backend.main:app", "--host", "127.0.0.1", "--port", "8002"]
