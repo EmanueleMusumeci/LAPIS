@@ -39,10 +39,28 @@ class VectorDB:
             json.dump(self.data, f, indent=4)
 
     def _get_embedding(self, text: str) -> List[float]:
-        """Get the embedding for a given text using the OpenAI client."""
+        """Get the embedding for a given text.
+
+        Uses the OpenAI embeddings API. When the client is an Anthropic client
+        (which has no embeddings endpoint), falls back to constructing an OpenAI
+        client from the OPENAI_API_KEY environment variable.
+        """
         text = text.replace("\n", " ")
+        client = self.client
+
+        # Anthropic clients don't support embeddings — fall back to OpenAI.
+        client_module = type(client).__module__ or ""
+        if "anthropic" in client_module.lower():
+            import os
+            from openai import OpenAI
+            openai_key = os.getenv("OPENAI_API_KEY", "")
+            if not openai_key:
+                print("Warning: OPENAI_API_KEY not set; cannot generate embeddings.")
+                return []
+            client = OpenAI(api_key=openai_key)
+
         try:
-            return self.client.embeddings.create(input=[text], model="text-embedding-3-small").data[0].embedding
+            return client.embeddings.create(input=[text], model="text-embedding-3-small").data[0].embedding
         except Exception as e:
             print(f"Error getting embedding: {e}")
             return []

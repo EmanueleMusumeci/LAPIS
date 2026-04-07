@@ -241,15 +241,16 @@ async def handle_websocket(websocket: WebSocket):
                     data=state_payload["verification"],
                 ))
 
-                await manager.send_message(conn_id, WSMessage(
-                    type=WSMessageType.VIZ_BLUEPRINT,
-                    data={"blueprint": state_payload["blueprint"]},
-                ))
-
             elif msg_type == WSMessageType.INIT_SESSION.value:
                 domain_name = data.get("domain_name")
+                domain_pddl = data.get("domain_pddl") or None
+                problem_pddl = data.get("problem_pddl") or None
                 orchestrator = manager.orchestrators[conn_id]
-                init_payload = await orchestrator.init_session(domain_name=domain_name)
+                init_payload = await orchestrator.init_session(
+                    domain_name=domain_name,
+                    domain_pddl=domain_pddl,
+                    problem_pddl=problem_pddl,
+                )
 
                 await manager.send_message(conn_id, WSMessage(
                     type=WSMessageType.UPDATE,
@@ -264,11 +265,6 @@ async def handle_websocket(websocket: WebSocket):
                 await manager.send_message(conn_id, WSMessage(
                     type=WSMessageType.VERIFY_RESULTS,
                     data=init_payload["verification"],
-                ))
-
-                await manager.send_message(conn_id, WSMessage(
-                    type=WSMessageType.VIZ_BLUEPRINT,
-                    data={"blueprint": init_payload["blueprint"]},
                 ))
 
             elif msg_type == WSMessageType.PDDL_UPDATE.value:
@@ -304,11 +300,6 @@ async def handle_websocket(websocket: WebSocket):
                     data=sync_payload["verification"],
                 ))
 
-                await manager.send_message(conn_id, WSMessage(
-                    type=WSMessageType.VIZ_BLUEPRINT,
-                    data={"blueprint": sync_payload["blueprint"]},
-                ))
-
             elif msg_type == WSMessageType.VERIFY_REQUEST.value:
                 orchestrator = manager.orchestrators[conn_id]
                 verification = await orchestrator.run_verification()
@@ -339,11 +330,6 @@ async def handle_websocket(websocket: WebSocket):
                         "source": sync_payload["source"],
                         "verification": sync_payload["verification"],
                     },
-                ))
-
-                await manager.send_message(conn_id, WSMessage(
-                    type=WSMessageType.VIZ_BLUEPRINT,
-                    data={"blueprint": sync_payload["blueprint"]},
                 ))
 
     except WebSocketDisconnect:

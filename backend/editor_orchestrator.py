@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import re
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -13,7 +12,6 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from src.lapis.agents.editor_agent import EditorAgent
-from src.lapis.agents.dialogue_manager import DialogueManager
 from src.lapis.validators import VerificationService
 
 
@@ -45,7 +43,6 @@ class SessionState:
     problem: str = DEFAULT_PROBLEM
     chat: list[dict[str, Any]] = field(default_factory=list)
     verification: dict[str, Any] | None = None
-    blueprint: dict[str, Any] | None = None
 
 
 class EditorOrchestrator:
@@ -56,15 +53,22 @@ class EditorOrchestrator:
         self._state = SessionState()
         self._verifier = VerificationService()
         self._agent = EditorAgent()
-        self._dialogue = DialogueManager()
 
     @property
     def state(self) -> SessionState:
         return self._state
 
-    async def init_session(self, domain_name: str | None = None) -> dict[str, Any]:
+    async def init_session(
+        self,
+        domain_name: str | None = None,
+        domain_pddl: str | None = None,
+        problem_pddl: str | None = None,
+    ) -> dict[str, Any]:
         async with self._lock:
-            if domain_name and domain_name.lower() in {"babyai", "minigrid", "gridworld"}:
+            if domain_pddl and problem_pddl:
+                self._state.domain = domain_pddl
+                self._state.problem = problem_pddl
+            elif domain_name and domain_name.lower() in {"babyai", "minigrid", "gridworld"}:
                 self._state.domain = self._default_grid_domain()
                 self._state.problem = self._default_grid_problem()
             else:
@@ -73,12 +77,10 @@ class EditorOrchestrator:
 
             self._state.chat = []
             verification = self._run_verification_locked()
-            blueprint = self._build_blueprint_locked()
             return {
                 "domain": self._state.domain,
                 "problem": self._state.problem,
                 "verification": verification,
-                "blueprint": blueprint,
             }
 
     async def process_user_message(self, text: str, api_key: str | None = None) -> dict[str, Any]:
@@ -93,13 +95,11 @@ class EditorOrchestrator:
             self._state.chat.append({"role": "agent", "text": response.reply})
 
             verification = self._run_verification_locked()
-            blueprint = self._build_blueprint_locked()
             return {
                 "response": response.reply,
                 "domain": self._state.domain,
                 "problem": self._state.problem,
                 "verification": verification,
-                "blueprint": blueprint,
             }
 
     async def sync_pddl(self, domain: str, problem: str, source: str = "text") -> dict[str, Any]:
@@ -107,13 +107,11 @@ class EditorOrchestrator:
             self._state.domain = domain
             self._state.problem = problem
             verification = self._run_verification_locked()
-            blueprint = self._build_blueprint_locked()
             return {
                 "domain": domain,
                 "problem": problem,
                 "source": source,
                 "verification": verification,
-                "blueprint": blueprint,
             }
 
     async def run_verification(self) -> dict[str, Any]:
@@ -129,88 +127,6 @@ class EditorOrchestrator:
         }
         self._state.verification = payload
         return payload
-
-    async def get_ui_blueprint(self) -> dict[str, Any]:
-        async with self._lock:
-            return self._build_blueprint_locked()
-
-    def _build_blueprint_locked(self) -> dict[str, Any]:
-        domain = self._state.domain.lower()
-        problem = self._state.problem
-
-        if "on ?x" in domain or "block" in domain:
-            blueprint = self._build_blocksworld_blueprint(problem)
-        elif "agentinroom" in domain or "room" in domain:
-            blueprint = self._build_gridworld_blueprint(problem)
-        else:
-            blueprint = self._dialogue.generate_blueprint(self._state.domain, self._state.problem)
-
-        self._state.blueprint = blueprint
-        return blueprint
-
-    def _build_blocksworld_blueprint(self, problem: str) -> dict[str, Any]:
-        blocks = re.findall(r"([a-zA-Z0-9_-]+)\s*-\s*block", problem, flags=re.IGNORECASE)
-        if not blocks:
-            blocks = ["a", "b", "c"]
-
-        objects = [
-            {
-                "id": block,
-                "label": block,
-                "draggable": True,
-                "color": "amber",
-            }
-            for block in blocks
-        ]
-        actions = [
-            {
-                "type": "drag",
-                "target_id": "*",
-                "update_predicate": "(on {target} {destination})",
-            },
-            {
-                "type": "click",
-                "target_id": "*",
-                "update_predicate": "(ontable {target})",
-            },
-        ]
-        return {
-            "layout": "canvas",
-            "objects": objects,
-            "actions": actions,
-        }
-
-    def _build_gridworld_blueprint(self, problem: str) -> dict[str, Any]:
-        rooms = re.findall(r"([a-zA-Z0-9_-]+)\s*-\s*room", problem, flags=re.IGNORECASE)
-        if not rooms:
-            rooms = ["room1", "room2"]
-
-        objects = [
-            {
-                "id": room,
-                "label": room,
-                "draggable": False,
-                "color": "slate",
-            }
-            for room in rooms
-        ]
-        objects.append({
-            "id": "agent",
-            "label": "agent",
-            "draggable": True,
-            "color": "cyan",
-        })
-        return {
-            "layout": "grid",
-            "objects": objects,
-            "actions": [
-                {
-                    "type": "click",
-                    "target_id": "agent",
-                    "update_predicate": "(agentinroom {destination})",
-                }
-            ],
-        }
 
     def _default_grid_domain(self) -> str:
         return """(define (domain gridworld)

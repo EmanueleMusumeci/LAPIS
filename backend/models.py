@@ -113,6 +113,14 @@ class PresetList(BaseModel):
     domains: list[str]
 
 
+class PresetPddl(BaseModel):
+    """PDDL files for a specific preset."""
+    domain: str
+    problem_id: str
+    domain_pddl: str
+    problem_pddl: str
+
+
 # WebSocket message types
 
 class WSMessageType(str, Enum):
@@ -129,7 +137,6 @@ class WSMessageType(str, Enum):
     PDDL_UPDATE = "PDDL_UPDATE"
     VERIFY_REQUEST = "VERIFY_REQUEST"
     VERIFY_RESULTS = "VERIFY_RESULTS"
-    VIZ_BLUEPRINT = "VIZ_BLUEPRINT"
 
 
 class WSMessage(BaseModel):

@@ -10,7 +10,7 @@ from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 
-from ..models import Preset, PresetList
+from ..models import Preset, PresetList, PresetPddl
 
 router = APIRouter(prefix="/api", tags=["presets"])
 
@@ -197,6 +197,28 @@ async def get_domain_problems(domain: str) -> list[str]:
     if not problems:
         raise HTTPException(status_code=404, detail=f"No problems found for domain: {domain}")
     return problems
+
+
+@router.get("/presets/{domain}/{problem_id}/pddl", response_model=PresetPddl)
+async def get_preset_pddl(domain: str, problem_id: str) -> PresetPddl:
+    """
+    Get the actual PDDL files (domain + problem) for a preset.
+    """
+    domain_path = _NL_DATA_ROOT / domain / problem_id / "domain.pddl"
+    problem_path = _NL_DATA_ROOT / domain / problem_id / "problem.pddl"
+
+    if not domain_path.exists() or not problem_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"PDDL files not found for {domain}/{problem_id}"
+        )
+
+    return PresetPddl(
+        domain=domain,
+        problem_id=problem_id,
+        domain_pddl=domain_path.read_text(),
+        problem_pddl=problem_path.read_text(),
+    )
 
 
 @router.post("/presets/reload")

@@ -1,0 +1,201 @@
+/**
+ * PlanTrace - Interactive plan step-through component.
+ *
+ * Features:
+ * - Slider navigation (1 to N steps)
+ * - Prev/Next buttons
+ * - Current action banner
+ * - Full action list with active highlighting
+ */
+import { useState } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import * as Slider from '@radix-ui/react-slider'
+import { cn } from '@/lib/utils'
+
+interface PlanTraceProps {
+  actions: string[]
+  stepImages?: string[]  // Optional: URL to image for each step
+  animationUrl?: string  // Optional: URL to full animation GIF
+  className?: string
+}
+
+export function PlanTrace({ actions, stepImages, animationUrl, className }: PlanTraceProps) {
+  const [currentStep, setCurrentStep] = useState(0)
+  const [showAnimation, setShowAnimation] = useState(false)
+  // TODO: Auto-play feature (use Play/Pause icons)
+  // const [isAutoPlaying, setIsAutoPlaying] = useState(false)
+
+  const n = actions.length
+  const hasImages = stepImages && stepImages.length === n
+  const currentImage = hasImages ? stepImages[currentStep] : null
+
+  if (n === 0) {
+    return (
+      <div className={cn('text-center text-lapis-muted py-4', className)}>
+        No plan actions to display.
+      </div>
+    )
+  }
+
+  const handlePrev = () => {
+    setCurrentStep((prev) => Math.max(0, prev - 1))
+  }
+
+  const handleNext = () => {
+    setCurrentStep((prev) => Math.min(n - 1, prev + 1))
+  }
+
+  const currentAction = actions[currentStep]
+
+  // Parse action for display
+  const parseAction = (action: string) => {
+    const clean = action.trim().replace(/^\(|\)$/g, '')
+    const parts = clean.split(/\s+/)
+    return {
+      name: parts[0] || '',
+      params: parts.slice(1),
+    }
+  }
+
+  const { name, params } = parseAction(currentAction)
+
+  return (
+    <div className={cn('space-y-4', className)}>
+      {/* Animation Toggle (if animation available) */}
+      {animationUrl && (
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm text-lapis-muted">Plan Visualization</span>
+          <button
+            onClick={() => setShowAnimation(!showAnimation)}
+            className="px-3 py-1 text-xs rounded-lg bg-lapis-card border border-lapis-border hover:border-lapis-accent text-lapis-text transition-colors"
+          >
+            {showAnimation ? 'Show Step-by-Step' : 'Show Full Animation'}
+          </button>
+        </div>
+      )}
+
+      {/* Full Animation GIF */}
+      {showAnimation && animationUrl && (
+        <div className="border border-lapis-border rounded-lg overflow-hidden bg-lapis-bg">
+          <img
+            src={animationUrl}
+            alt="Plan animation"
+            className="w-full h-auto"
+          />
+        </div>
+      )}
+
+      {/* Step-by-step view (default) */}
+      {!showAnimation && (
+        <>
+          {/* Current Step Image */}
+          {currentImage && (
+            <div className="border border-lapis-border rounded-lg overflow-hidden bg-lapis-bg">
+              <img
+                src={currentImage}
+                alt={`Step ${currentStep + 1}`}
+                className="w-full h-auto"
+              />
+            </div>
+          )}
+
+          {/* Navigation Controls */}
+          <div className="flex items-center gap-3">
+        <button
+          onClick={handlePrev}
+          disabled={currentStep === 0}
+          className={cn(
+            'p-2 rounded-lg transition-colors',
+            currentStep === 0
+              ? 'bg-lapis-border text-lapis-muted cursor-not-allowed'
+              : 'bg-lapis-card hover:bg-lapis-accent/20 text-lapis-text'
+          )}
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+
+        <div className="flex-1">
+          <Slider.Root
+            value={[currentStep]}
+            onValueChange={([value]) => setCurrentStep(value)}
+            min={0}
+            max={n - 1}
+            step={1}
+            className="relative flex items-center select-none touch-none w-full h-5"
+          >
+            <Slider.Track className="bg-lapis-border relative grow rounded-full h-2">
+              <Slider.Range className="absolute bg-lapis-accent rounded-full h-full" />
+            </Slider.Track>
+            <Slider.Thumb
+              className={cn(
+                'block w-5 h-5 bg-lapis-accent rounded-full shadow-lg',
+                'hover:bg-lapis-accent/80 focus:outline-none focus:ring-2 focus:ring-lapis-accent/50',
+                'transition-colors cursor-pointer'
+              )}
+            />
+          </Slider.Root>
+        </div>
+
+        <button
+          onClick={handleNext}
+          disabled={currentStep === n - 1}
+          className={cn(
+            'p-2 rounded-lg transition-colors',
+            currentStep === n - 1
+              ? 'bg-lapis-border text-lapis-muted cursor-not-allowed'
+              : 'bg-lapis-card hover:bg-lapis-accent/20 text-lapis-text'
+          )}
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+
+        <span className="text-sm text-lapis-muted min-w-[60px] text-right">
+          {currentStep + 1} / {n}
+        </span>
+      </div>
+
+      {/* Current Action Banner */}
+      <div className="plan-current-action">
+        <span className="text-lapis-muted text-sm">Step {currentStep + 1}</span>
+        <span className="text-lapis-accent font-semibold">{name}</span>
+        {params.length > 0 && (
+          <span className="text-lapis-text-secondary">{params.join(' ')}</span>
+        )}
+      </div>
+
+          {/* Action List */}
+          <div className="space-y-1 max-h-64 overflow-y-auto">
+            {actions.map((action, i) => {
+              const isActive = i === currentStep
+              const isPast = i < currentStep
+
+              return (
+                <div
+                  key={i}
+                  onClick={() => setCurrentStep(i)}
+                  className={cn(
+                    'plan-step cursor-pointer transition-all duration-150',
+                    isActive && 'plan-step-active',
+                    isPast && 'opacity-60'
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'w-8 text-right text-sm',
+                      isActive ? 'text-lapis-accent font-semibold' : 'text-lapis-muted'
+                    )}
+                  >
+                    {i + 1}.
+                  </span>
+                  <span className={cn(isActive && 'text-lapis-accent')}>{action}</span>
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+export default PlanTrace
