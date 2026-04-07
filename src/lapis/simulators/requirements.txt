@@ -1,0 +1,29 @@
+# CoSTL Simulators Requirements
+# Core dependencies for all simulators
+
+# BabyAI/MiniGrid
+minigrid>=2.0.0
+gymnasium>=0.29.0
+
+# Common dependencies
+numpy>=1.21.0
+pddl>=0.3.0
+
+# Optional: AlfWorld (requires separate installation)
+# See INTEGRATION_GUIDE.md for AlfWorld setup instructions
+# alfworld requires: git clone + pip install -e . + alfworld-download
+
+# Optional: VirtualHome (requires separate installation + Unity simulator)
+# See INTEGRATION_GUIDE.md for VirtualHome setup instructions
+# virtualhome requires: git clone + pip install -e . + Unity simulator download
+
+# Optional: Habitat (requires conda installation for best results)
+# See README.md for Habitat setup instructions
+# Recommended: conda install -c conda-forge -c aihabitat habitat-sim
+# Alternative: pip install git+https://github.com/facebookresearch/habitat-lab.git
+# Note: habitat-sim is NOT available via pip, requires conda or building from source
+
+# Development/Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+

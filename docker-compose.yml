@@ -1,0 +1,19 @@
+services:
+  lapis-backend:
+    build: .
+    image: lapis-backend:latest
+    container_name: lapis-backend
+    restart: always
+    ports:
+      - "127.0.0.1:8001:8001"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LAPIS_FRONTEND_ORIGIN=https://lapis.emanuelemusumeci.com
+    volumes:
+      - lapis_results:/app/results_web
+      - lapis_tmp:/app/backend/tmp
+
+volumes:
+  lapis_results:
+  lapis_tmp:

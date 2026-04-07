@@ -18,8 +18,24 @@ jobs:
         run: |
           echo "$DEPLOY_SSH_KEY" > /tmp/deploy_key
           chmod 600 /tmp/deploy_key
+
+          # Sync all app files to /opt/lapis-webapp on the server
           rsync -avz --delete \
             --exclude='.github' \
+            --exclude='*.pyc' \
+            --exclude='__pycache__' \
+            --exclude='backend/tmp' \
+            --exclude='results_web' \
             -e "ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no" \
-            ./ root@142.93.104.36:/var/www/lapis.emanuelemusumeci.com/
+            ./ root@142.93.104.36:/opt/lapis-webapp/
+
+          # Sync static frontend to nginx webroot
+          rsync -avz --delete \
+            -e "ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no" \
+            ./frontend/ root@142.93.104.36:/var/www/lapis.emanuelemusumeci.com/
+
+          # Rebuild and restart the Docker container
+          ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no root@142.93.104.36 \
+            "cd /opt/lapis-webapp && docker compose build && docker compose up -d"
+
           rm -f /tmp/deploy_key
