@@ -21,5 +21,5 @@ jobs:
           rsync -avz --delete \
             --exclude='.github' \
             -e "ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no" \
-            ./ root@142.93.104.36:/var/www/lapis.synap.si/
+            ./ root@142.93.104.36:/var/www/lapis.emanuelemusumeci.com/
           rm -f /tmp/deploy_key
