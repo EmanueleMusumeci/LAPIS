@@ -551,7 +551,7 @@ p {
 
 .results-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
     margin-bottom: 3rem;
 }
@@ -583,6 +583,326 @@ p {
     font-size: 0.8rem;
     color: var(--text-muted);
 }
+
+.model-race {
+    margin: 3rem 0 2rem;
+}
+
+.model-race-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.model-race-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.table-note {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--card-radius);
+    border: 1px solid var(--border-color);
+}
+
+.race-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    font-family: var(--font-mono);
+    background: var(--bg-primary);
+}
+
+.race-table thead th {
+    padding: 0.75rem 1rem;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.race-table thead th:first-child {
+    text-align: left;
+}
+
+.race-table .sub-header {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.race-table tbody td {
+    padding: 0.65rem 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+    border-bottom: 1px solid rgba(30, 41, 59, 0.6);
+}
+
+.race-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.race-table tbody tr:hover td {
+    background: rgba(79, 195, 247, 0.04);
+}
+
+.domain-name {
+    text-align: left !important;
+    font-weight: 500;
+    color: var(--text-primary) !important;
+}
+
+.highlight-col {
+    background: rgba(79, 195, 247, 0.07);
+    border-left: 1px solid rgba(79, 195, 247, 0.2);
+}
+
+.lapis-result {
+    font-weight: 700;
+    color: var(--accent) !important;
+}
+
+.avg-row td {
+    border-top: 1px solid var(--border-color);
+    font-weight: 600;
+    color: var(--text-primary) !important;
+}
+
+.avg-row .lapis-result {
+    color: var(--accent) !important;
+}
+
+/* ── Benchmark Table ──────────────────────────────────────────── */
+
+.bench-section {
+    margin: 3rem 0 2rem;
+}
+
+.bench-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.bench-caption {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 1.5rem;
+    line-height: 1.7;
+}
+
+.caption-note {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.bench-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+    background: var(--bg-primary);
+}
+
+/* Group header row */
+.bench-table thead tr.group-row th {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.group-label-baseline {
+    background: rgba(100, 116, 139, 0.12);
+    color: #94a3b8;
+}
+
+.group-label-compare {
+    background: rgba(139, 92, 246, 0.1);
+    color: #a78bfa;
+}
+
+.group-label-lapis {
+    background: rgba(79, 195, 247, 0.1);
+    color: var(--accent);
+    border-left: 1px solid rgba(79, 195, 247, 0.2);
+    border-right: 1px solid rgba(79, 195, 247, 0.2);
+}
+
+.group-label-oracle {
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+}
+
+/* Column header row */
+.bench-table thead tr.col-row th {
+    padding: 0.6rem 0.75rem;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg-card);
+    border-bottom: 2px solid var(--border-color);
+    line-height: 1.4;
+    white-space: nowrap;
+    cursor: help;
+    transition: background 0.15s;
+    position: relative;
+}
+
+.bench-table thead tr.col-row th:hover {
+    background: rgba(79, 195, 247, 0.06);
+    color: var(--text-primary);
+}
+
+.bench-table thead tr.col-row th.domain-corner {
+    text-align: left;
+    cursor: default;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.col-sub {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-top: 2px;
+    font-family: var(--font-sans);
+}
+
+/* Column band shading */
+.bench-table .col-baseline { background: rgba(100, 116, 139, 0.04); }
+.bench-table .col-compare  { background: rgba(139, 92, 246, 0.04); }
+.bench-table .col-lapis    { background: transparent; }
+.bench-table .col-core     { background: rgba(79, 195, 247, 0.06); border-left: 1px solid rgba(79, 195, 247, 0.15); border-right: 1px solid rgba(79, 195, 247, 0.15); }
+.bench-table .col-oracle   { background: rgba(251, 191, 36, 0.06); border-left: 2px solid rgba(251, 191, 36, 0.25); }
+
+/* Body cells */
+.bench-table tbody td {
+    padding: 0.55rem 0.75rem;
+    text-align: center;
+    color: var(--text-secondary);
+    border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+    transition: background 0.12s;
+}
+
+.bench-table tbody tr:last-child td { border-bottom: none; }
+
+.bench-table tbody tr:hover td {
+    filter: brightness(1.35);
+}
+
+.bench-table tbody td.domain-cell {
+    text-align: left;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    cursor: help;
+    white-space: nowrap;
+}
+
+.bench-table tbody td.oracle-cell {
+    font-weight: 700;
+    color: #fbbf24 !important;
+    font-size: 0.85rem;
+}
+
+.bench-table tbody td.core-cell {
+    font-weight: 700;
+    color: var(--accent) !important;
+}
+
+/* Average row */
+.bench-table tr.avg-row td {
+    border-top: 2px solid var(--border-color);
+    font-weight: 700;
+    color: var(--text-primary) !important;
+    font-family: var(--font-sans);
+}
+
+.bench-table tr.avg-row td.oracle-cell { color: #fbbf24 !important; }
+.bench-table tr.avg-row td.core-cell   { color: var(--accent) !important; }
+
+/* Footnote superscripts inside table */
+.bench-table sup {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    margin-left: 1px;
+}
+
+/* Footnotes */
+.bench-footnotes {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-family: var(--font-sans);
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+.bench-footnotes p { margin: 0; }
+.bench-footnotes p + p { margin-top: 0.25rem; }
+
+/* Key insight callout */
+.insight-box {
+    margin-top: 1.25rem;
+    padding: 1rem 1.25rem;
+    background: rgba(79, 195, 247, 0.06);
+    border: 1px solid rgba(79, 195, 247, 0.2);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-family: var(--font-sans);
+    color: var(--text-secondary);
+    line-height: 1.65;
+}
+
+.insight-box strong { color: var(--text-primary); }
+
+/* JS-driven tooltip */
+.bench-tooltip {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    max-width: 260px;
+    padding: 8px 12px;
+    background: #0f172a;
+    border: 1px solid rgba(79, 195, 247, 0.25);
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-family: var(--font-sans);
+    color: #e2e8f0;
+    line-height: 1.55;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    opacity: 0;
+    transition: opacity 0.12s;
+}
+
+.bench-tooltip.visible { opacity: 1; }
 
 .cta-section {
     text-align: center;
