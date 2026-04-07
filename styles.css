@@ -743,6 +743,13 @@ p {
     color: #a78bfa;
 }
 
+.group-label-gt {
+    background: rgba(100, 116, 139, 0.1);
+    color: #cbd5e1;
+    border-left: 1px solid rgba(100, 116, 139, 0.2);
+    border-right: 1px solid rgba(100, 116, 139, 0.2);
+}
+
 .group-label-lapis {
     background: rgba(79, 195, 247, 0.1);
     color: var(--accent);
@@ -795,8 +802,9 @@ p {
 /* Column band shading */
 .bench-table .col-baseline { background: rgba(100, 116, 139, 0.04); }
 .bench-table .col-compare  { background: rgba(139, 92, 246, 0.04); }
+.bench-table .col-gt       { background: rgba(100, 116, 139, 0.06); border-left: 1px solid rgba(100, 116, 139, 0.15); }
+.bench-table .col-gt-last  { background: rgba(100, 116, 139, 0.06); border-right: 1px solid rgba(100, 116, 139, 0.15); }
 .bench-table .col-lapis    { background: transparent; }
-.bench-table .col-core     { background: rgba(79, 195, 247, 0.06); border-left: 1px solid rgba(79, 195, 247, 0.15); border-right: 1px solid rgba(79, 195, 247, 0.15); }
 .bench-table .col-oracle   { background: rgba(251, 191, 36, 0.06); border-left: 2px solid rgba(251, 191, 36, 0.25); }
 
 /* Body cells */
