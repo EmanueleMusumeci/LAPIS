@@ -254,24 +254,103 @@
             <div class="results-grid">
                 <div class="result-card">
                     <div class="result-value">100%</div>
-                    <div class="result-label">Success Rate</div>
-                    <div class="result-detail">Blocksworld, Grippers &amp; Termes</div>
-                </div>
-                <div class="result-card">
-                    <div class="result-value">94%</div>
-                    <div class="result-label">Success Rate</div>
-                    <div class="result-detail">Floortile (synthesis mode)</div>
+                    <div class="result-label">Planning Success Rate</div>
+                    <div class="result-detail">VAL validation across all 7 IPC domains</div>
                 </div>
                 <div class="result-card">
                     <div class="result-value">73%</div>
-                    <div class="result-label">GT Validation Rate</div>
-                    <div class="result-detail">LAPIS/Oracle across 7 IPC domains</div>
+                    <div class="result-label">GT Execution Success Rate</div>
+                    <div class="result-detail">Ground-truth simulator, avg. 7 domains</div>
                 </div>
                 <div class="result-card">
-                    <div class="result-value">0</div>
-                    <div class="result-label">Manual Modeling</div>
-                    <div class="result-detail">Expert effort required</div>
+                    <div class="result-value">8.9s</div>
+                    <div class="result-label">Avg. Generation Time</div>
+                    <div class="result-detail">Per task (36x faster than NL2Plan)</div>
                 </div>
+            </div>
+
+            <div class="model-race">
+                <h3 class="model-race-title">The Model Race</h3>
+                <p class="model-race-subtitle">Success rates (%) across 7 IPC domains &middot; 20 problems each &middot; Claude Sonnet 4.6 + FastDownward<br>
+                    <span class="table-note">* Uses ground-truth domains &nbsp;&middot;&nbsp; A/B = VAL self-consistency % / GT simulator executability %</span>
+                </p>
+                <div class="table-wrapper">
+                    <table class="race-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Domain</th>
+                                <th colspan="2">LLM+P*</th>
+                                <th>NL2Plan</th>
+                                <th>GT-LAPIS²*</th>
+                                <th colspan="3">LAPIS²</th>
+                                <th>Sim-LAPIS²</th>
+                            </tr>
+                            <tr>
+                                <th class="sub-header">Few-shot</th>
+                                <th class="sub-header">Zero-shot</th>
+                                <th class="sub-header">325s/task</th>
+                                <th class="sub-header">GT domain</th>
+                                <th class="sub-header">Zero</th>
+                                <th class="sub-header">Dom.</th>
+                                <th class="sub-header">Adq.</th>
+                                <th class="sub-header highlight-col">VAL / GT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="domain-name">Blocksworld</td>
+                                <td>100</td><td>80</td><td>95</td><td>100</td>
+                                <td>100</td><td>100</td><td>100</td>
+                                <td class="lapis-result highlight-col">100 / 90</td>
+                            </tr>
+                            <tr>
+                                <td class="domain-name">Floortile</td>
+                                <td>100</td><td>45</td><td>—</td><td>90</td>
+                                <td>90</td><td>90</td><td>85</td>
+                                <td class="lapis-result highlight-col">100 / 75</td>
+                            </tr>
+                            <tr>
+                                <td class="domain-name">Tyreworld</td>
+                                <td>95</td><td>90</td><td>—</td><td>95</td>
+                                <td>75</td><td>75</td><td>75</td>
+                                <td class="lapis-result highlight-col">100 / 45</td>
+                            </tr>
+                            <tr>
+                                <td class="domain-name">Storage</td>
+                                <td>100</td><td>90</td><td>25</td><td>100</td>
+                                <td>75</td><td>100</td><td>100</td>
+                                <td class="lapis-result highlight-col">100 / 35</td>
+                            </tr>
+                            <tr>
+                                <td class="domain-name">Barman</td>
+                                <td>95</td><td>0</td><td>—</td><td>80</td>
+                                <td>0</td><td>50</td><td>100</td>
+                                <td class="lapis-result highlight-col">100 / 90</td>
+                            </tr>
+                            <tr>
+                                <td class="domain-name">Grippers</td>
+                                <td>100</td><td>100</td><td>—</td><td>100</td>
+                                <td>100</td><td>100</td><td>100</td>
+                                <td class="lapis-result highlight-col">100 / 90</td>
+                            </tr>
+                            <tr>
+                                <td class="domain-name">Termes</td>
+                                <td>100</td><td>95</td><td>—</td><td>100</td>
+                                <td>95</td><td>100</td><td>100</td>
+                                <td class="lapis-result highlight-col">100 / 85</td>
+                            </tr>
+                            <tr class="avg-row">
+                                <td class="domain-name">Average</td>
+                                <td>99</td><td>71</td><td>—</td><td>95</td>
+                                <td>76</td><td>85</td><td>96</td>
+                                <td class="lapis-result highlight-col">100 / 73</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="validation-gap-note">
+                    <strong>The validation gap:</strong> Baselines achieve high self-consistency but <strong>0% GT executability</strong> — plans look valid but fail in real simulators. Only Sim-LAPIS² closes this gap with ground-truth feedback.
+                </p>
             </div>
 
             <div class="cta-section">
