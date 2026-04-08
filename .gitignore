@@ -5,3 +5,5 @@ __pycache__/
 backend/tmp/
 results_web/
 *.log
+frontend/node_modules/
+frontend/dist/
