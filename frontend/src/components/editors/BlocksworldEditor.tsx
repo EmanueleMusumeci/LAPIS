@@ -40,15 +40,18 @@ function parseBlocksworld(problemPddl: string): ParsedState {
   const blocksMatch = problemPddl.match(/\(:objects([\s\S]*?)\)/i)
   const objectSection = blocksMatch ? blocksMatch[1] : ''
   const blockTokens = objectSection.match(/[a-zA-Z0-9_-]+/g) || []
-  const blocks = blockTokens.filter((token) => !['block', '-', 'objects'].includes(token.toLowerCase()))
+  // Normalize to lowercase so names match the rebuilt init section (blocksworldSim always writes lowercase)
+  const blocks = blockTokens
+    .filter((token) => !['block', '-', 'objects'].includes(token.toLowerCase()))
+    .map((t) => t.toLowerCase())
 
   const initMatch = problemPddl.match(/\(:init([\s\S]*?)\)\s*\(:goal/i)
   const initSection = initMatch ? initMatch[1] : ''
 
   const onRelations = Array.from(initSection.matchAll(/\(on\s+([a-zA-Z0-9_-]+)\s+([a-zA-Z0-9_-]+)\)/gi)).map(
-    (m) => ({ top: m[1], bottom: m[2] })
+    (m) => ({ top: m[1].toLowerCase(), bottom: m[2].toLowerCase() })
   )
-  const onTable = Array.from(initSection.matchAll(/\(ontable\s+([a-zA-Z0-9_-]+)\)/gi)).map((m) => m[1])
+  const onTable = Array.from(initSection.matchAll(/\(ontable\s+([a-zA-Z0-9_-]+)\)/gi)).map((m) => m[1].toLowerCase())
 
   return {
     blocks,
