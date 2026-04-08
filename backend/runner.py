@@ -360,7 +360,7 @@ class LAPISRunner:
         await self._emit(sr4, on_stage_update)
 
         try:
-            _uses_refinement = method in ("lapis", "lapis_noadq", "gt_lapis")
+            _uses_refinement = method in ("lapis", "lapis_noadq", "gt_lapis", "sim_val")
             max_ref = config.max_refinements if _uses_refinement else 0
             plan_actions, refinement_history, val_log, n_refs = await self._plan_refine_loop(
                 domain_path=domain_path,
@@ -374,6 +374,7 @@ class LAPISRunner:
                 domain_nl=config.domain_nl,
                 semantic_checks=(config.semantic_checks and _uses_refinement),
                 refine_domain_enabled=(config.refine_domain and _uses_refinement),
+                use_simulator=(method == "sim_val"),
                 extractor_type=config.extractor_type,
                 current_goal=_extract_goal(config.problem_nl),
                 logs_dir=logs_dir,
@@ -446,6 +447,7 @@ class LAPISRunner:
         current_goal: str,
         logs_dir: str,
         on_update,
+        use_simulator: bool = False,
     ) -> tuple[list[str], list[RefinementEntry], str, int]:
         """
         Run the planner; on failure, call refine_problem up to max_refinements times.
@@ -468,11 +470,14 @@ class LAPISRunner:
         planning_successful = False
         val_grounding_successful = False
         semantic_passed = True
+        sim_passed = True
+        sim_failure_msg = ""
 
         async def _plan_and_validate(suffix: str):
             nonlocal val_log, pddlenv_err, planner_err, val_grounding_log
             nonlocal planning_successful, val_grounding_successful
             nonlocal semantic_passed, semantic_diagnosis, semantic_result
+            nonlocal sim_passed, sim_failure_msg
 
             plan, pddlenv_err, planner_err, _ = await asyncio.to_thread(
                 plan_with_output,
@@ -499,6 +504,24 @@ class LAPISRunner:
 
             val_grounding_successful = val_successful and val_ground_successful
 
+            # Ground-truth simulator validation (Sim-LAPIS² mode)
+            sim_passed = True
+            sim_failure_msg = ""
+            if use_simulator and val_grounding_successful:
+                try:
+                    from src.lapis.plan_renderer import simulate_plan
+                    translated_plan_path = os.path.join(problem_dir, f"translated_plan_{suffix}.txt")
+                    goal_reached, failure_msg, _ = await asyncio.to_thread(
+                        simulate_plan, domain_path, problem_path, translated_plan_path
+                    )
+                    sim_passed = goal_reached
+                    sim_failure_msg = failure_msg or ""
+                    if not sim_passed:
+                        val_log = f"{val_log}\n[SIM] {sim_failure_msg}".strip()
+                except Exception as sim_exc:
+                    print(f"[WARN] Simulator error (non-fatal): {sim_exc}")
+                    sim_passed = True  # Don't block on simulator errors
+
             semantic_passed = True
             semantic_diagnosis = ""
             semantic_result = None
@@ -524,6 +547,7 @@ class LAPISRunner:
         should_refine = (
             (not planning_successful)
             or (not val_grounding_successful)
+            or (use_simulator and not sim_passed)
             or (semantic_checks and not semantic_passed)
         )
         if not should_refine and plan:
@@ -602,11 +626,11 @@ class LAPISRunner:
                 iteration=i + 1,
                 error=(entry_error or "")[:300],
                 fix=fix_text,
-                success=bool(plan and val_grounding_successful and (not semantic_checks or semantic_passed)),
+                success=bool(plan and val_grounding_successful and (not use_simulator or sim_passed) and (not semantic_checks or semantic_passed)),
             )
             refinement_history.append(entry)
 
-            done = bool(plan and val_grounding_successful and (not semantic_checks or semantic_passed))
+            done = bool(plan and val_grounding_successful and (not use_simulator or sim_passed) and (not semantic_checks or semantic_passed))
             if done:
                 return _read_plan(plan_path, plan), refinement_history, val_log, i + 1
 

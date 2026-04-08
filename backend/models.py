@@ -86,6 +86,7 @@ class PipelineMethod(str, Enum):
     LAPIS_NOADQ = "lapis_noadq"
     LLMPP = "llmpp"
     GT_LAPIS = "gt_lapis"
+    SIM_VAL = "sim_val"
 
 
 class PipelineConfig(BaseModel):

@@ -52,7 +52,7 @@ export interface RunResult {
   error_msg: string
 }
 
-export type PipelineMethod = 'lapis' | 'lapis_noadq' | 'llmpp' | 'gt_lapis'
+export type PipelineMethod = 'lapis' | 'lapis_noadq' | 'llmpp' | 'gt_lapis' | 'sim_val'
 
 export interface PipelineConfig {
   domain_nl: string

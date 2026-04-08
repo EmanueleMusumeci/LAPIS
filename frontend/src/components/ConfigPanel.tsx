@@ -27,6 +27,8 @@ interface ConfigPanelProps {
   onTimeoutChange: (value: number) => void
   skipAdequacy: boolean
   onSkipAdequacyChange: (value: boolean) => void
+  semanticChecks: boolean
+  onSemanticChecksChange: (value: boolean) => void
   method: PipelineMethod
   onMethodChange: (method: PipelineMethod) => void
   className?: string
@@ -43,6 +45,8 @@ export function ConfigPanel({
   onTimeoutChange,
   skipAdequacy,
   onSkipAdequacyChange,
+  semanticChecks,
+  onSemanticChecksChange,
   method,
   onMethodChange,
   className,
@@ -60,12 +64,14 @@ export function ConfigPanel({
           <option value="lapis">LAPIS² (full, with adequacy)</option>
           <option value="lapis_noadq">LAPIS² (no adequacy check)</option>
           <option value="gt_lapis">GT-LAPIS² (GT domain + LAPIS refinement)</option>
+          <option value="sim_val">Sim-LAPIS² VAL (+ ground-truth simulator)</option>
           <option value="llmpp">LLM+P (GT domain, no refinement)</option>
         </select>
         <p className="text-xs text-lapis-muted">
           {method === 'lapis' && 'Full pipeline: domain gen → adequacy → problem gen → plan/refine'}
           {method === 'lapis_noadq' && 'Like LAPIS² but skips the domain adequacy check'}
           {method === 'gt_lapis' && 'Ground-truth domain + LAPIS² problem gen and refinement loop'}
+          {method === 'sim_val' && 'LAPIS² + UP sequential simulator validates each candidate plan'}
           {method === 'llmpp' && 'Ground-truth domain injected; generate problem; 0 refinements'}
         </p>
       </div>
@@ -226,16 +232,17 @@ export function ConfigPanel({
         </Slider.Root>
       </div>
 
-      {/* Adequacy Check Toggle (LAPIS only) */}
-      {method === 'lapis' && (
+      {/* Adequacy Check Toggle (methods that use domain gen) */}
+      {(method === 'lapis' || method === 'sim_val') && (
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-lapis-text">
-            Enable Adequacy Checks
-          </label>
+          <div>
+            <label className="text-sm font-medium text-lapis-text">Domain Adequacy Check</label>
+            <p className="text-xs text-lapis-muted">Amend domain to cover problem predicates</p>
+          </div>
           <button
             onClick={() => onSkipAdequacyChange(!skipAdequacy)}
             className={cn(
-              'relative w-11 h-6 rounded-full transition-colors',
+              'relative w-11 h-6 rounded-full transition-colors flex-shrink-0',
               skipAdequacy ? 'bg-lapis-border' : 'bg-lapis-accent'
             )}
           >
@@ -243,6 +250,30 @@ export function ConfigPanel({
               className={cn(
                 'absolute top-1 w-4 h-4 rounded-full bg-white transition-transform',
                 skipAdequacy ? 'left-1' : 'left-6'
+              )}
+            />
+          </button>
+        </div>
+      )}
+
+      {/* Semantic Checks Toggle */}
+      {(method === 'lapis' || method === 'lapis_noadq' || method === 'gt_lapis' || method === 'sim_val') && (
+        <div className="flex items-center justify-between">
+          <div>
+            <label className="text-sm font-medium text-lapis-text">Semantic Validity Checks</label>
+            <p className="text-xs text-lapis-muted">Predicate coverage, action reachability</p>
+          </div>
+          <button
+            onClick={() => onSemanticChecksChange(!semanticChecks)}
+            className={cn(
+              'relative w-11 h-6 rounded-full transition-colors flex-shrink-0',
+              semanticChecks ? 'bg-lapis-accent' : 'bg-lapis-border'
+            )}
+          >
+            <span
+              className={cn(
+                'absolute top-1 w-4 h-4 rounded-full bg-white transition-transform',
+                semanticChecks ? 'left-6' : 'left-1'
               )}
             />
           </button>

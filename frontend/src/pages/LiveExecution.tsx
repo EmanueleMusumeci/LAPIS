@@ -42,7 +42,7 @@ export default function LiveExecution() {
   const [maxRefinements, setMaxRefinements] = useState(3)
   const [plannerTimeout, setPlannerTimeout] = useState(300)
   const [skipAdequacy, setSkipAdequacy] = useState(false)
-  const [semanticChecks] = useState(true)
+  const [semanticChecks, setSemanticChecks] = useState(true)
   const [refineDomain] = useState(true)
   const [extractorType] = useState('auto')
 
@@ -220,6 +220,8 @@ export default function LiveExecution() {
               onTimeoutChange={setPlannerTimeout}
               skipAdequacy={skipAdequacy}
               onSkipAdequacyChange={setSkipAdequacy}
+              semanticChecks={semanticChecks}
+              onSemanticChecksChange={setSemanticChecks}
             />
           </div>
 
