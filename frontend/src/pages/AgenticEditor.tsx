@@ -8,6 +8,7 @@ import { useAgenticEditor } from '@/hooks/useAgenticEditor'
 import { usePresets } from '@/hooks/usePresets'
 import GridworldEditor from '@/components/editors/GridworldEditor'
 import BlocksworldEditor from '@/components/editors/BlocksworldEditor'
+import DomainStateViewer from '@/components/editors/DomainStateViewer'
 import PDDLEditor, { type PDDLIssue } from '@/components/PDDLEditor'
 import PresetSelector from '@/components/PresetSelector'
 import PlanTrace from '@/components/PlanTrace'
@@ -188,16 +189,44 @@ function VerificationPanel({
   valid,
   errors,
   warnings,
+  onFixWithAgent,
 }: {
   valid: boolean
   errors: string[]
   warnings: string[]
+  onFixWithAgent?: (msg: string) => void
 }) {
+  const hasIssues = errors.length > 0 || warnings.length > 0
+
+  const handleFix = () => {
+    if (!onFixWithAgent) return
+    const parts: string[] = ['Please fix the following PDDL issues:']
+    if (errors.length > 0) {
+      parts.push('Errors:\n' + errors.map((e) => `- ${e}`).join('\n'))
+    }
+    if (warnings.length > 0) {
+      parts.push('Warnings:\n' + warnings.map((w) => `- ${w}`).join('\n'))
+    }
+    onFixWithAgent(parts.join('\n\n'))
+  }
+
   return (
     <div className="rounded-xl border border-lapis-border bg-lapis-card p-4 space-y-3">
-      <div className="flex items-center gap-2 text-sm font-semibold">
-        {valid ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <AlertTriangle className="w-4 h-4 text-yellow-500" />}
-        <span>{valid ? 'Verification passed' : 'Verification requires attention'}</span>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          {valid ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <AlertTriangle className="w-4 h-4 text-yellow-500" />}
+          <span>{valid ? 'Verification passed' : 'Verification requires attention'}</span>
+        </div>
+        {hasIssues && onFixWithAgent && (
+          <button
+            type="button"
+            onClick={handleFix}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-lapis-accent/20 text-lapis-accent text-xs font-medium hover:bg-lapis-accent/30 transition-colors"
+          >
+            <Bot className="w-3 h-3" />
+            Fix with Agent
+          </button>
+        )}
       </div>
 
       {errors.length > 0 && (
@@ -314,6 +343,8 @@ function PlannerPanel({
 
 // ─── Domain visualizer ────────────────────────────────────────────────────────
 
+const KNOWN_IPC_DOMAINS = ['grippers', 'barman', 'floortile', 'storage', 'termes', 'tyreworld']
+
 function DomainVisualizer({
   domain,
   problemPddl,
@@ -337,6 +368,15 @@ function DomainVisualizer({
       <GridworldEditor
         problemPddl={problemPddl}
         onChange={onProblemChange}
+      />
+    )
+  }
+
+  if (KNOWN_IPC_DOMAINS.includes(domain)) {
+    return (
+      <DomainStateViewer
+        domainName={domain}
+        problemPddl={problemPddl}
       />
     )
   }
@@ -507,6 +547,7 @@ export default function AgenticEditor() {
             valid={state.verification.valid}
             errors={state.verification.errors}
             warnings={state.verification.warnings}
+            onFixWithAgent={sendUserMessage}
           />
         )}
 

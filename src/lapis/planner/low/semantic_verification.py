@@ -1121,7 +1121,15 @@ def run_semantic_checks(
     if not checks["domain_goal_producibility"]["passed"]:
         domain_level_errors.append("domain_goal_producibility")
     if not checks["domain_action_viability"]["passed"]:
-        domain_level_errors.append("domain_action_viability")
+        # Suppress domain_action_viability if ALL missing predicates are already in the
+        # problem's init state (static/fluent predicates — this is valid PDDL, not a bug).
+        init_preds = _extract_init_predicates_regex(problem_pddl)
+        all_in_init = all(
+            all(mp in init_preds for mp in missing)
+            for _, missing in checks["domain_action_viability"]["problem_actions"]
+        )
+        if not all_in_init:
+            domain_level_errors.append("domain_action_viability")
 
     problem_level = ["predicate_coverage", "action_reachability", "type_grounding", "init_defined", "goal_defined"]
     for name in problem_level:
@@ -1146,7 +1154,7 @@ def run_semantic_checks(
     # Domain-level errors first (these are serious)
     if not checks["domain_goal_producibility"]["passed"]:
         diagnoses.append("CRITICAL (Domain): " + checks["domain_goal_producibility"]["diagnosis"])
-    if not checks["domain_action_viability"]["passed"]:
+    if "domain_action_viability" in domain_level_errors:
         diagnoses.append("WARNING (Domain): " + checks["domain_action_viability"]["diagnosis"])
 
     # Problem-level errors (these might be fixable)

@@ -1,7 +1,7 @@
 /**
  * ConfigPanel - Configuration options for pipeline execution.
  */
-import { ChevronDown, Cpu, Timer, RefreshCw, Shield } from 'lucide-react'
+import { ChevronDown, Cpu, Timer, RefreshCw, Shield, Layers, Database, Zap, FlaskConical } from 'lucide-react'
 import * as Select from '@radix-ui/react-select'
 import * as Slider from '@radix-ui/react-slider'
 import { cn } from '@/lib/utils'
@@ -53,27 +53,77 @@ export function ConfigPanel({
 }: ConfigPanelProps) {
   return (
     <div className={cn('space-y-4', className)}>
-      {/* Method Selection */}
+      {/* Method Selection — visual cards */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-lapis-text">Pipeline Method</label>
-        <select
-          value={method}
-          onChange={(e) => onMethodChange(e.target.value as PipelineMethod)}
-          className="w-full px-3 py-2 rounded-lg bg-lapis-card border border-lapis-border text-sm text-lapis-text focus:outline-none focus:border-lapis-accent"
-        >
-          <option value="lapis">LAPIS² (full, with adequacy)</option>
-          <option value="lapis_noadq">LAPIS² (no adequacy check)</option>
-          <option value="gt_lapis">GT-LAPIS² (GT domain + LAPIS refinement)</option>
-          <option value="sim_val">Sim-LAPIS² VAL (+ ground-truth simulator)</option>
-          <option value="llmpp">LLM+P (GT domain, no refinement)</option>
-        </select>
-        <p className="text-xs text-lapis-muted">
-          {method === 'lapis' && 'Full pipeline: domain gen → adequacy → problem gen → plan/refine'}
-          {method === 'lapis_noadq' && 'Like LAPIS² but skips the domain adequacy check'}
-          {method === 'gt_lapis' && 'Ground-truth domain + LAPIS² problem gen and refinement loop'}
-          {method === 'sim_val' && 'LAPIS² + UP sequential simulator validates each candidate plan'}
-          {method === 'llmpp' && 'Ground-truth domain injected; generate problem; 0 refinements'}
-        </p>
+        <div className="grid grid-cols-1 gap-1.5">
+          {(
+            [
+              {
+                id: 'lapis',
+                icon: <Layers className="w-4 h-4" />,
+                label: 'LAPI(S)²',
+                sub: 'Full: domain gen → adequacy → problem gen → refine',
+                accent: 'lapis',
+              },
+              {
+                id: 'lapis_noadq',
+                icon: <Layers className="w-4 h-4" />,
+                label: 'LAPI(S)² (no adq.)',
+                sub: 'Skips the domain adequacy check',
+                accent: 'lapis',
+              },
+              {
+                id: 'gt_lapis',
+                icon: <Database className="w-4 h-4" />,
+                label: 'GT-LAPI(S)²',
+                sub: 'Ground-truth domain + LAPIS² problem gen & refinement',
+                accent: 'violet',
+              },
+              {
+                id: 'sim_val',
+                icon: <FlaskConical className="w-4 h-4" />,
+                label: 'Sim-LAPI(S)² VAL',
+                sub: 'LAPI(S)² + UP sequential simulator validates plans',
+                accent: 'orange',
+              },
+              {
+                id: 'llmpp',
+                icon: <Zap className="w-4 h-4" />,
+                label: 'LLM+P',
+                sub: 'GT domain injected, generate problem, 0 refinements',
+                accent: 'slate',
+              },
+            ] as Array<{ id: PipelineMethod; icon: React.ReactNode; label: string; sub: string; accent: string }>
+          ).map((m) => {
+            const isSelected = method === m.id
+            const accentMap: Record<string, string> = {
+              lapis: 'border-lapis-accent/60 bg-lapis-accent/10 text-lapis-accent',
+              violet: 'border-violet-500/60 bg-violet-500/10 text-violet-400',
+              orange: 'border-orange-500/60 bg-orange-500/10 text-orange-400',
+              slate: 'border-slate-500/60 bg-slate-500/10 text-slate-400',
+            }
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => onMethodChange(m.id)}
+                className={cn(
+                  'w-full text-left px-3 py-2.5 rounded-lg border transition-all text-sm',
+                  isSelected
+                    ? accentMap[m.accent] || accentMap['lapis']
+                    : 'border-lapis-border bg-lapis-bg/60 text-lapis-text-secondary hover:border-lapis-accent/30 hover:text-lapis-text'
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <span className={isSelected ? '' : 'opacity-50'}>{m.icon}</span>
+                  <span className={cn('font-semibold', isSelected ? '' : 'text-lapis-text')}>{m.label}</span>
+                </div>
+                <p className="mt-0.5 pl-6 text-xs opacity-70">{m.sub}</p>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Model Selection */}
