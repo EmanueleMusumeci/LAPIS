@@ -2,8 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import {
   Bot, CheckCircle2, AlertTriangle, XCircle, Wifi, WifiOff, Loader2,
-  ChevronDown, ChevronRight, Play, Wrench, Brain,
-  KeyRound, AlertOctagon, ChevronUp,
+  ChevronDown, ChevronRight, Play, Wrench, Brain, ChevronUp,
 } from 'lucide-react'
 import { useAgenticEditor } from '@/hooks/useAgenticEditor'
 import { usePresets } from '@/hooks/usePresets'
@@ -11,7 +10,7 @@ import PDDLEditor, { type PDDLIssue } from '@/components/PDDLEditor'
 import PresetSelector from '@/components/PresetSelector'
 import PlanTrace from '@/components/PlanTrace'
 import { extractIssueLine } from '@/lib/pddlPatch'
-import { useApiKey } from '@/contexts/ApiKeyContext'
+import { ApiKeyDropdown } from '@/contexts/ApiKeyContext'
 import { runPlanner, simulateSteps, simulateFrames, type SimStepsResult, type SimFramesResult } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
@@ -31,75 +30,6 @@ function detectDomain(domainPddl: string): string {
 }
 
 // ─── API key popover ──────────────────────────────────────────────────────────
-
-function ApiKeyDropdown() {
-  const { apiKey, setApiKey } = useApiKey()
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [open])
-
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        title={apiKey ? 'API key set' : 'No API key set'}
-        className={cn(
-          'flex items-center gap-1 px-2 py-1 rounded-lg border text-xs transition-colors',
-          apiKey
-            ? 'border-lapis-border text-lapis-muted hover:border-lapis-accent/40 hover:text-lapis-text'
-            : 'border-amber-500/50 bg-amber-500/10 text-amber-400 hover:border-amber-500/80',
-        )}
-      >
-        <KeyRound className="w-3.5 h-3.5" />
-        {!apiKey && <AlertOctagon className="w-3 h-3" />}
-        {apiKey ? (
-          <span className="font-mono">{apiKey.slice(0, 8)}…</span>
-        ) : (
-          <span>No key</span>
-        )}
-      </button>
-
-      {open && (
-        <div className="absolute right-0 top-full mt-1.5 z-50 w-72 rounded-xl border border-lapis-border bg-lapis-card shadow-xl p-3 space-y-2">
-          <label className="flex items-center gap-1.5 text-xs font-medium text-lapis-muted">
-            <KeyRound className="w-3 h-3" />
-            API Key
-            <span className="font-normal text-lapis-text-secondary">(Anthropic or OpenAI)</span>
-          </label>
-          <input
-            type="password"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="sk-ant-… or sk-…"
-            autoComplete="off"
-            autoFocus
-            className="w-full px-3 py-2 rounded-lg bg-lapis-bg border border-lapis-border text-lapis-text text-sm font-mono placeholder:text-lapis-text-secondary focus:outline-none focus:border-lapis-accent"
-          />
-          {apiKey ? (
-            <p className="text-xs text-emerald-400 flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3" />
-              Key set ({apiKey.startsWith('sk-ant') ? 'Anthropic' : 'OpenAI'})
-            </p>
-          ) : (
-            <p className="text-xs text-amber-400 flex items-center gap-1">
-              <AlertOctagon className="w-3 h-3" />
-              Required to run the agent
-            </p>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
 
 // ─── Chat message types ───────────────────────────────────────────────────────
 

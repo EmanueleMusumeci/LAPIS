@@ -151,54 +151,79 @@ export function StageCard({ stage, defaultExpanded = false, prevDomainPddl, prev
   const preview = getPreview()
   const hasContent = preview.length > 0 || stage.domain_pddl || stage.problem_pddl || stage.plan_actions.length > 0
 
+  // Compute whether a diff is available (for header badge)
+  const hasDomainDiff = !!(prevDomainPddl && prevDomainPddl !== stage.domain_pddl && stage.domain_pddl)
+  const hasProblemDiff = !!(prevProblemPddl && prevProblemPddl !== stage.problem_pddl && stage.problem_pddl)
+
   return (
     <div className={cn('stage-card', stage.status, className)}>
       {/* Header */}
-      <div
-        className="flex items-center gap-2 cursor-pointer select-none"
-        onClick={() => hasContent && setIsExpanded(!isExpanded)}
-      >
-        {hasContent && (
-          <span className="text-lapis-muted">
-            {isExpanded ? (
-              <ChevronDown className="w-4 h-4" />
-            ) : (
-              <ChevronRight className="w-4 h-4" />
+      <div className="flex items-center gap-2 select-none">
+        {/* Expand toggle */}
+        <div
+          className="flex items-center gap-2 flex-1 cursor-pointer"
+          onClick={() => hasContent && setIsExpanded(!isExpanded)}
+        >
+          {hasContent && (
+            <span className="text-lapis-muted">
+              {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            </span>
+          )}
+          <span className="text-lapis-accent">{icon}</span>
+          <span className="font-semibold">{stage.name}</span>
+        </div>
+
+        {/* Diff button — always visible in header when a diff exists */}
+        {(hasDomainDiff || hasProblemDiff) && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              if (hasDomainDiff) setShowDomainDiff((v) => !v)
+              if (hasProblemDiff) setShowProblemDiff((v) => !v)
+              // Ensure card is expanded when diff is shown
+              if (!isExpanded) setIsExpanded(true)
+            }}
+            title="Show diff vs previous stage"
+            className={cn(
+              'flex items-center gap-1 text-xs px-2 py-0.5 rounded border transition-colors flex-shrink-0',
+              (showDomainDiff || showProblemDiff)
+                ? 'border-lapis-accent/60 bg-lapis-accent/10 text-lapis-accent'
+                : 'border-lapis-border text-lapis-text-secondary hover:border-lapis-accent/40 hover:text-lapis-text',
             )}
-          </span>
+          >
+            <Diff className="w-3 h-3" />
+            Diff
+          </button>
         )}
-
-        <span className="text-lapis-accent">{icon}</span>
-
-        <span className="font-semibold flex-1">{stage.name}</span>
 
         {stage.domain_amended && (
-          <span className="text-xs text-amber-400">amended</span>
+          <span className="text-xs px-1.5 py-0.5 rounded border border-amber-500/40 bg-amber-500/10 text-amber-400">amended</span>
         )}
         {stage.problem_amended && (
-          <span className="text-xs text-amber-400">amended</span>
+          <span className="text-xs px-1.5 py-0.5 rounded border border-amber-500/40 bg-amber-500/10 text-amber-400">amended</span>
         )}
 
         <span className={cn('badge', badge.className)}>{badge.label}</span>
 
         {stage.duration > 0 && (
-          <span className="flex items-center gap-1 text-xs text-lapis-muted ml-2">
+          <span className="flex items-center gap-1 text-xs text-lapis-muted">
             <Clock className="w-3 h-3" />
             {formatDuration(stage.duration)}
           </span>
         )}
       </div>
 
-      {/* Preview (collapsed) */}
+      {/* Preview (collapsed) — larger, shows more PDDL */}
       {!isExpanded && preview && (
-        <div
-          className={cn(
-            'mt-2 font-mono text-xs p-2 rounded bg-lapis-bg/50 text-lapis-text-secondary',
-            'max-h-20 overflow-hidden whitespace-pre-wrap',
-            stage.status === 'error' && 'text-red-400'
-          )}
-        >
-          {truncate(preview, 200)}
+        <div className="relative mt-2 overflow-hidden rounded border border-lapis-border/50 bg-lapis-bg/40">
+          <pre className={cn(
+            'font-mono text-xs p-2.5 whitespace-pre-wrap leading-5',
+            stage.status === 'error' ? 'text-red-400' : 'text-lapis-text-secondary',
+          )}>
+            {truncate(preview, 600)}
+          </pre>
+          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-lapis-card to-transparent pointer-events-none" />
         </div>
       )}
 
@@ -209,30 +234,11 @@ export function StageCard({ stage, defaultExpanded = false, prevDomainPddl, prev
           {(stage.name === 'Domain Generation' || stage.name === 'Domain Adequacy Check') &&
             stage.domain_pddl && (
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <div className="text-xs font-semibold text-lapis-muted">Domain PDDL</div>
-                  {prevDomainPddl && prevDomainPddl !== stage.domain_pddl && (
-                    <button
-                      type="button"
-                      onClick={() => setShowDomainDiff((v) => !v)}
-                      className={cn(
-                        'flex items-center gap-1 text-xs px-2 py-0.5 rounded border transition-colors',
-                        showDomainDiff
-                          ? 'border-lapis-accent/60 bg-lapis-accent/10 text-lapis-accent'
-                          : 'border-lapis-border text-lapis-text-secondary hover:border-lapis-accent/40'
-                      )}
-                    >
-                      <Diff className="w-3 h-3" />
-                      {showDomainDiff ? 'Hide diff' : 'Show diff'}
-                    </button>
-                  )}
-                </div>
+                <div className="text-xs font-semibold text-lapis-muted mb-1">Domain PDDL</div>
                 {showDomainDiff && prevDomainPddl ? (
                   <PddlDiff before={prevDomainPddl} after={stage.domain_pddl} />
                 ) : (
-                  <pre className="pddl-code text-xs max-h-64 overflow-auto">
-                    {stage.domain_pddl}
-                  </pre>
+                  <pre className="pddl-code text-xs max-h-64 overflow-auto">{stage.domain_pddl}</pre>
                 )}
               </div>
             )}
@@ -240,9 +246,7 @@ export function StageCard({ stage, defaultExpanded = false, prevDomainPddl, prev
           {/* Adequacy Analysis */}
           {stage.name === 'Domain Adequacy Check' && stage.adequacy_analysis && (
             <div>
-              <div className="text-xs font-semibold text-lapis-muted mb-1">
-                Adequacy Analysis
-              </div>
+              <div className="text-xs font-semibold text-lapis-muted mb-1">Adequacy Analysis</div>
               <pre className="bg-lapis-bg/50 p-3 rounded text-xs text-lapis-text-secondary whitespace-pre-wrap">
                 {stage.adequacy_analysis}
               </pre>
@@ -252,18 +256,14 @@ export function StageCard({ stage, defaultExpanded = false, prevDomainPddl, prev
           {/* CoT Steps */}
           {stage.cot_steps && stage.cot_steps.length > 0 && (
             <div>
-              <div className="text-xs font-semibold text-lapis-muted mb-1">
-                Chain of Thought Steps
-              </div>
+              <div className="text-xs font-semibold text-lapis-muted mb-1">Chain of Thought Steps</div>
               <div className="space-y-2">
                 {stage.cot_steps.map((step) => (
                   <div key={step.step} className="bg-lapis-bg/50 p-2 rounded">
                     <div className="text-xs font-semibold text-lapis-accent mb-1">
                       Step {step.step}: {step.label}
                     </div>
-                    <pre className="text-xs text-lapis-text-secondary whitespace-pre-wrap">
-                      {step.content}
-                    </pre>
+                    <pre className="text-xs text-lapis-text-secondary whitespace-pre-wrap">{step.content}</pre>
                   </div>
                 ))}
               </div>
@@ -273,30 +273,11 @@ export function StageCard({ stage, defaultExpanded = false, prevDomainPddl, prev
           {/* Problem PDDL */}
           {stage.name === 'Problem Generation' && stage.problem_pddl && (
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <div className="text-xs font-semibold text-lapis-muted">Problem PDDL</div>
-                {prevProblemPddl && prevProblemPddl !== stage.problem_pddl && (
-                  <button
-                    type="button"
-                    onClick={() => setShowProblemDiff((v) => !v)}
-                    className={cn(
-                      'flex items-center gap-1 text-xs px-2 py-0.5 rounded border transition-colors',
-                      showProblemDiff
-                        ? 'border-lapis-accent/60 bg-lapis-accent/10 text-lapis-accent'
-                        : 'border-lapis-border text-lapis-text-secondary hover:border-lapis-accent/40'
-                    )}
-                  >
-                    <Diff className="w-3 h-3" />
-                    {showProblemDiff ? 'Hide diff' : 'Show diff'}
-                  </button>
-                )}
-              </div>
+              <div className="text-xs font-semibold text-lapis-muted mb-1">Problem PDDL</div>
               {showProblemDiff && prevProblemPddl ? (
                 <PddlDiff before={prevProblemPddl} after={stage.problem_pddl} />
               ) : (
-                <pre className="pddl-code text-xs max-h-64 overflow-auto">
-                  {stage.problem_pddl}
-                </pre>
+                <pre className="pddl-code text-xs max-h-64 overflow-auto">{stage.problem_pddl}</pre>
               )}
             </div>
           )}

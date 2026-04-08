@@ -16,7 +16,7 @@ import {
 import { Loader2, Play, RotateCcw, Wifi, WifiOff, StopCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { PipelineConfig, PipelineMethod } from '@/types'
-import { useApiKey, ApiKeyInput } from '@/contexts/ApiKeyContext'
+import { useApiKey, ApiKeyDropdown } from '@/contexts/ApiKeyContext'
 import { simulateFrames, type SimFramesResult } from '@/lib/api'
 
 export default function LiveExecution() {
@@ -180,14 +180,17 @@ export default function LiveExecution() {
             </span></>
           )}
         </div>
-        {!isConnected && connectionStatus !== 'connecting' && (
-          <button
-            onClick={connect}
-            className="px-3 py-1 text-xs font-medium bg-rose-500/20 hover:bg-rose-500/30 rounded transition-colors"
-          >
-            Reconnect
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {!isConnected && connectionStatus !== 'connecting' && (
+            <button
+              onClick={connect}
+              className="px-3 py-1 text-xs font-medium bg-rose-500/20 hover:bg-rose-500/30 rounded transition-colors"
+            >
+              Reconnect
+            </button>
+          )}
+          <ApiKeyDropdown />
+        </div>
       </div>
 
       {/* Main Layout */}
@@ -208,14 +211,6 @@ export default function LiveExecution() {
               selectedPreset={selectedPreset}
               onPresetChange={handlePresetChange}
             />
-          </div>
-
-          {/* API Key */}
-          <div className="bg-lapis-card border border-lapis-border rounded-xl p-4">
-            <ApiKeyInput />
-            <p className="text-xs text-lapis-muted mt-2">
-              Leave blank to use the server's API key.
-            </p>
           </div>
 
           {/* Configuration */}

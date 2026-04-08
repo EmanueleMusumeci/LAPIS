@@ -1,4 +1,28 @@
 import { useMemo, useState } from 'react'
+import { cn } from '@/lib/utils'
+
+// Deterministic per-block color palette — 12 distinct hues
+const BLOCK_PALETTE: Array<{ bg: string; border: string; text: string }> = [
+  { bg: 'bg-red-500/80',    border: 'border-red-400',    text: 'text-white' },
+  { bg: 'bg-orange-500/80', border: 'border-orange-400', text: 'text-white' },
+  { bg: 'bg-amber-500/80',  border: 'border-amber-400',  text: 'text-black' },
+  { bg: 'bg-yellow-400/80', border: 'border-yellow-300', text: 'text-black' },
+  { bg: 'bg-lime-500/80',   border: 'border-lime-400',   text: 'text-black' },
+  { bg: 'bg-emerald-500/80',border: 'border-emerald-400',text: 'text-white' },
+  { bg: 'bg-teal-500/80',   border: 'border-teal-400',   text: 'text-white' },
+  { bg: 'bg-cyan-500/80',   border: 'border-cyan-400',   text: 'text-black' },
+  { bg: 'bg-sky-500/80',    border: 'border-sky-400',    text: 'text-white' },
+  { bg: 'bg-blue-500/80',   border: 'border-blue-400',   text: 'text-white' },
+  { bg: 'bg-violet-500/80', border: 'border-violet-400', text: 'text-white' },
+  { bg: 'bg-pink-500/80',   border: 'border-pink-400',   text: 'text-white' },
+]
+
+function blockColor(name: string) {
+  // Simple djb2-style hash
+  let h = 5381
+  for (let i = 0; i < name.length; i++) h = ((h * 33) ^ name.charCodeAt(i)) >>> 0
+  return BLOCK_PALETTE[h % BLOCK_PALETTE.length]
+}
 
 interface BlocksworldEditorProps {
   problemPddl: string
@@ -88,20 +112,26 @@ function StackVisualizer({ parsed }: { parsed: ParsedState }) {
   }
 
   return (
-    <div className="flex items-end gap-3 min-h-[80px] py-2">
+    <div className="flex items-end gap-3 min-h-[80px] py-2 flex-wrap">
       {columns.map((tower, ci) => (
-        <div key={ci} className="flex flex-col-reverse items-center gap-1">
-          {tower.map((block, bi) => (
-            <div
-              key={block}
-              className="px-3 py-1.5 rounded border border-lapis-accent/60 bg-lapis-accent/10 text-lapis-accent font-mono text-xs font-semibold min-w-[40px] text-center"
-              title={`Block ${block} (layer ${bi + 1})`}
-            >
-              {block}
-            </div>
-          ))}
-          <div className="w-full h-px bg-lapis-border mt-1" />
-          <span className="text-[10px] text-lapis-text-secondary">table</span>
+        <div key={ci} className="flex flex-col-reverse items-center gap-1 min-w-[48px]">
+          {tower.map((block, bi) => {
+            const { bg, border, text } = blockColor(block)
+            return (
+              <div
+                key={block}
+                title={`Block ${block} (layer ${bi + 1})`}
+                className={cn(
+                  'px-3 py-1.5 rounded border font-mono text-xs font-bold min-w-[48px] text-center shadow-md',
+                  bg, border, text,
+                )}
+              >
+                {block.toUpperCase()}
+              </div>
+            )
+          })}
+          <div className="w-full h-1 bg-lapis-border/60 rounded-full mt-1" />
+          <span className="text-[9px] text-lapis-text-secondary tracking-wide">TABLE</span>
         </div>
       ))}
     </div>

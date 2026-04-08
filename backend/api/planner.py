@@ -276,10 +276,8 @@ def _render_frames(domain_pddl: str, problem_pddl: str, plan: list[str], domain_
         return SimFramesResponse(success=False, error=f"No graphical simulator for domain '{domain_name}'")
 
     try:
-        from unified_planning.io import PDDLReader
         from unified_planning.shortcuts import get_environment
         from unified_planning.plans import ActionInstance
-        from src.lapis.utils.pddl_preprocessor import preprocess_pddl_for_up
 
         mod_name, cls_name = sim_path.rsplit(".", 1)
         sim_mod = __import__(f"src.lapis.simulators.{mod_name}", fromlist=[cls_name])
@@ -296,13 +294,8 @@ def _render_frames(domain_pddl: str, problem_pddl: str, plan: list[str], domain_
             f.write(problem_pddl)
 
         try:
-            dp, pp = preprocess_pddl_for_up(domain_path, problem_path)
-        except Exception:
-            dp, pp = domain_path, problem_path
-
-        try:
             sim = SimClass()
-            ok = sim.setup(dp, pp)
+            ok = sim.setup(domain_path, problem_path)
             if not ok:
                 return SimFramesResponse(success=False, error="Simulator setup failed")
 
@@ -323,9 +316,9 @@ def _render_frames(domain_pddl: str, problem_pddl: str, plan: list[str], domain_
             if b64:
                 frames.append(b64)
 
-            # Parse plan using the same UP machinery
-            reader = PDDLReader()
-            problem = reader.parse_problem(dp, pp)
+            # Use the simulator's own problem to avoid object-identity mismatches
+            # that happen when parsing a second time with a fresh PDDLReader.
+            problem = sim.problem
             env = get_environment()
             action_map = {a.name: a for a in problem.actions}
 
@@ -352,8 +345,12 @@ def _render_frames(domain_pddl: str, problem_pddl: str, plan: list[str], domain_
                     params.append(env.expression_manager.ObjectExp(obj))
 
                 if ok_params:
-                    ai = ActionInstance(action, tuple(params))
-                    sim.step(ai)
+                    try:
+                        ai = ActionInstance(action, tuple(params))
+                        sim.step(ai)
+                    except Exception:
+                        # Action not applicable in current state — render frame unchanged
+                        pass
 
                 frame_img = sim.get_image(action_text=clean)
                 b64 = _img_to_b64(frame_img)
