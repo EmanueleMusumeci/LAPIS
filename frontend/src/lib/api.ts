@@ -94,6 +94,20 @@ export async function getResults(filters?: {
 // Alias for Model Race page
 export const fetchModelRaceData = getResults
 
+// ─── Planner ─────────────────────────────────────────────────────────────────
+
+export async function runPlanner(params: {
+  domain_pddl: string
+  problem_pddl: string
+  planner?: string
+  timeout?: number
+}): Promise<{ success: boolean; plan: string[]; error: string }> {
+  return fetchJson('/api/plan', {
+    method: 'POST',
+    body: JSON.stringify(params),
+  })
+}
+
 // ─── System ──────────────────────────────────────────────────────────────────
 
 export async function getModels(): Promise<ModelInfo> {

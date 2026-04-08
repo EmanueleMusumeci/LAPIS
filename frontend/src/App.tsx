@@ -10,11 +10,12 @@ function Header() {
     <header className="border-b border-lapis-border bg-lapis-card/50 backdrop-blur-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
+          <img src="/lapis.svg" alt="LAPIS" className="w-8 h-8 flex-shrink-0" />
           <span className="text-2xl font-extrabold tracking-wide text-lapis-accent">
-            LAPIS
+            LAPI(S)<sup className="text-base font-bold">2</sup>
           </span>
           <span className="text-sm text-lapis-muted italic hidden sm:block">
-            Language-to-Action Planning via Iterative Schema injection
+            Language-to-Action Planning via Iterative Schema injection²
           </span>
         </div>
 

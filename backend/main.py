@@ -19,6 +19,7 @@ from fastapi.staticfiles import StaticFiles
 from backend.api.presets import router as presets_router
 from backend.api.pipeline import router as pipeline_router
 from backend.api.results import router as results_router
+from backend.api.planner import router as planner_router
 from backend.websocket import handle_websocket
 
 # Configuration
@@ -89,6 +90,7 @@ app.add_middleware(
 app.include_router(presets_router)
 app.include_router(pipeline_router)
 app.include_router(results_router)
+app.include_router(planner_router)
 
 
 # WebSocket endpoint

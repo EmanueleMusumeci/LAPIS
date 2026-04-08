@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 interface BlocksworldEditorProps {
   problemPddl: string
   onChange: (updatedProblemPddl: string) => void
+  readOnly?: boolean
 }
 
 interface ParsedState {
@@ -52,7 +53,64 @@ function rebuildInit(problemPddl: string, state: ParsedState): string {
   return problemPddl.replace(oldInitRaw, initBlock)
 }
 
-export default function BlocksworldEditor({ problemPddl, onChange }: BlocksworldEditorProps) {
+// ─── Read-only stack visualizer ───────────────────────────────────────────────
+
+function StackVisualizer({ parsed }: { parsed: ParsedState }) {
+  // Build columns: each column is a tower from bottom to top
+  const columns: string[][] = []
+  const placed = new Set<string>()
+
+  // Find all blocks on the table
+  for (const b of parsed.onTable) {
+    const tower: string[] = [b]
+    let current = b
+    placed.add(b)
+    // Build upward
+    while (true) {
+      const above = parsed.onRelations.find((r) => r.bottom === current)
+      if (!above) break
+      tower.push(above.top)
+      placed.add(above.top)
+      current = above.top
+    }
+    columns.push(tower)
+  }
+
+  // Any blocks not yet placed (only on-relations, no ontable)
+  for (const b of parsed.blocks) {
+    if (!placed.has(b)) {
+      columns.push([b])
+    }
+  }
+
+  if (columns.length === 0) {
+    return <p className="text-xs text-lapis-text-secondary italic">No blocks placed on table.</p>
+  }
+
+  return (
+    <div className="flex items-end gap-3 min-h-[80px] py-2">
+      {columns.map((tower, ci) => (
+        <div key={ci} className="flex flex-col-reverse items-center gap-1">
+          {tower.map((block, bi) => (
+            <div
+              key={block}
+              className="px-3 py-1.5 rounded border border-lapis-accent/60 bg-lapis-accent/10 text-lapis-accent font-mono text-xs font-semibold min-w-[40px] text-center"
+              title={`Block ${block} (layer ${bi + 1})`}
+            >
+              {block}
+            </div>
+          ))}
+          <div className="w-full h-px bg-lapis-border mt-1" />
+          <span className="text-[10px] text-lapis-text-secondary">table</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
+export default function BlocksworldEditor({ problemPddl, onChange, readOnly = false }: BlocksworldEditorProps) {
   const parsed = useMemo(() => parseBlocksworld(problemPddl), [problemPddl])
   const [top, setTop] = useState('')
   const [bottom, setBottom] = useState('table')
@@ -74,6 +132,16 @@ export default function BlocksworldEditor({ problemPddl, onChange }: Blocksworld
 
     const updated = rebuildInit(problemPddl, nextState)
     onChange(updated)
+  }
+
+  // Read-only: just show the visual tower layout
+  if (readOnly) {
+    return (
+      <div className="rounded-xl border border-lapis-border bg-lapis-card p-4 space-y-2">
+        <p className="text-xs uppercase tracking-wide text-lapis-text-secondary">State</p>
+        <StackVisualizer parsed={parsed} />
+      </div>
+    )
   }
 
   return (
@@ -117,6 +185,7 @@ export default function BlocksworldEditor({ problemPddl, onChange }: Blocksworld
 
       <div className="space-y-2">
         <p className="text-xs uppercase tracking-wide text-lapis-text-secondary">Current Scene</p>
+        <StackVisualizer parsed={parsed} />
         <div className="grid grid-cols-1 gap-2">
           {parsed.onTable.map((b) => (
             <div

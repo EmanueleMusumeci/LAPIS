@@ -75,9 +75,17 @@ class RunResult(BaseModel):
 
 
 class PipelineMethod(str, Enum):
-    """Pipeline execution method."""
+    """Pipeline execution method.
+
+    lapis       Full LAPIS² pipeline (domain gen + adequacy + problem gen + plan/refine)
+    lapis_noadq LAPIS² without domain adequacy check
+    llmpp       LLM+P: GT domain injected, generate problem, 0 refinements
+    gt_lapis    GT-LAPIS²: GT domain injected, generate problem, full LAPIS refinement
+    """
     LAPIS = "lapis"
+    LAPIS_NOADQ = "lapis_noadq"
     LLMPP = "llmpp"
+    GT_LAPIS = "gt_lapis"
 
 
 class PipelineConfig(BaseModel):

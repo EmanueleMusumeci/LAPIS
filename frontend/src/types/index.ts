@@ -48,11 +48,11 @@ export interface RunResult {
   plan_step_images: string[]  // URLs to individual step images
   total_time: number
   refinements: number
-  method: 'lapis' | 'llmpp'
+  method: PipelineMethod
   error_msg: string
 }
 
-export type PipelineMethod = 'lapis' | 'llmpp'
+export type PipelineMethod = 'lapis' | 'lapis_noadq' | 'llmpp' | 'gt_lapis'
 
 export interface PipelineConfig {
   domain_nl: string

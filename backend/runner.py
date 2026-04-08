@@ -209,18 +209,19 @@ class LAPISRunner:
         await self._emit(sr1, on_stage_update)
 
         try:
-            if method == "llmpp":
+            if method in ("llmpp", "gt_lapis"):
                 gt_domain = _find_gt_domain(self.domain_name)
+                label = "LLM+P mode" if method == "llmpp" else "GT-LAPIS² mode"
                 if gt_domain:
                     shutil.copy(gt_domain, domain_path)
                     with open(domain_path) as f:
                         domain_pddl_text = f.read()
                     await _finish(sr1, t0, StageStatus.SKIPPED,
                                   domain_pddl=domain_pddl_text,
-                                  adequacy_analysis="Using ground-truth domain (LLM+P mode).")
+                                  adequacy_analysis=f"Using ground-truth domain ({label}).")
                 else:
                     await _finish(sr1, t0, StageStatus.ERROR,
-                                  error_msg=f"GT domain not found for '{self.domain_name}'")
+                                  error_msg=f"GT domain not found for '{self.domain_name}' ({label})")
                     return RunResult(success=False, stages=stages,
                                      error_msg=sr1.error_msg, method=method)
             else:
@@ -240,7 +241,7 @@ class LAPISRunner:
             return RunResult(success=False, stages=stages,
                              error_msg=str(e), method=method)
 
-        # --- Stage 2: Domain Adequacy Check (LAPIS only) ---
+        # --- Stage 2: Domain Adequacy Check (LAPIS with adequacy only) ---
         if method == "lapis" and not config.skip_adequacy:
             t0 = time.time()
             sr2 = _stage("Domain Adequacy Check")
@@ -327,7 +328,8 @@ class LAPISRunner:
                 problem_pddl_text = f.read()
 
             problem_amended = False
-            if method == "lapis":
+            # Run problem adequacy check for lapis and gt_lapis
+            if method in ("lapis", "gt_lapis"):
                 amended_problem = await asyncio.to_thread(
                     check_problem_adequacy,
                     problem_pddl=problem_pddl_text,
@@ -358,7 +360,8 @@ class LAPISRunner:
         await self._emit(sr4, on_stage_update)
 
         try:
-            max_ref = 0 if method == "llmpp" else config.max_refinements
+            _uses_refinement = method in ("lapis", "lapis_noadq", "gt_lapis")
+            max_ref = config.max_refinements if _uses_refinement else 0
             plan_actions, refinement_history, val_log, n_refs = await self._plan_refine_loop(
                 domain_path=domain_path,
                 problem_path=problem_path,
@@ -369,8 +372,8 @@ class LAPISRunner:
                 max_refinements=max_ref,
                 problem_nl=config.problem_nl,
                 domain_nl=config.domain_nl,
-                semantic_checks=(config.semantic_checks and method == "lapis"),
-                refine_domain_enabled=(config.refine_domain and method == "lapis"),
+                semantic_checks=(config.semantic_checks and _uses_refinement),
+                refine_domain_enabled=(config.refine_domain and _uses_refinement),
                 extractor_type=config.extractor_type,
                 current_goal=_extract_goal(config.problem_nl),
                 logs_dir=logs_dir,

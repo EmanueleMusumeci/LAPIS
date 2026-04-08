@@ -385,6 +385,8 @@ export default function LiveExecution() {
                     actions={result.plan_actions}
                     stepImages={result.plan_step_images}
                     animationUrl={result.plan_animation_url}
+                    problemPddl={result.final_problem_pddl}
+                    domainName={domainName}
                   />
                 </div>
               )}

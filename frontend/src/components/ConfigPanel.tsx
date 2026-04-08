@@ -49,37 +49,24 @@ export function ConfigPanel({
 }: ConfigPanelProps) {
   return (
     <div className={cn('space-y-4', className)}>
-      {/* Method Toggle */}
+      {/* Method Selection */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-lapis-text">Pipeline Method</label>
-        <div className="flex gap-2">
-          <button
-            onClick={() => onMethodChange('lapis')}
-            className={cn(
-              'flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-              method === 'lapis'
-                ? 'bg-lapis-accent text-lapis-bg'
-                : 'bg-lapis-card border border-lapis-border text-lapis-text-secondary hover:border-lapis-accent/50'
-            )}
-          >
-            LAPIS
-          </button>
-          <button
-            onClick={() => onMethodChange('llmpp')}
-            className={cn(
-              'flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-              method === 'llmpp'
-                ? 'bg-violet-500 text-white'
-                : 'bg-lapis-card border border-lapis-border text-lapis-text-secondary hover:border-violet-500/50'
-            )}
-          >
-            LLM+P
-          </button>
-        </div>
+        <select
+          value={method}
+          onChange={(e) => onMethodChange(e.target.value as PipelineMethod)}
+          className="w-full px-3 py-2 rounded-lg bg-lapis-card border border-lapis-border text-sm text-lapis-text focus:outline-none focus:border-lapis-accent"
+        >
+          <option value="lapis">LAPIS² (full, with adequacy)</option>
+          <option value="lapis_noadq">LAPIS² (no adequacy check)</option>
+          <option value="gt_lapis">GT-LAPIS² (GT domain + LAPIS refinement)</option>
+          <option value="llmpp">LLM+P (GT domain, no refinement)</option>
+        </select>
         <p className="text-xs text-lapis-muted">
-          {method === 'lapis'
-            ? 'Full pipeline with domain generation and adequacy checks'
-            : 'Use ground-truth domain, skip adequacy checks'}
+          {method === 'lapis' && 'Full pipeline: domain gen → adequacy → problem gen → plan/refine'}
+          {method === 'lapis_noadq' && 'Like LAPIS² but skips the domain adequacy check'}
+          {method === 'gt_lapis' && 'Ground-truth domain + LAPIS² problem gen and refinement loop'}
+          {method === 'llmpp' && 'Ground-truth domain injected; generate problem; 0 refinements'}
         </p>
       </div>
 
