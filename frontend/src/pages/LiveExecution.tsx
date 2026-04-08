@@ -13,7 +13,7 @@ import {
   PlanTrace,
   PDDLViewer,
 } from '@/components'
-import { Loader2, Play, RotateCcw, Wifi, WifiOff } from 'lucide-react'
+import { Loader2, Play, RotateCcw, Wifi, WifiOff, StopCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { PipelineConfig, PipelineMethod } from '@/types'
 import { useApiKey, ApiKeyInput } from '@/contexts/ApiKeyContext'
@@ -26,6 +26,7 @@ export default function LiveExecution() {
     result,
     error,
     runPipeline,
+    cancelPipeline,
     reset,
     connect,
   } = usePipeline()
@@ -50,35 +51,30 @@ export default function LiveExecution() {
   const [problemNL, setProblemNL] = useState('')
   const [domainName, setDomainName] = useState('')
 
-  // Handle preset selection
+  // Handle preset selection — populate fields, mark as preset
   const handlePresetChange = (preset: Preset | null) => {
-    console.log('[LAPIS] Preset selected:', preset)
     setSelectedPreset(preset)
     if (preset) {
       setDomainNL(preset.domain_nl)
       setProblemNL(preset.problem_nl)
       setDomainName(preset.domain)
-      console.log('[LAPIS] Fields set:', {
-        domainNL: preset.domain_nl?.slice(0, 50),
-        problemNL: preset.problem_nl?.slice(0, 50),
-        domainName: preset.domain,
-      })
     }
   }
 
-  // Handle pipeline execution
+  // Editing any NL field switches back to Custom
+  const handleDomainNameChange = (v: string) => { setDomainName(v); setSelectedPreset(null) }
+  const handleDomainNLChange   = (v: string) => { setDomainNL(v);   setSelectedPreset(null) }
+  const handleProblemNLChange  = (v: string) => { setProblemNL(v);  setSelectedPreset(null) }
+
+  // Run / re-run pipeline
   const handleRun = () => {
-    console.log('[LAPIS] handleRun called', { domainNL, problemNL, domainName, connectionStatus })
-
-    if (!apiKey) {
-      alert('Please enter your Anthropic or OpenAI API key before running.')
-      return
-    }
-
     if (!domainNL || !problemNL || !domainName) {
-      alert('Please provide domain name, domain NL, and problem NL')
+      alert('Please provide domain name, domain description, and problem description.')
       return
     }
+
+    // Clear previous run results immediately so UI reflects new run
+    if (result || error) reset()
 
     const config: PipelineConfig = {
       domain_nl: domainNL,
@@ -93,15 +89,17 @@ export default function LiveExecution() {
       semantic_checks: semanticChecks,
       refine_domain: refineDomain,
       extractor_type: extractorType,
-      api_key: apiKey,
+      api_key: apiKey || undefined,
     }
-
-    console.log('[LAPIS] Running pipeline with config:', config)
     runPipeline(config)
   }
 
   const isConnected = connectionStatus === 'connected'
-  const canRun = isConnected && !isRunning && domainNL && problemNL && domainName && !!apiKey
+  const hasInputs = !!(domainNL && problemNL && domainName)
+  const canRun = isConnected && !isRunning && hasInputs
+  const serverOffline = !isConnected
+  const offlineTitle = serverOffline ? 'Not connected to server' : undefined
+
   const currentRunningStage = stages.find((stage) => stage.status === 'running')
 
   const executionStatus = (() => {
@@ -109,49 +107,38 @@ export default function LiveExecution() {
       return {
         label: `Running: ${currentRunningStage.name}`,
         detail: currentRunningStage.adequacy_analysis || 'Processing current stage...',
+        color: 'bg-blue-500/10 border-blue-500/30',
       }
     }
-
     if (isRunning) {
       return {
         label: 'Starting pipeline...',
-        detail: 'Request sent. Waiting for first stage update from backend.',
+        detail: 'Waiting for first stage update from backend.',
+        color: 'bg-blue-500/10 border-blue-500/30',
       }
     }
-
     if (result?.success) {
       return {
         label: 'Pipeline completed',
-        detail: `Finished in ${result.total_time.toFixed(2)}s with ${result.refinements} refinements.`,
+        detail: `Finished in ${result.total_time.toFixed(2)}s · ${result.refinements} refinements`,
+        color: 'bg-emerald-500/10 border-emerald-500/30',
       }
     }
-
-    if (result && !result.success) {
+    if (result) {
       return {
         label: 'Pipeline failed',
         detail: result.error_msg || 'Execution ended with an error.',
+        color: 'bg-rose-500/10 border-rose-500/30',
       }
     }
-
     return {
       label: isConnected ? 'Ready to run' : 'Waiting for server connection',
       detail: isConnected
         ? 'Configure inputs and click Run Pipeline.'
-        : 'The UI will enable execution automatically once WebSocket connects.',
+        : 'WebSocket will connect automatically. Check server status if this persists.',
+      color: 'bg-lapis-card border-lapis-border',
     }
   })()
-
-  // Debug: log state changes
-  console.log('[LAPIS] State:', {
-    connectionStatus,
-    isConnected,
-    isRunning,
-    canRun,
-    domainName: domainName?.slice(0, 20),
-    domainNL: domainNL ? `${domainNL.length} chars` : 'empty',
-    problemNL: problemNL ? `${problemNL.length} chars` : 'empty',
-    selectedPreset: selectedPreset?.id,
-  })
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
@@ -166,17 +153,11 @@ export default function LiveExecution() {
       >
         <div className="flex items-center gap-2">
           {isConnected ? (
-            <>
-              <Wifi className="w-4 h-4" />
-              <span>Connected to server</span>
-            </>
+            <><Wifi className="w-4 h-4" /><span>Connected to server</span></>
           ) : (
-            <>
-              <WifiOff className="w-4 h-4" />
-              <span>
-                {connectionStatus === 'connecting' ? 'Connecting...' : 'Disconnected from server'}
-              </span>
-            </>
+            <><WifiOff className="w-4 h-4" /><span>
+              {connectionStatus === 'connecting' ? 'Connecting to server...' : 'Disconnected — server unreachable'}
+            </span></>
           )}
         </div>
         {!isConnected && connectionStatus !== 'connecting' && (
@@ -189,12 +170,18 @@ export default function LiveExecution() {
         )}
       </div>
 
-      {/* Main Layout: Config + Execution */}
+      {/* Main Layout */}
       <div className="grid lg:grid-cols-[320px_1fr] gap-6">
-        {/* Left Column: Configuration */}
+        {/* Left Column */}
         <div className="space-y-4">
           {/* Preset Selector */}
-          <div className="bg-lapis-card border border-lapis-border rounded-xl p-4 space-y-3">
+          <div
+            className={cn(
+              'bg-lapis-card border border-lapis-border rounded-xl p-4 space-y-3',
+              serverOffline && 'opacity-50 pointer-events-none'
+            )}
+            title={offlineTitle}
+          >
             <h3 className="text-sm font-semibold text-lapis-text">Select Preset</h3>
             <PresetSelector
               presets={presetsData?.presets || []}
@@ -206,10 +193,19 @@ export default function LiveExecution() {
           {/* API Key */}
           <div className="bg-lapis-card border border-lapis-border rounded-xl p-4">
             <ApiKeyInput />
+            <p className="text-xs text-lapis-muted mt-2">
+              Leave blank to use the server's API key.
+            </p>
           </div>
 
-          {/* Configuration Panel */}
-          <div className="bg-lapis-card border border-lapis-border rounded-xl p-4 space-y-3">
+          {/* Configuration */}
+          <div
+            className={cn(
+              'bg-lapis-card border border-lapis-border rounded-xl p-4 space-y-3',
+              serverOffline && 'opacity-50 pointer-events-none'
+            )}
+            title={offlineTitle}
+          >
             <h3 className="text-sm font-semibold text-lapis-text">Configuration</h3>
             <ConfigPanel
               method={method}
@@ -229,138 +225,124 @@ export default function LiveExecution() {
 
           {/* Action Buttons */}
           <div className="space-y-2">
-            <button
-              onClick={handleRun}
-              disabled={!canRun}
-              className={cn(
-                'w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all',
-                canRun
-                  ? 'bg-lapis-accent text-lapis-bg hover:bg-lapis-accent/90 shadow-lg shadow-lapis-accent/30'
-                  : 'bg-lapis-card border border-lapis-border text-lapis-text-secondary cursor-not-allowed'
-              )}
-            >
-              {isRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-              <span>{isRunning ? 'Running...' : 'Run Pipeline'}</span>
-            </button>
+            {isRunning ? (
+              <button
+                onClick={cancelPipeline}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 transition-all"
+              >
+                <StopCircle className="w-4 h-4" />
+                <span>Cancel Pipeline</span>
+              </button>
+            ) : (
+              <button
+                onClick={handleRun}
+                disabled={!canRun}
+                title={
+                  !isConnected ? 'Not connected to server' :
+                  !hasInputs ? 'Fill in domain name and descriptions' :
+                  undefined
+                }
+                className={cn(
+                  'w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all',
+                  canRun
+                    ? 'bg-lapis-accent text-lapis-bg hover:bg-lapis-accent/90 shadow-lg shadow-lapis-accent/30'
+                    : 'bg-lapis-card border border-lapis-border text-lapis-text-secondary cursor-not-allowed'
+                )}
+              >
+                <Play className="w-4 h-4" />
+                <span>{result ? 'Run Again' : 'Run Pipeline'}</span>
+              </button>
+            )}
 
-            {/* Show why button is disabled */}
-            {!canRun && !isRunning && (
+            {/* Hint why disabled */}
+            {!isRunning && !canRun && (
               <p className="text-xs text-lapis-muted text-center">
-                {!isConnected
-                  ? 'Connecting to server...'
-                  : !apiKey
-                  ? 'Enter your API key above'
-                  : !domainName || !domainNL || !problemNL
-                  ? 'Select a preset or fill in custom task description'
-                  : ''}
+                {!isConnected ? 'Connecting to server...' :
+                 !hasInputs ? 'Select a preset or fill in the task description' : ''}
               </p>
             )}
 
-            {(result || error) && (
+            {(result || error) && !isRunning && (
               <button
                 onClick={reset}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-lapis-border text-lapis-text-secondary hover:border-lapis-accent/50 hover:text-lapis-text transition-colors"
               >
                 <RotateCcw className="w-4 h-4" />
-                <span>Reset</span>
+                <span>Clear Results</span>
               </button>
             )}
           </div>
         </div>
 
-        {/* Right Column: Execution & Results */}
+        {/* Right Column */}
         <div className="space-y-4">
           {/* Execution Status */}
-          <div
-            className={cn(
-              'rounded-xl border p-4',
-              isRunning
-                ? 'bg-blue-500/10 border-blue-500/30'
-                : result?.success
-                ? 'bg-emerald-500/10 border-emerald-500/30'
-                : result
-                ? 'bg-rose-500/10 border-rose-500/30'
-                : 'bg-lapis-card border-lapis-border'
-            )}
-          >
+          <div className={cn('rounded-xl border p-4', executionStatus.color)}>
             <div className="flex items-start gap-3">
-              {isRunning ? (
-                <Loader2 className="w-4 h-4 mt-0.5 animate-spin text-blue-300" />
-              ) : (
-                <Play className="w-4 h-4 mt-0.5 text-lapis-muted" />
-              )}
+              {isRunning
+                ? <Loader2 className="w-4 h-4 mt-0.5 animate-spin text-blue-300" />
+                : <Play className="w-4 h-4 mt-0.5 text-lapis-muted" />
+              }
               <div className="space-y-1">
                 <p className="text-sm font-semibold text-lapis-text">{executionStatus.label}</p>
-                <p className="text-xs text-lapis-text-secondary whitespace-pre-wrap">{executionStatus.detail}</p>
+                <p className="text-xs text-lapis-text-secondary">{executionStatus.detail}</p>
               </div>
             </div>
           </div>
 
-          {/* Custom NL Input (editable when no preset or custom selected) */}
-          {!selectedPreset && (
-            <div className="bg-lapis-card border border-lapis-border rounded-xl p-4 space-y-4">
-              <h3 className="text-sm font-semibold text-lapis-text">Custom Task Description</h3>
-
-              {/* Domain Name */}
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-lapis-muted">Domain Name</label>
-                <input
-                  type="text"
-                  value={domainName}
-                  onChange={(e) => setDomainName(e.target.value)}
-                  placeholder="e.g., blocksworld, gripper, logistics"
-                  className="w-full px-3 py-2 rounded-lg bg-lapis-bg border border-lapis-border text-lapis-text text-sm focus:outline-none focus:border-lapis-accent"
-                />
-              </div>
-
-              {/* Domain NL */}
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-lapis-muted">Domain Description (Natural Language)</label>
-                <textarea
-                  value={domainNL}
-                  onChange={(e) => setDomainNL(e.target.value)}
-                  placeholder="Describe the domain in natural language..."
-                  rows={4}
-                  className="w-full px-3 py-2 rounded-lg bg-lapis-bg border border-lapis-border text-lapis-text text-sm font-mono focus:outline-none focus:border-lapis-accent resize-none"
-                />
-              </div>
-
-              {/* Problem NL */}
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-lapis-muted">Problem Description (Natural Language)</label>
-                <textarea
-                  value={problemNL}
-                  onChange={(e) => setProblemNL(e.target.value)}
-                  placeholder="Describe the problem (initial state and goal)..."
-                  rows={6}
-                  className="w-full px-3 py-2 rounded-lg bg-lapis-bg border border-lapis-border text-lapis-text text-sm font-mono focus:outline-none focus:border-lapis-accent resize-none"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* NL Inputs (read-only display when preset is selected) */}
-          {selectedPreset && (domainNL || problemNL) && (
-            <div className="bg-lapis-card border border-lapis-border rounded-xl p-4 space-y-3">
+          {/* Task Description — always editable; preset-loaded shows badge */}
+          <div className="bg-lapis-card border border-lapis-border rounded-xl p-4 space-y-4">
+            <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-lapis-text">Task Description</h3>
-              {domainNL && (
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-lapis-muted">Domain</label>
-                  <div className="text-sm text-lapis-text-secondary bg-lapis-bg/50 rounded p-2 font-mono text-xs whitespace-pre-wrap">
-                    {domainNL}
-                  </div>
-                </div>
-              )}
-              {problemNL && (
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-lapis-muted">Problem</label>
-                  <div className="text-sm text-lapis-text-secondary bg-lapis-bg/50 rounded p-2 font-mono text-xs whitespace-pre-wrap">
-                    {problemNL}
-                  </div>
-                </div>
+              {selectedPreset && (
+                <span className="text-xs text-lapis-muted bg-lapis-bg/60 px-2 py-0.5 rounded">
+                  {selectedPreset.id} — edit to customise
+                </span>
               )}
             </div>
-          )}
+
+            {/* Domain Name */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-lapis-muted">Domain Name</label>
+              <input
+                type="text"
+                value={domainName}
+                onChange={(e) => handleDomainNameChange(e.target.value)}
+                disabled={serverOffline}
+                title={offlineTitle}
+                placeholder="e.g., blocksworld, gripper, logistics"
+                className="w-full px-3 py-2 rounded-lg bg-lapis-bg border border-lapis-border text-lapis-text text-sm focus:outline-none focus:border-lapis-accent disabled:opacity-50"
+              />
+            </div>
+
+            {/* Domain NL */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-lapis-muted">Domain Description</label>
+              <textarea
+                value={domainNL}
+                onChange={(e) => handleDomainNLChange(e.target.value)}
+                disabled={serverOffline}
+                title={offlineTitle}
+                placeholder="Describe the domain in natural language..."
+                rows={4}
+                className="w-full px-3 py-2 rounded-lg bg-lapis-bg border border-lapis-border text-lapis-text text-sm font-mono focus:outline-none focus:border-lapis-accent resize-none disabled:opacity-50"
+              />
+            </div>
+
+            {/* Problem NL */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-lapis-muted">Problem Description</label>
+              <textarea
+                value={problemNL}
+                onChange={(e) => handleProblemNLChange(e.target.value)}
+                disabled={serverOffline}
+                title={offlineTitle}
+                placeholder="Describe the initial state and goal..."
+                rows={5}
+                className="w-full px-3 py-2 rounded-lg bg-lapis-bg border border-lapis-border text-lapis-text text-sm font-mono focus:outline-none focus:border-lapis-accent resize-none disabled:opacity-50"
+              />
+            </div>
+          </div>
 
           {/* Error Display */}
           {error && (
@@ -369,12 +351,10 @@ export default function LiveExecution() {
             </div>
           )}
 
-          {/* Pipeline Progress */}
+          {/* Pipeline Progress + Stage Cards */}
           {stages.length > 0 && (
             <div className="space-y-4">
               <PipelineProgress stages={stages} />
-
-              {/* Stage Cards */}
               <div className="space-y-2">
                 {stages.map((stage) => (
                   <StageCard key={stage.name} stage={stage} />
@@ -386,22 +366,18 @@ export default function LiveExecution() {
           {/* Results */}
           {result && (
             <div className="space-y-4">
-              {/* Success Banner */}
-              <div
-                className={cn(
-                  'px-4 py-3 rounded-xl font-semibold text-center',
-                  result.success
-                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                    : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
-                )}
-              >
+              <div className={cn(
+                'px-4 py-3 rounded-xl font-semibold text-center',
+                result.success
+                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                  : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+              )}>
                 {result.success ? '✓ Pipeline Complete' : '✗ Pipeline Failed'}
                 <span className="ml-3 text-sm font-normal opacity-80">
                   ({result.total_time.toFixed(2)}s, {result.refinements} refinements)
                 </span>
               </div>
 
-              {/* Plan Trace */}
               {result.plan_actions.length > 0 && (
                 <div className="bg-lapis-card border border-lapis-border rounded-xl p-4 space-y-3">
                   <h3 className="text-sm font-semibold text-lapis-text">Generated Plan</h3>
@@ -413,7 +389,6 @@ export default function LiveExecution() {
                 </div>
               )}
 
-              {/* PDDL Outputs */}
               <div className="grid md:grid-cols-2 gap-4">
                 {result.final_domain_pddl && (
                   <div className="bg-lapis-card border border-lapis-border rounded-xl p-4 space-y-3">
@@ -421,7 +396,6 @@ export default function LiveExecution() {
                     <PDDLViewer code={result.final_domain_pddl} />
                   </div>
                 )}
-
                 {result.final_problem_pddl && (
                   <div className="bg-lapis-card border border-lapis-border rounded-xl p-4 space-y-3">
                     <h3 className="text-sm font-semibold text-lapis-text">Problem PDDL</h3>

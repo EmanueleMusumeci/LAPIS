@@ -119,7 +119,7 @@ class EditorOrchestrator:
             return self._run_verification_locked()
 
     def _run_verification_locked(self) -> dict[str, Any]:
-        result = self._verifier.verify(self._state.domain, self._state.problem, run_asp=True)
+        result = self._verifier.verify(self._state.domain, self._state.problem, run_asp=False)
         payload = {
             "valid": result.valid,
             "errors": result.errors,

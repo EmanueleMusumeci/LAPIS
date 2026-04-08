@@ -87,8 +87,10 @@ def sanitize_error_message(error: Exception) -> str:
     if len(compact) > 1200:
         compact = compact[:1200] + "..."
 
+    if re.search(r"invalid.*api.key|authentication_error|401", compact, re.IGNORECASE):
+        return "Invalid API key. Please enter a valid Anthropic or OpenAI key in the UI, or check the server's .env file."
     if re.search(r"api[_ ]?key", compact, re.IGNORECASE):
-        return "Missing or invalid API key. Please check backend environment variables."
+        return "API key error. Please enter your Anthropic or OpenAI key in the UI."
 
     return html.escape(compact)
 
@@ -222,7 +224,8 @@ class LAPISRunner:
                     return RunResult(success=False, stages=stages,
                                      error_msg=sr1.error_msg, method=method)
             else:
-                generate_domain(
+                await asyncio.to_thread(
+                    generate_domain,
                     domain_file_path=domain_path,
                     domain_description=config.domain_nl,
                     agent=self.agent,
@@ -265,14 +268,17 @@ class LAPISRunner:
                     return result
 
                 self.agent.llm_call = _capturing_llm_call
-                amended_domain = check_domain_adequacy(
-                    domain_pddl=domain_pddl_text,
-                    raw_observation=config.problem_nl,
-                    objects_list=_extract_objects_hint(config.problem_nl),
-                    agent=self.agent,
-                    logs_dir=logs_dir,
-                )
-                self.agent.llm_call = original_llm_call
+                try:
+                    amended_domain = await asyncio.to_thread(
+                        check_domain_adequacy,
+                        domain_pddl=domain_pddl_text,
+                        raw_observation=config.problem_nl,
+                        objects_list=_extract_objects_hint(config.problem_nl),
+                        agent=self.agent,
+                        logs_dir=logs_dir,
+                    )
+                finally:
+                    self.agent.llm_call = original_llm_call
 
                 was_amended = (amended_domain.strip() != domain_pddl_text.strip())
                 if was_amended:
@@ -307,7 +313,8 @@ class LAPISRunner:
             schema = extract_schema(domain_pddl_text)
             schema_block = _format_schema_block(schema)
 
-            generate_problem(
+            await asyncio.to_thread(
+                generate_problem,
                 domain_file_path=domain_path,
                 task=_extract_goal(config.problem_nl),
                 environment=_extract_world_state(config.problem_nl),
@@ -321,7 +328,8 @@ class LAPISRunner:
 
             problem_amended = False
             if method == "lapis":
-                amended_problem = check_problem_adequacy(
+                amended_problem = await asyncio.to_thread(
+                    check_problem_adequacy,
                     problem_pddl=problem_pddl_text,
                     domain_pddl=domain_pddl_text,
                     raw_observation=config.problem_nl,
@@ -463,8 +471,10 @@ class LAPISRunner:
             nonlocal planning_successful, val_grounding_successful
             nonlocal semantic_passed, semantic_diagnosis, semantic_result
 
-            plan, pddlenv_err, planner_err, _ = plan_with_output(
-                domain_path, problem_dir, plan_path, planner_name=planner_name, timeout=planner_timeout
+            plan, pddlenv_err, planner_err, _ = await asyncio.to_thread(
+                plan_with_output,
+                domain_path, problem_dir, plan_path,
+                planner_name=planner_name, timeout=planner_timeout,
             )
             planning_successful = plan is not None
 
@@ -475,10 +485,14 @@ class LAPISRunner:
 
             if planning_successful:
                 translated_plan_path = os.path.join(problem_dir, f"translated_plan_{suffix}.txt")
-                translate_plan(plan_path, translated_plan_path)
-                val_successful, val_log = VAL_validate(domain_path, problem_path, translated_plan_path)
+                await asyncio.to_thread(translate_plan, plan_path, translated_plan_path)
+                val_successful, val_log = await asyncio.to_thread(
+                    VAL_validate, domain_path, problem_path, translated_plan_path
+                )
                 if val_successful:
-                    val_ground_successful, val_grounding_log = VAL_ground(domain_path, problem_path)
+                    val_ground_successful, val_grounding_log = await asyncio.to_thread(
+                        VAL_ground, domain_path, problem_path
+                    )
 
             val_grounding_successful = val_successful and val_ground_successful
 
@@ -490,11 +504,10 @@ class LAPISRunner:
                     domain_content = f.read()
                 with open(problem_path) as f:
                     problem_content = f.read()
-                semantic_result = run_semantic_checks(
-                    domain_content,
-                    problem_content,
-                    strict=False,
-                    extractor_type=extractor_type,
+                semantic_result = await asyncio.to_thread(
+                    run_semantic_checks,
+                    domain_content, problem_content,
+                    strict=False, extractor_type=extractor_type,
                 )
                 semantic_passed = semantic_result.get("passed", True)
                 if not semantic_passed:
@@ -527,7 +540,8 @@ class LAPISRunner:
                     domain_level_errors = semantic_result.get("domain_level_errors", [])
                     if domain_level_errors:
                         await on_update("Semantic domain errors detected; refining domain...")
-                        new_domain_pddl, _ = refine_domain(
+                        new_domain_pddl, _ = await asyncio.to_thread(
+                            refine_domain,
                             domain_file_path=domain_path,
                             problem_file_path=problem_path,
                             environment=domain_nl,
@@ -545,7 +559,8 @@ class LAPISRunner:
                             f.write(new_domain_pddl)
                         domain_refined = True
 
-                new_problem_pddl, ref_hist = refine_problem(
+                new_problem_pddl, ref_hist = await asyncio.to_thread(
+                    refine_problem,
                     domain_file_path=domain_path,
                     problem_file_path=problem_path,
                     environment=problem_nl,

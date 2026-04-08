@@ -180,13 +180,6 @@ async def handle_websocket(websocket: WebSocket):
                     ))
                     continue
 
-                if not config.api_key:
-                    await manager.send_message(conn_id, WSMessage(
-                        type=WSMessageType.ERROR,
-                        message="No API key provided. Please enter your Anthropic or OpenAI key in the UI.",
-                    ))
-                    continue
-
                 # Create and store the task
                 task = asyncio.create_task(run_pipeline_ws(conn_id, config))
                 manager.running_tasks[conn_id] = task
@@ -207,12 +200,6 @@ async def handle_websocket(websocket: WebSocket):
             elif msg_type == WSMessageType.USER_MESSAGE.value:
                 text = (data.get("text") or "").strip()
                 api_key = (data.get("api_key") or "").strip() or None
-                if not api_key:
-                    await manager.send_message(conn_id, WSMessage(
-                        type=WSMessageType.ERROR,
-                        message="No API key provided. Please enter your Anthropic or OpenAI key in the editor.",
-                    ))
-                    continue
                 orchestrator = manager.orchestrators[conn_id]
                 state_payload = await orchestrator.process_user_message(text, api_key=api_key)
 
