@@ -175,8 +175,8 @@ def _simulate_steps(domain_pddl: str, problem_pddl: str, plan: list[str]) -> Sim
                 goal_reached=goal_reached,
             )
 
-    except Exception as exc:
-        return SimStepsResponse(success=False, error=str(exc))
+        except Exception as exc:
+            return SimStepsResponse(success=False, error=str(exc))
 
 
 @router.post("/plan", response_model=PlanResponse)
