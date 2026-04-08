@@ -73,11 +73,6 @@ export function useAgenticEditor() {
     const trimmed = text.trim()
     if (!trimmed) return
 
-    if (!apiKey) {
-      setState((prev) => ({ ...prev, error: 'Please enter an API key (Anthropic or OpenAI) before sending messages.' }))
-      return
-    }
-
     setState((prev) => ({
       ...prev,
       chat: [...prev.chat, { role: 'user', text: trimmed, at: Date.now() }],
@@ -92,7 +87,7 @@ export function useAgenticEditor() {
       text: trimmed,
       domain: state.domainPddl,
       problem: state.problemPddl,
-      api_key: apiKey,
+      api_key: apiKey || undefined,
     })
   }, [send, state.domainPddl, state.problemPddl, apiKey])
 

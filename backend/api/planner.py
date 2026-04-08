@@ -103,7 +103,7 @@ def _simulate_steps(domain_pddl: str, problem_pddl: str, plan: list[str]) -> Sim
             def _iter_grounded(fluent, problem):
                 from itertools import product
                 type_lists = [
-                    [o for o in problem.all_objects if problem.has_type(o.type) and o.type == p.type]
+                    [o for o in problem.all_objects if o.type == p.type or o.type.is_subtype(p.type)]
                     for p in fluent.signature
                 ]
                 if not type_lists:

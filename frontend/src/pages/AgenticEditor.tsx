@@ -154,29 +154,36 @@ interface PanelCardProps {
   badges?: React.ReactNode[]
   preview?: string   // short text shown in collapsed preview
   defaultOpen?: boolean
+  collapsible?: boolean
   className?: string
   children: React.ReactNode
 }
 
-function PanelCard({ title, icon, badges = [], preview, defaultOpen = false, className, children }: PanelCardProps) {
+function PanelCard({ title, icon, badges = [], preview, defaultOpen = false, collapsible = true, className, children }: PanelCardProps) {
   const [open, setOpen] = useState(defaultOpen)
+  const isOpen = !collapsible || open
 
   return (
-    <div className={cn('rounded-xl border border-lapis-border bg-lapis-card overflow-hidden', className)}>
+    <div className={cn('rounded-xl border border-lapis-border bg-lapis-card overflow-hidden flex flex-col', className)}>
       {/* Header */}
-      <button
-        type="button"
-        className="w-full flex items-center gap-2 px-4 py-3 text-sm font-semibold text-lapis-text hover:bg-lapis-bg/30 transition-colors"
-        onClick={() => setOpen((v) => !v)}
+      <div
+        role={collapsible ? 'button' : undefined}
+        tabIndex={collapsible ? 0 : undefined}
+        className={cn(
+          'flex items-center gap-2 px-4 py-3 text-sm font-semibold text-lapis-text',
+          collapsible && 'cursor-pointer hover:bg-lapis-bg/30 transition-colors',
+        )}
+        onClick={collapsible ? () => setOpen((v) => !v) : undefined}
+        onKeyDown={collapsible ? (e) => e.key === 'Enter' && setOpen((v) => !v) : undefined}
       >
         <span className="text-lapis-accent">{icon}</span>
         <span className="flex-1 text-left">{title}</span>
         {badges.map((b, i) => <span key={i}>{b}</span>)}
-        {open ? <ChevronUp className="w-4 h-4 text-lapis-muted" /> : <ChevronDown className="w-4 h-4 text-lapis-muted" />}
-      </button>
+        {collapsible && (isOpen ? <ChevronUp className="w-4 h-4 text-lapis-muted" /> : <ChevronDown className="w-4 h-4 text-lapis-muted" />)}
+      </div>
 
       {/* Collapsed preview */}
-      {!open && preview && (
+      {collapsible && !isOpen && preview && (
         <div className="relative mx-4 mb-3 rounded-lg border border-lapis-border bg-lapis-bg/40 overflow-hidden h-24">
           <pre className="p-2 text-xs font-mono text-lapis-text-secondary whitespace-pre-wrap leading-5">{preview}</pre>
           <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-lapis-card to-transparent" />
@@ -184,8 +191,8 @@ function PanelCard({ title, icon, badges = [], preview, defaultOpen = false, cla
       )}
 
       {/* Expanded content */}
-      {open && (
-        <div className="px-4 pb-4">
+      {isOpen && (
+        <div className="px-4 pb-4 flex-1 overflow-y-auto">
           {children}
         </div>
       )}
@@ -264,6 +271,8 @@ function VerificationCard({
       badges={badges}
       preview={preview}
       defaultOpen={hasResult && !verification!.valid}
+      collapsible={false}
+      className="h-full"
     >
       <div className="space-y-3 pt-1">
         <div className="flex items-center gap-3">
@@ -406,6 +415,8 @@ function PlannerCard({
       badges={badges}
       preview={planPreview}
       defaultOpen={status === 'done' || status === 'error'}
+      collapsible={false}
+      className="h-full"
     >
       <div className="space-y-4 pt-1">
         <div className="flex items-center gap-2">
@@ -585,8 +596,8 @@ export default function AgenticEditor() {
       </div>
 
       {/* Bottom row: verification + planner */}
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
-        <div className="xl:col-span-2">
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-4 items-stretch">
+        <div className="xl:col-span-2 flex flex-col">
           <VerificationCard
             verification={state.verification ?? null}
             isLoading={state.isLoading}
@@ -595,7 +606,7 @@ export default function AgenticEditor() {
           />
         </div>
 
-        <div className="xl:col-span-3">
+        <div className="xl:col-span-3 flex flex-col">
           <PlannerCard
             domainPddl={state.domainPddl}
             problemPddl={state.problemPddl}
