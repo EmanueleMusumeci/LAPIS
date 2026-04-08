@@ -10,6 +10,10 @@ export interface RefinementEntry {
   error: string
   fix: string
   success: boolean
+  domain_pddl_before: string
+  problem_pddl_before: string
+  domain_pddl_after: string
+  problem_pddl_after: string
 }
 
 export interface CoTStep {

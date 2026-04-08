@@ -561,6 +561,12 @@ class LAPISRunner:
             if semantic_diagnosis:
                 combined_val_log = f"{combined_val_log}\n\n{semantic_diagnosis}" if combined_val_log else semantic_diagnosis
 
+            # Capture PDDL state before this iteration
+            with open(domain_path) as _f:
+                _domain_before = _f.read()
+            with open(problem_path) as _f:
+                _problem_before = _f.read()
+
             try:
                 domain_refined = False
                 if refine_domain_enabled and semantic_result:
@@ -607,6 +613,8 @@ class LAPISRunner:
                     error=str(ex),
                     fix="refinement call failed",
                     success=False,
+                    domain_pddl_before=_domain_before,
+                    problem_pddl_before=_problem_before,
                 ))
                 continue
 
@@ -614,6 +622,12 @@ class LAPISRunner:
                 f.write(new_problem_pddl)
 
             plan = await _plan_and_validate(str(i + 1))
+
+            # Read PDDL state after this iteration
+            with open(domain_path) as _f:
+                _domain_after = _f.read()
+            with open(problem_path) as _f:
+                _problem_after = _f.read()
 
             fix_text = "see logs"
             if ref_hist:
@@ -627,6 +641,10 @@ class LAPISRunner:
                 error=(entry_error or "")[:300],
                 fix=fix_text,
                 success=bool(plan and val_grounding_successful and (not use_simulator or sim_passed) and (not semantic_checks or semantic_passed)),
+                domain_pddl_before=_domain_before,
+                problem_pddl_before=_problem_before,
+                domain_pddl_after=_domain_after,
+                problem_pddl_after=_problem_after,
             )
             refinement_history.append(entry)
 

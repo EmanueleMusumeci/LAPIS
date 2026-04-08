@@ -1,7 +1,7 @@
 /**
  * StageCard - Expandable card showing pipeline stage status and content.
  */
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
   Wrench,
   Search,
@@ -11,9 +11,84 @@ import {
   ChevronRight,
   Clock,
   AlertCircle,
+  Diff,
 } from 'lucide-react'
 import { cn, formatDuration, truncate } from '@/lib/utils'
 import type { StageResult, StageStatus } from '@/types'
+
+// ─── Line-level diff ──────────────────────────────────────────────────────────
+
+interface DiffLine {
+  type: 'same' | 'added' | 'removed'
+  text: string
+}
+
+function computeLineDiff(before: string, after: string): DiffLine[] {
+  const bLines = before.split('\n')
+  const aLines = after.split('\n')
+
+  // Simple LCS-based diff (Patience-style via DP)
+  const m = bLines.length
+  const n = aLines.length
+
+  // Build LCS table
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0))
+  for (let i = m - 1; i >= 0; i--) {
+    for (let j = n - 1; j >= 0; j--) {
+      if (bLines[i] === aLines[j]) {
+        dp[i][j] = dp[i + 1][j + 1] + 1
+      } else {
+        dp[i][j] = Math.max(dp[i + 1][j], dp[i][j + 1])
+      }
+    }
+  }
+
+  const result: DiffLine[] = []
+  let i = 0, j = 0
+  while (i < m || j < n) {
+    if (i < m && j < n && bLines[i] === aLines[j]) {
+      result.push({ type: 'same', text: bLines[i] })
+      i++; j++
+    } else if (j < n && (i >= m || dp[i + 1]?.[j] <= dp[i]?.[j + 1])) {
+      result.push({ type: 'added', text: aLines[j] })
+      j++
+    } else {
+      result.push({ type: 'removed', text: bLines[i] })
+      i++
+    }
+  }
+  return result
+}
+
+function PddlDiff({ before, after }: { before: string; after: string }) {
+  const lines = useMemo(() => computeLineDiff(before, after), [before, after])
+  const hasChanges = lines.some((l) => l.type !== 'same')
+
+  if (!hasChanges) {
+    return <p className="text-xs text-lapis-text-secondary italic">No changes</p>
+  }
+
+  return (
+    <div className="font-mono text-xs max-h-72 overflow-auto rounded bg-lapis-bg border border-lapis-border p-2 space-y-0">
+      {lines.map((line, i) => (
+        <div
+          key={i}
+          className={cn(
+            'whitespace-pre px-1 leading-5',
+            line.type === 'added' && 'bg-emerald-900/30 text-emerald-300',
+            line.type === 'removed' && 'bg-red-900/30 text-red-300 line-through opacity-70',
+            line.type === 'same' && 'text-lapis-text-secondary',
+          )}
+        >
+          <span className="select-none mr-1 opacity-50">
+            {line.type === 'added' ? '+' : line.type === 'removed' ? '−' : ' '}
+          </span>
+          {line.text || ' '}
+        </div>
+      ))}
+    </div>
+  )
+}
 
 const STAGE_ICONS: Record<string, React.ReactNode> = {
   'Domain Generation': <Wrench className="w-4 h-4" />,
@@ -33,11 +108,17 @@ const STATUS_BADGES: Record<StageStatus, { label: string; className: string }> =
 interface StageCardProps {
   stage: StageResult
   defaultExpanded?: boolean
+  /** PDDL from the preceding stage, used to show a diff toggle */
+  prevDomainPddl?: string
+  prevProblemPddl?: string
   className?: string
 }
 
-export function StageCard({ stage, defaultExpanded = false, className }: StageCardProps) {
+export function StageCard({ stage, defaultExpanded = false, prevDomainPddl, prevProblemPddl, className }: StageCardProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
+  const [showDomainDiff, setShowDomainDiff] = useState(false)
+  const [showProblemDiff, setShowProblemDiff] = useState(false)
+  const [showRefineDiff, setShowRefineDiff] = useState<number | null>(null)
 
   const icon = STAGE_ICONS[stage.name] || <Cog className="w-4 h-4" />
   const badge = STATUS_BADGES[stage.status]
@@ -128,10 +209,31 @@ export function StageCard({ stage, defaultExpanded = false, className }: StageCa
           {(stage.name === 'Domain Generation' || stage.name === 'Domain Adequacy Check') &&
             stage.domain_pddl && (
               <div>
-                <div className="text-xs font-semibold text-lapis-muted mb-1">Domain PDDL</div>
-                <pre className="pddl-code text-xs max-h-64 overflow-auto">
-                  {stage.domain_pddl}
-                </pre>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="text-xs font-semibold text-lapis-muted">Domain PDDL</div>
+                  {prevDomainPddl && prevDomainPddl !== stage.domain_pddl && (
+                    <button
+                      type="button"
+                      onClick={() => setShowDomainDiff((v) => !v)}
+                      className={cn(
+                        'flex items-center gap-1 text-xs px-2 py-0.5 rounded border transition-colors',
+                        showDomainDiff
+                          ? 'border-lapis-accent/60 bg-lapis-accent/10 text-lapis-accent'
+                          : 'border-lapis-border text-lapis-text-secondary hover:border-lapis-accent/40'
+                      )}
+                    >
+                      <Diff className="w-3 h-3" />
+                      {showDomainDiff ? 'Hide diff' : 'Show diff'}
+                    </button>
+                  )}
+                </div>
+                {showDomainDiff && prevDomainPddl ? (
+                  <PddlDiff before={prevDomainPddl} after={stage.domain_pddl} />
+                ) : (
+                  <pre className="pddl-code text-xs max-h-64 overflow-auto">
+                    {stage.domain_pddl}
+                  </pre>
+                )}
               </div>
             )}
 
@@ -171,10 +273,31 @@ export function StageCard({ stage, defaultExpanded = false, className }: StageCa
           {/* Problem PDDL */}
           {stage.name === 'Problem Generation' && stage.problem_pddl && (
             <div>
-              <div className="text-xs font-semibold text-lapis-muted mb-1">Problem PDDL</div>
-              <pre className="pddl-code text-xs max-h-64 overflow-auto">
-                {stage.problem_pddl}
-              </pre>
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-xs font-semibold text-lapis-muted">Problem PDDL</div>
+                {prevProblemPddl && prevProblemPddl !== stage.problem_pddl && (
+                  <button
+                    type="button"
+                    onClick={() => setShowProblemDiff((v) => !v)}
+                    className={cn(
+                      'flex items-center gap-1 text-xs px-2 py-0.5 rounded border transition-colors',
+                      showProblemDiff
+                        ? 'border-lapis-accent/60 bg-lapis-accent/10 text-lapis-accent'
+                        : 'border-lapis-border text-lapis-text-secondary hover:border-lapis-accent/40'
+                    )}
+                  >
+                    <Diff className="w-3 h-3" />
+                    {showProblemDiff ? 'Hide diff' : 'Show diff'}
+                  </button>
+                )}
+              </div>
+              {showProblemDiff && prevProblemPddl ? (
+                <PddlDiff before={prevProblemPddl} after={stage.problem_pddl} />
+              ) : (
+                <pre className="pddl-code text-xs max-h-64 overflow-auto">
+                  {stage.problem_pddl}
+                </pre>
+              )}
             </div>
           )}
 
@@ -221,21 +344,60 @@ export function StageCard({ stage, defaultExpanded = false, className }: StageCa
               <div className="text-xs font-semibold text-lapis-muted mb-1">
                 Refinement History
               </div>
-              <div className="refine-terminal">
-                {stage.refinement_history.map((entry) => (
-                  <div key={entry.iteration} className="mb-2">
-                    <span className="refine-info">
-                      ─── Iteration {entry.iteration}/{stage.refinement_history.length}{' '}
-                      {entry.success ? '✓' : '✗'}
-                    </span>
-                    {entry.error && (
-                      <div className="refine-err ml-4">Error: {truncate(entry.error, 200)}</div>
-                    )}
-                    {entry.fix && (
-                      <div className="refine-ok ml-4">Fix: {truncate(entry.fix, 200)}</div>
-                    )}
-                  </div>
-                ))}
+              <div className="refine-terminal space-y-3">
+                {stage.refinement_history.map((entry) => {
+                  const hasDomainDiff = entry.domain_pddl_before && entry.domain_pddl_after && entry.domain_pddl_before !== entry.domain_pddl_after
+                  const hasProblemDiff = entry.problem_pddl_before && entry.problem_pddl_after && entry.problem_pddl_before !== entry.problem_pddl_after
+                  const isShowingDiff = showRefineDiff === entry.iteration
+
+                  return (
+                    <div key={entry.iteration} className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="refine-info">
+                          ─── Iteration {entry.iteration}/{stage.refinement_history.length}{' '}
+                          {entry.success ? '✓' : '✗'}
+                        </span>
+                        {(hasDomainDiff || hasProblemDiff) && (
+                          <button
+                            type="button"
+                            onClick={() => setShowRefineDiff(isShowingDiff ? null : entry.iteration)}
+                            className={cn(
+                              'flex items-center gap-1 text-xs px-2 py-0.5 rounded border transition-colors',
+                              isShowingDiff
+                                ? 'border-lapis-accent/60 bg-lapis-accent/10 text-lapis-accent'
+                                : 'border-lapis-border/60 text-lapis-text-secondary hover:border-lapis-accent/40'
+                            )}
+                          >
+                            <Diff className="w-3 h-3" />
+                            {isShowingDiff ? 'Hide diff' : 'Diff'}
+                          </button>
+                        )}
+                      </div>
+                      {entry.error && (
+                        <div className="refine-err ml-4">Error: {truncate(entry.error, 200)}</div>
+                      )}
+                      {entry.fix && (
+                        <div className="refine-ok ml-4">Fix: {truncate(entry.fix, 200)}</div>
+                      )}
+                      {isShowingDiff && (
+                        <div className="ml-4 space-y-2">
+                          {hasDomainDiff && (
+                            <div>
+                              <p className="text-xs text-lapis-text-secondary mb-1">Domain changes:</p>
+                              <PddlDiff before={entry.domain_pddl_before} after={entry.domain_pddl_after} />
+                            </div>
+                          )}
+                          {hasProblemDiff && (
+                            <div>
+                              <p className="text-xs text-lapis-text-secondary mb-1">Problem changes:</p>
+                              <PddlDiff before={entry.problem_pddl_before} after={entry.problem_pddl_after} />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}

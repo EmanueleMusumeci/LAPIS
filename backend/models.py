@@ -29,6 +29,10 @@ class RefinementEntry(BaseModel):
     error: str = ""
     fix: str = ""
     success: bool = False
+    domain_pddl_before: str = ""    # Domain PDDL at start of this iteration
+    problem_pddl_before: str = ""   # Problem PDDL at start of this iteration
+    domain_pddl_after: str = ""     # Domain PDDL after refinement (if changed)
+    problem_pddl_after: str = ""    # Problem PDDL after refinement (if changed)
 
 
 class CoTStep(BaseModel):

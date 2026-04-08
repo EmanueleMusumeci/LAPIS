@@ -378,9 +378,21 @@ export default function LiveExecution() {
             <div className="space-y-4">
               <PipelineProgress stages={stages} />
               <div className="space-y-2">
-                {stages.map((stage) => (
-                  <StageCard key={stage.name} stage={stage} />
-                ))}
+                {stages.map((stage, idx) => {
+                  // Find previous domain/problem PDDL from earlier stages
+                  const prevDomains = stages.slice(0, idx).map((s) => s.domain_pddl).filter(Boolean)
+                  const prevProblems = stages.slice(0, idx).map((s) => s.problem_pddl).filter(Boolean)
+                  const prevDomainPddl = prevDomains[prevDomains.length - 1]
+                  const prevProblemPddl = prevProblems[prevProblems.length - 1]
+                  return (
+                    <StageCard
+                      key={stage.name}
+                      stage={stage}
+                      prevDomainPddl={prevDomainPddl}
+                      prevProblemPddl={prevProblemPddl}
+                    />
+                  )
+                })}
               </div>
             </div>
           )}
