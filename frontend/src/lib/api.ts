@@ -108,6 +108,51 @@ export async function runPlanner(params: {
   })
 }
 
+export interface StepState {
+  action: string
+  added: string[]
+  removed: string[]
+  all_facts: string[]
+}
+
+export interface SimStepsResult {
+  success: boolean
+  init_facts: string[]
+  goal_facts: string[]
+  steps: StepState[]
+  goal_reached: boolean
+  error: string
+}
+
+export async function simulateSteps(params: {
+  domain_pddl: string
+  problem_pddl: string
+  plan: string[]
+}): Promise<SimStepsResult> {
+  return fetchJson('/api/simulate-steps', {
+    method: 'POST',
+    body: JSON.stringify(params),
+  })
+}
+
+export interface SimFramesResult {
+  success: boolean
+  frames: string[]   // base64 data URIs, one per step (index 0 = init state)
+  error: string
+}
+
+export async function simulateFrames(params: {
+  domain_pddl: string
+  problem_pddl: string
+  plan: string[]
+  domain_name: string
+}): Promise<SimFramesResult> {
+  return fetchJson('/api/simulate-frames', {
+    method: 'POST',
+    body: JSON.stringify(params),
+  })
+}
+
 // ─── System ──────────────────────────────────────────────────────────────────
 
 export async function getModels(): Promise<ModelInfo> {

@@ -1,7 +1,7 @@
 /**
  * LiveExecution - Main page for live pipeline execution with real-time updates.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePipeline } from '@/hooks/usePipeline'
 import { usePresets } from '@/hooks/usePresets'
 import type { Preset } from '@/types'
@@ -17,6 +17,7 @@ import { Loader2, Play, RotateCcw, Wifi, WifiOff, StopCircle } from 'lucide-reac
 import { cn } from '@/lib/utils'
 import type { PipelineConfig, PipelineMethod } from '@/types'
 import { useApiKey, ApiKeyInput } from '@/contexts/ApiKeyContext'
+import { simulateFrames, type SimFramesResult } from '@/lib/api'
 
 export default function LiveExecution() {
   const {
@@ -50,6 +51,25 @@ export default function LiveExecution() {
   const [domainNL, setDomainNL] = useState('')
   const [problemNL, setProblemNL] = useState('')
   const [domainName, setDomainName] = useState('')
+  const [simFrames, setSimFrames] = useState<SimFramesResult | null>(null)
+
+  // When a pipeline result arrives with a plan, fetch graphical frames
+  useEffect(() => {
+    if (!result?.plan_actions?.length || !result.final_domain_pddl || !result.final_problem_pddl) {
+      setSimFrames(null)
+      return
+    }
+    let cancelled = false
+    simulateFrames({
+      domain_pddl: result.final_domain_pddl,
+      problem_pddl: result.final_problem_pddl,
+      plan: result.plan_actions,
+      domain_name: domainName,
+    }).then((frames) => {
+      if (!cancelled && frames.success && frames.frames.length > 0) setSimFrames(frames)
+    }).catch(() => {})
+    return () => { cancelled = true }
+  }, [result, domainName])
 
   // Handle preset selection — populate fields, mark as preset
   const handlePresetChange = (preset: Preset | null) => {
@@ -389,6 +409,7 @@ export default function LiveExecution() {
                     animationUrl={result.plan_animation_url}
                     problemPddl={result.final_problem_pddl}
                     domainName={domainName}
+                    simFrames={simFrames ?? undefined}
                   />
                 </div>
               )}

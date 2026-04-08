@@ -6,11 +6,11 @@
  * - Prev/Next buttons
  * - Current action banner
  * - Full action list with active highlighting
- * - Blocksworld state simulator at each step
- * - Generic PDDL state viewer for other domains
+ * - Blocksworld: client-side tower simulator (no backend needed)
+ * - Other IPC domains: state-diff viewer (facts added/removed per step)
  */
 import { useState, useMemo } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react'
 import * as Slider from '@radix-ui/react-slider'
 import { cn } from '@/lib/utils'
 import {
@@ -20,15 +20,20 @@ import {
   rebuildBWInit,
 } from '@/lib/blocksworldSim'
 import BlocksworldEditor from '@/components/editors/BlocksworldEditor'
+import type { SimStepsResult, SimFramesResult } from '@/lib/api'
 
 interface PlanTraceProps {
   actions: string[]
   stepImages?: string[]   // Optional: URL to image for each step
   animationUrl?: string   // Optional: URL to full animation GIF
-  /** Optional: problem PDDL for state simulation */
+  /** Optional: problem PDDL for client-side BW simulator */
   problemPddl?: string
   /** Optional: domain name for choosing the right simulator */
   domainName?: string
+  /** Optional: pre-computed per-step state diffs from backend */
+  simSteps?: SimStepsResult
+  /** Optional: pre-rendered graphical frames from backend (index 0 = init, i+1 = after action i) */
+  simFrames?: SimFramesResult
   className?: string
 }
 
@@ -58,29 +63,163 @@ function BlocksworldSim({
   )
 }
 
-// ─── Generic PDDL fact viewer ─────────────────────────────────────────────────
+// ─── Generic state-diff viewer ────────────────────────────────────────────────
 
-function GenericStateBanner({ action, domainName }: { action: string; domainName: string }) {
-  const norm = normalizeAction(action)
-  const clean = norm.replace(/^\(|\)$/g, '').trim()
-  const parts = clean.split(/\s+/)
-  const name = parts[0] || ''
-  const params = parts.slice(1)
+/** Renders the inner content of a diff step (shared by collapsible and standalone modes). */
+function SimDiffContent({
+  simSteps,
+  step,
+  goalFacts,
+  showAll,
+  setShowAll,
+}: {
+  simSteps: SimStepsResult
+  step: number
+  goalFacts: string[]
+  showAll: boolean
+  setShowAll: (fn: (s: boolean) => boolean) => void
+}) {
+  if (step === 0) {
+    return (
+      <>
+        <p className="text-lapis-text-secondary uppercase tracking-wide font-medium">Initial State</p>
+        <FactList facts={simSteps.init_facts} goalFacts={goalFacts} />
+        {goalFacts.length > 0 && (
+          <div className="pt-1 border-t border-lapis-border">
+            <p className="text-lapis-text-secondary uppercase tracking-wide font-medium mb-1">Goal</p>
+            <FactList facts={goalFacts} goalFacts={goalFacts} alwaysHighlight />
+          </div>
+        )}
+      </>
+    )
+  }
+
+  const stepData = simSteps.steps[step - 1]
+  if (!stepData) return null
+  const goalReached = step === simSteps.steps.length && simSteps.goal_reached
 
   return (
-    <div className="rounded-lg border border-lapis-border bg-lapis-card/60 p-3 text-sm">
-      <span className="text-xs text-lapis-text-secondary uppercase tracking-wide mr-2">{domainName}</span>
-      <span className="font-mono text-lapis-accent font-semibold">{name}</span>
-      {params.length > 0 && (
-        <span className="font-mono text-lapis-text-secondary ml-2">{params.join(' ')}</span>
+    <>
+      {goalReached && (
+        <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+          <CheckCircle2 className="w-3.5 h-3.5" />
+          Goal reached
+        </div>
       )}
+      {stepData.added.length > 0 && (
+        <div>
+          <p className="text-emerald-400 uppercase tracking-wide font-medium mb-1">+ Added</p>
+          <div className="space-y-0.5">
+            {stepData.added.map((f, i) => (
+              <div key={i} className="font-mono text-emerald-300 bg-emerald-900/20 rounded px-2 py-0.5">{f}</div>
+            ))}
+          </div>
+        </div>
+      )}
+      {stepData.removed.length > 0 && (
+        <div>
+          <p className="text-red-400 uppercase tracking-wide font-medium mb-1">− Removed</p>
+          <div className="space-y-0.5">
+            {stepData.removed.map((f, i) => (
+              <div key={i} className="font-mono text-red-300 bg-red-900/20 rounded px-2 py-0.5 line-through opacity-70">{f}</div>
+            ))}
+          </div>
+        </div>
+      )}
+      {stepData.added.length === 0 && stepData.removed.length === 0 && (
+        <p className="text-lapis-text-secondary italic">No state change (precondition check failed?)</p>
+      )}
+      <div className="pt-1 border-t border-lapis-border">
+        <button
+          type="button"
+          className="text-lapis-text-secondary hover:text-lapis-text text-xs flex items-center gap-1"
+          onClick={() => setShowAll((s) => !s)}
+        >
+          {showAll ? '▾' : '▸'} All facts ({stepData.all_facts.length})
+        </button>
+        {showAll && <FactList facts={stepData.all_facts} goalFacts={goalFacts} />}
+      </div>
+    </>
+  )
+}
+
+function SimDiffViewer({
+  simSteps,
+  step,
+  collapsible = false,
+}: {
+  simSteps: SimStepsResult
+  step: number   // 1-based step index (0 = init state)
+  collapsible?: boolean
+}) {
+  const [showAll, setShowAll] = useState(false)
+  const [collapsed, setCollapsed] = useState(collapsible)
+
+  const goalFacts = simSteps.goal_facts
+
+  // When used as supplementary (below graphical frames), wrap in a collapsible shell
+  if (collapsible) {
+    return (
+      <div className="rounded-lg border border-lapis-border bg-lapis-card/60 text-xs">
+        <button
+          type="button"
+          className="w-full flex items-center gap-1.5 px-3 py-2 text-lapis-text-secondary hover:text-lapis-text"
+          onClick={() => setCollapsed((c) => !c)}
+        >
+          {collapsed ? '▸' : '▾'}
+          <span className="font-medium uppercase tracking-wide">State diff</span>
+        </button>
+        {!collapsed && (
+          <div className="px-3 pb-3 space-y-2">
+            <SimDiffContent simSteps={simSteps} step={step} goalFacts={goalFacts} showAll={showAll} setShowAll={setShowAll} />
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-lg border border-lapis-border bg-lapis-card/60 p-3 space-y-2 text-xs">
+      <SimDiffContent simSteps={simSteps} step={step} goalFacts={goalFacts} showAll={showAll} setShowAll={setShowAll} />
+    </div>
+  )
+}
+
+function FactList({
+  facts,
+  goalFacts,
+  alwaysHighlight = false,
+}: {
+  facts: string[]
+  goalFacts: string[]
+  alwaysHighlight?: boolean
+}) {
+  const goalSet = new Set(goalFacts.map((f) => f.toLowerCase()))
+  return (
+    <div className="space-y-0.5 max-h-40 overflow-y-auto">
+      {facts.map((f, i) => {
+        const isGoal = alwaysHighlight || goalSet.has(f.toLowerCase())
+        return (
+          <div
+            key={i}
+            className={cn(
+              'font-mono rounded px-2 py-0.5',
+              isGoal
+                ? 'text-emerald-300 bg-emerald-900/20'
+                : 'text-lapis-text bg-lapis-bg/60'
+            )}
+          >
+            {f}
+          </div>
+        )
+      })}
     </div>
   )
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function PlanTrace({ actions, stepImages, animationUrl, problemPddl, domainName, className }: PlanTraceProps) {
+export function PlanTrace({ actions, stepImages, animationUrl, problemPddl, domainName, simSteps, simFrames, className }: PlanTraceProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const [showAnimation, setShowAnimation] = useState(false)
 
@@ -103,15 +242,16 @@ export function PlanTrace({ actions, stepImages, animationUrl, problemPddl, doma
   const handleNext = () => setCurrentStep((prev) => Math.min(n - 1, prev + 1))
 
   const currentAction = normalizedActions[currentStep]
-
-  // Parse normalized action for display
   const clean = currentAction.replace(/^\(|\)$/g, '').trim()
   const parts = clean.split(/\s+/)
   const name = parts[0] || ''
   const params = parts.slice(1)
 
   const showBWSim = domainName === 'blocksworld' && problemPddl
-  const showGenericBanner = !showBWSim && domainName && domainName !== 'custom'
+  // Show graphical frames when available and not blocksworld (has its own client-side sim)
+  const showSimFrames = !showBWSim && simFrames?.success && simFrames.frames.length > 0
+  // Show sim diff for any domain when simSteps are available, not blocksworld, and no graphical frames
+  const showSimDiff = !showBWSim && !showSimFrames && simSteps?.success
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -138,7 +278,7 @@ export function PlanTrace({ actions, stepImages, animationUrl, problemPddl, doma
       {/* Step-by-step view */}
       {!showAnimation && (
         <>
-          {/* Blocksworld simulator */}
+          {/* Blocksworld tower simulator */}
           {showBWSim && (
             <BlocksworldSim
               problemPddl={problemPddl!}
@@ -147,16 +287,31 @@ export function PlanTrace({ actions, stepImages, animationUrl, problemPddl, doma
             />
           )}
 
-          {/* Step image (if provided and no blocksworld sim) */}
-          {!showBWSim && currentImage && (
+          {/* Graphical frame viewer for IPC domains with graphical simulators */}
+          {showSimFrames && (
             <div className="border border-lapis-border rounded-lg overflow-hidden bg-lapis-bg">
-              <img src={currentImage} alt={`Step ${currentStep + 1}`} className="w-full h-auto" />
+              <img
+                src={simFrames!.frames[currentStep + 1] ?? simFrames!.frames[currentStep] ?? simFrames!.frames[0]}
+                alt={`State after step ${currentStep + 1}`}
+                className="w-full h-auto"
+              />
             </div>
           )}
 
-          {/* Generic domain state banner */}
-          {showGenericBanner && (
-            <GenericStateBanner action={currentAction} domainName={domainName!} />
+          {/* State diff viewer — supplementary when graphical frames available, primary otherwise */}
+          {simSteps?.success && (showSimDiff || showSimFrames) && (
+            <SimDiffViewer
+              simSteps={simSteps}
+              step={currentStep}
+              collapsible={showSimFrames}
+            />
+          )}
+
+          {/* Step image (if provided and no domain simulator or graphical frames) */}
+          {!showBWSim && !showSimFrames && !showSimDiff && currentImage && (
+            <div className="border border-lapis-border rounded-lg overflow-hidden bg-lapis-bg">
+              <img src={currentImage} alt={`Step ${currentStep + 1}`} className="w-full h-auto" />
+            </div>
           )}
 
           {/* Navigation Controls */}
@@ -224,7 +379,7 @@ export function PlanTrace({ actions, stepImages, animationUrl, problemPddl, doma
           </div>
 
           {/* Action List */}
-          <div className="space-y-1 max-h-64 overflow-y-auto">
+          <div className="space-y-1 max-h-48 overflow-y-auto">
             {normalizedActions.map((action, i) => {
               const isActive = i === currentStep
               const isPast = i < currentStep

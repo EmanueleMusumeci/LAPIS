@@ -8,13 +8,12 @@ import { useAgenticEditor } from '@/hooks/useAgenticEditor'
 import { usePresets } from '@/hooks/usePresets'
 import GridworldEditor from '@/components/editors/GridworldEditor'
 import BlocksworldEditor from '@/components/editors/BlocksworldEditor'
-import DomainStateViewer from '@/components/editors/DomainStateViewer'
 import PDDLEditor, { type PDDLIssue } from '@/components/PDDLEditor'
 import PresetSelector from '@/components/PresetSelector'
 import PlanTrace from '@/components/PlanTrace'
 import { extractIssueLine } from '@/lib/pddlPatch'
 import { ApiKeyInput } from '@/contexts/ApiKeyContext'
-import { runPlanner } from '@/lib/api'
+import { runPlanner, simulateSteps, simulateFrames, type SimStepsResult, type SimFramesResult } from '@/lib/api'
 
 // ─── Domain detection ─────────────────────────────────────────────────────────
 
@@ -256,7 +255,7 @@ function VerificationPanel({
 
 // ─── Planner panel ────────────────────────────────────────────────────────────
 
-type PlannerStatus = 'idle' | 'running' | 'done' | 'error'
+type PlannerStatus = 'idle' | 'running' | 'simulating' | 'done' | 'error'
 
 function PlannerPanel({
   domainPddl,
@@ -270,26 +269,59 @@ function PlannerPanel({
   const [planner, setPlanner] = useState('up_fd')
   const [status, setStatus] = useState<PlannerStatus>('idle')
   const [plan, setPlan] = useState<string[]>([])
+  const [simSteps, setSimSteps] = useState<SimStepsResult | null>(null)
+  const [simFrames, setSimFrames] = useState<SimFramesResult | null>(null)
   const [error, setError] = useState('')
 
   const handleRun = async () => {
     setStatus('running')
     setError('')
     setPlan([])
+    setSimSteps(null)
+    setSimFrames(null)
     try {
       const res = await runPlanner({ domain_pddl: domainPddl, problem_pddl: problemPddl, planner })
-      if (res.success) {
-        setPlan(res.plan)
-        setStatus('done')
-      } else {
+      if (!res.success) {
         setError(res.error || 'Planner failed')
         setStatus('error')
+        return
       }
+      setPlan(res.plan)
+
+      if (res.plan.length > 0) {
+        setStatus('simulating')
+        // Try graphical frames first (available for all IPC domains)
+        if (domainName !== 'custom') {
+          try {
+            const frames = await simulateFrames({
+              domain_pddl: domainPddl,
+              problem_pddl: problemPddl,
+              plan: res.plan,
+              domain_name: domainName,
+            })
+            if (frames.success && frames.frames.length > 0) {
+              setSimFrames(frames)
+            }
+          } catch {
+            // Frames not available — fall through to state-diff
+          }
+        }
+        // Also get state diffs as fallback / supplementary
+        try {
+          const sim = await simulateSteps({ domain_pddl: domainPddl, problem_pddl: problemPddl, plan: res.plan })
+          if (sim.success) setSimSteps(sim)
+        } catch {
+          // Non-fatal
+        }
+      }
+      setStatus('done')
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
       setStatus('error')
     }
   }
+
+  const busyLabel = status === 'running' ? 'Planning...' : status === 'simulating' ? 'Simulating...' : null
 
   return (
     <div className="rounded-xl border border-lapis-border bg-lapis-card p-4 space-y-4">
@@ -300,7 +332,7 @@ function PlannerPanel({
             className="bg-lapis-bg border border-lapis-border rounded px-2 py-1 text-xs text-lapis-text"
             value={planner}
             onChange={(e) => setPlanner(e.target.value)}
-            disabled={status === 'running'}
+            disabled={!!busyLabel}
           >
             <option value="up_fd">Fast Downward</option>
             <option value="pyperplan">Pyperplan</option>
@@ -309,12 +341,12 @@ function PlannerPanel({
             type="button"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-lapis-accent text-black text-xs font-semibold disabled:opacity-50"
             onClick={handleRun}
-            disabled={status === 'running'}
+            disabled={!!busyLabel}
           >
-            {status === 'running' ? (
-              <><Loader2 className="w-3 h-3 animate-spin" /> Running...</>
+            {busyLabel ? (
+              <><Loader2 className="w-3 h-3 animate-spin" /> {busyLabel}</>
             ) : (
-              <><Play className="w-3 h-3" /> Run Planner</>
+              <><Play className="w-3 h-3" /> {plan.length > 0 ? 'Re-run' : 'Run Planner'}</>
             )}
           </button>
         </div>
@@ -335,15 +367,15 @@ function PlannerPanel({
           actions={plan}
           problemPddl={problemPddl}
           domainName={domainName}
+          simSteps={simSteps ?? undefined}
+          simFrames={simFrames ?? undefined}
         />
       )}
     </div>
   )
 }
 
-// ─── Domain visualizer ────────────────────────────────────────────────────────
-
-const KNOWN_IPC_DOMAINS = ['grippers', 'barman', 'floortile', 'storage', 'termes', 'tyreworld']
+// ─── Domain visualizer (only for domains with interactive editors) ────────────
 
 function DomainVisualizer({
   domain,
@@ -368,15 +400,6 @@ function DomainVisualizer({
       <GridworldEditor
         problemPddl={problemPddl}
         onChange={onProblemChange}
-      />
-    )
-  }
-
-  if (KNOWN_IPC_DOMAINS.includes(domain)) {
-    return (
-      <DomainStateViewer
-        domainName={domain}
-        problemPddl={problemPddl}
       />
     )
   }
