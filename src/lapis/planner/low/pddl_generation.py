@@ -5,6 +5,12 @@ from pathlib import Path
 from src.lapis.agents.agent import Agent
 from src.lapis.logger_cfg import logger
 
+__all__ = [
+    "classify_issue", "IssueStats", "_preprocess_pddl",
+    "generate_domain", "generate_problem", "refine_problem", 
+    "refine_domain", "refine_domain_and_problem_unified"
+]
+
 # ─── Issue Classification ───────────────────────────────────────────────────
 
 PRIORITY_ORDER = ['P0_SYNTAX', 'P1_TYPE', 'P1_PREDICATE', 'P2_ACTION', 'P3_OTHER']

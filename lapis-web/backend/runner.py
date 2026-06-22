@@ -631,9 +631,25 @@ async def _generate_plan_animation(
 
 def make_agent(model_id: str):
     """Create an agent instance for the given model ID."""
+    DOUBLEWORD_MODELS = {
+        "doubleword-glm-5-2": "zai-org/GLM-5.2-FP8",
+        "doubleword-nemotron-550b": "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-NVFP4",
+        "doubleword-deepseek-v4": "deepseek-ai/DeepSeek-V4-Pro",
+        "doubleword-qwen-35b": "Qwen/Qwen3.6-35B-A3B-FP8",
+        "doubleword-kimi-k2-6": "moonshotai/Kimi-K2.6",
+        "doubleword-gemma-4": "google/gemma-4-31B-it",
+    }
+
     if model_id.startswith("claude"):
         from src.lapis.agents.claude import ClaudeAgent
         return ClaudeAgent(model=model_id)
+    elif model_id in DOUBLEWORD_MODELS:
+        from src.lapis.agents.doubleword import DoublewordAgent
+        return DoublewordAgent(model=DOUBLEWORD_MODELS[model_id])
+    elif model_id.startswith("doubleword/"):
+        from src.lapis.agents.doubleword import DoublewordAgent
+        model_name = model_id.replace("doubleword/", "", 1)
+        return DoublewordAgent(model=model_name)
     else:
         from src.lapis.agents.gpt import GPTAgent
         return GPTAgent(model=model_id)

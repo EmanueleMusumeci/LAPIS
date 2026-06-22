@@ -4,9 +4,9 @@ from src.lapis.agents.agent import Agent
 
 
 class ClaudeAgent(Agent):
-    def __init__(self, model, max_history: int = 5):
+    def __init__(self, model, max_history: int = 5, api_key: str | None = None):
         super().__init__(model)
-        api_key = os.getenv("ANTHROPIC_API_KEY")
+        api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
         base_url = None
         use_openrouter_fallback = os.getenv("LAPIS_USE_OPENROUTER_FALLBACK", "false").lower() in {
             "1", "true", "yes", "on"

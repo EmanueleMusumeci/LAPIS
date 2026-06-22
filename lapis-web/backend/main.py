@@ -11,6 +11,10 @@ from __future__ import annotations
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load workspace .env file
+load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
 
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -141,6 +145,12 @@ async def get_models():
             "claude-3-5-sonnet-20241022": "Claude 3.5 Sonnet",
             "gpt-4o": "GPT-4o",
             "gpt-4o-mini": "GPT-4o mini",
+            "doubleword-glm-5-2": "Doubleword GLM 5.2",
+            "doubleword-nemotron-550b": "Doubleword Nemotron 3 Ultra 550B",
+            "doubleword-deepseek-v4": "Doubleword DeepSeek V4 Pro",
+            "doubleword-qwen-35b": "Doubleword Qwen 3.6 35B",
+            "doubleword-kimi-k2-6": "Doubleword Kimi K2.6",
+            "doubleword-gemma-4": "Doubleword Gemma 4 31B",
         },
         "planners": ["pyperplan", "up_fd", "fd"],
     }

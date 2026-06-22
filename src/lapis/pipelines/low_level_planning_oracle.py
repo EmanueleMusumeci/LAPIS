@@ -1,7 +1,3 @@
-"""
-Oracle Low-Level Planning Pipeline for LAPIS
-Combines oracle state grounding (adapted from CoSTL) with LAPIS's semantic verification.
-"""
 import os
 import sys
 from pathlib import Path
@@ -17,16 +13,6 @@ from unified_planning.io import PDDLReader
 
 
 class LowLevelPlanningOraclePipeline(BasePipeline):
-    """
-    Oracle pipeline that uses ground-truth simulator state for PDDL problem generation.
-
-    Architecture:
-    1. Sets up GT simulator from ground-truth PDDL files
-    2. Extracts raw simulator state
-    3. Maps state to PDDL predicates via LLM (fair grounding)
-    4. Passes grounded state to LowLevelPlanner via nl_sections['initial_state']
-    5. LowLevelPlanner formats it into valid PDDL :init block
-    """
 
     def __init__(self,
                  gt_source_dir: str = "third-party/llm-pddl/domains",
@@ -37,7 +23,6 @@ class LowLevelPlanningOraclePipeline(BasePipeline):
         self.low_level_planner = None
 
     def _initialize_csv(self, csv_filepath):
-        """Initialize CSV for oracle pipeline results (required by BasePipeline)"""
         import csv
         header = ["Problem", "Domain", "Oracle Success", "Plan Found", "Error"]
         with open(csv_filepath, mode="w", newline='') as f:
@@ -45,16 +30,6 @@ class LowLevelPlanningOraclePipeline(BasePipeline):
             writer.writerow(header)
 
     def _process_task(self, task_data):
-        """
-        Process a single task with oracle grounding.
-
-        Expected task_data:
-        - domain_name: e.g., "barman"
-        - problem_id: e.g., "p01"
-        - gt_domain_path: path to GT domain.pddl
-        - gt_problem_path: path to GT problem.pddl
-        - task_description: natural language task
-        """
         domain_name = task_data["domain_name"]
         problem_id = task_data["problem_id"]
         task_description = task_data.get("task_description", "")
@@ -141,15 +116,6 @@ class LowLevelPlanningOraclePipeline(BasePipeline):
         return result
 
     def _setup_gt_simulator(self, gt_domain_path: str, gt_problem_path: str, domain_name: str):
-        """
-        Set up UP SequentialSimulator with GT domain and problem.
-        Works with any PDDL domain.
-
-        If UP's PDDLReader fails due to unsupported PDDL features:
-        1. Try UP-fixed version if available (domain_up_fixed.pddl)
-        2. Try CPDDL preprocessing to compile away ADL features
-        3. Fail gracefully if neither works
-        """
         logger.info(f"Setting up UP SequentialSimulator for {domain_name}")
 
         # First, apply UP-specific preprocessing (handles tyreworld, storage, floortile)
@@ -238,7 +204,6 @@ class LowLevelPlanningOraclePipeline(BasePipeline):
             return None
 
     def _extract_objects_from_problem(self, problem_path: str) -> str:
-        """Extract the :objects block from a PDDL problem file."""
         import re
         with open(problem_path) as f:
             content = f.read()
@@ -249,10 +214,6 @@ class LowLevelPlanningOraclePipeline(BasePipeline):
         return ""
 
     def _get_simulator_raw_state_report(self, simulator) -> str:
-        """
-        Extract a textual raw description of the simulator state.
-        Adapted from CoSTL multi_level_planning.py:1961-2036
-        """
         # UP-based simulator (any PDDL domain)
         current_state = getattr(simulator, 'current_state', None)
         if not simulator or not current_state:
@@ -282,13 +243,6 @@ class LowLevelPlanningOraclePipeline(BasePipeline):
         return "\n".join(report)
 
     def _map_simulator_state_to_assignment(self, raw_report: str, objects_list: str) -> str:
-        """
-        Use LLM to map a raw simulator report to a PDDL-style :init block.
-        Adapted from CoSTL multi_level_planning.py:2038-2094
-
-        This provides a 'fair' grounding step - the LLM still does the work of
-        formatting the predicates into valid PDDL, but receives the GT facts.
-        """
         system_prompt = (
             "You are a PDDL state translator. Your task is to translate a raw state report "
             "into valid PDDL predicates for the :init block."

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import re
 from dataclasses import dataclass, field
 from typing import Any
@@ -80,7 +81,13 @@ class EditorOrchestrator:
             if user_text:
                 self._state.chat.append({"role": "user", "text": user_text})
 
-            response = self._agent.process(user_text, self._state.domain, self._state.problem)
+            api_key = os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("OPENAI_API_KEY")
+            response = self._agent.process(
+                user_text,
+                self._state.domain,
+                self._state.problem,
+                api_key=api_key,
+            )
             self._state.domain = response.domain
             self._state.problem = response.problem
             self._state.chat.append({"role": "agent", "text": response.reply})

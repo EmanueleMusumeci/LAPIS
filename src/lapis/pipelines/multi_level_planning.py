@@ -2026,10 +2026,6 @@ FINAL SUBGOAL:
         return "\n".join(report)
 
     def _map_simulator_state_to_assignment(self, raw_report: str, objects_list: str) -> str:
-        """
-        Use LLM to map a raw simulator report to a PDDL-style :init block.
-        This provides a 'fair' grounding step.
-        """
         system_prompt = (
             "You are a PDDL state translator. Your task is to translate a raw physical state report "
             "into a list of PDDL predicates (the :init block) using ONLY the provided object names."

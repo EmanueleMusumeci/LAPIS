@@ -105,7 +105,32 @@ def plan_with_output(domain_file_path, problem_dir, plan_file_path, env=None, pl
     print(domain_file_path)
     print(os.path.join(problem_dir, "problem.pddl"))
     
-    if planner_name.lower().startswith("up") or planner_name.lower() in ["fd", "symk", "pyperplan"]:
+    if planner_name == "regression":
+        try:
+            # Inject L-LAPIS regression planner
+            from llapis.planner.regression import NLFOLRegressionPlanner
+            problem_file_path = os.path.join(problem_dir, "problem.pddl")
+            
+            planner = NLFOLRegressionPlanner(
+                nl_domain=domain_file_path,
+                nl_problem=problem_file_path,
+                nl_init=None, # or parse initial state if available
+                verbose=False,
+                auto_match=False
+            )
+            reg_plans = planner.regress_plan()
+            
+            # Since L-LAPIS planner returns a list of subgoals with plans, we just take the first one or a formatted string.
+            # Usually match() is required, but we'll return the raw tuples for now, or strings.
+            plan = []
+            if reg_plans:
+                plan = [str(a) for a in reg_plans[0][1]]
+                
+            pddlenv_error_log, planner_error_log, statistics = None, None, None
+        except Exception as e:
+            plan, pddlenv_error_log, planner_error_log, statistics = None, None, f"Regression Planner error: {e}", None
+            
+    elif planner_name.lower().startswith("up") or planner_name.lower() in ["fd", "symk", "pyperplan"]:
         # Use Unified Planning for everything now as requested
         plan, pddlenv_error_log, planner_error_log, statistics = run_planner_UP(domain_file_path, problem_dir, planner_name, timeout)
 
